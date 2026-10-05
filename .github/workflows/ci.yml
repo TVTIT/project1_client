@@ -24,7 +24,9 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
+      - run: cp .env.example .env
       - run: flutter pub get
+      - run: dart scripts/validate_client_env.dart --allow-placeholder
       - run: dart format --set-exit-if-changed .
       - run: flutter analyze --fatal-infos
 
@@ -51,7 +53,9 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
+      - run: cp .env.example .env
       - run: flutter pub get
+      - run: dart scripts/validate_client_env.dart --allow-placeholder
       - run: flutter test --coverage
 
   build:
@@ -84,7 +88,9 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
+      - run: cp .env.example .env
       - run: flutter pub get
+      - run: dart scripts/validate_client_env.dart --allow-placeholder
       - run: ${{ matrix.cmd }}
 
   size:
@@ -97,7 +103,9 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
+      - run: cp .env.example .env
       - run: flutter pub get
+      - run: dart scripts/validate_client_env.dart --allow-placeholder
       - run: flutter build web --wasm --release
       - run: node tools/strip-fonts.mjs build/web
       - name: Subset the Lucide face
@@ -136,7 +144,9 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
+      - run: cp .env.example .env
       - run: flutter pub get
+      - run: dart scripts/validate_client_env.dart --allow-placeholder
       - run: flutter build web --wasm --release
       - name: Drop Lucide variable-weight instances
         run: node tools/strip-fonts.mjs build/web
