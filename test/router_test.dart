@@ -66,7 +66,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(container: container, child: const KiteApp()),
       );
-      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
 
       // Verify loading barrier is shown, NOT PlaceholderScreen
       expect(find.text('Đang kiểm tra phiên làm việc...'), findsOneWidget);
@@ -177,7 +177,8 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Trạng thái Hệ thống Client'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      final exc = tester.takeException();
+      expect(exc, isNull);
     });
   }
 

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// A UI that has never rendered right-to-left is full of hard-coded `left:`
 /// padding nobody noticed.
 enum KiteLocale {
+  vi('Vietnamese', 'Tiếng Việt'),
   en('English', 'English'),
   es('Spanish', 'Español'),
   fr('French', 'Français'),
@@ -25,7 +26,7 @@ enum KiteLocale {
 
 class LocaleController extends Notifier<KiteLocale> {
   @override
-  KiteLocale build() => KiteLocale.en;
+  KiteLocale build() => KiteLocale.vi;
 
   void set(KiteLocale value) => state = value;
 }

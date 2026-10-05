@@ -175,11 +175,14 @@ class _NavTile extends StatelessWidget {
                   color: active ? c.foreground : c.mutedForeground,
                 ),
                 const SizedBox(width: KiteSpace.md),
-                Text(
-                  item.labelOf(L.of(context)),
-                  style: t.small.copyWith(
-                    color: active ? c.foreground : c.mutedForeground,
-                    fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    item.labelOf(L.of(context)),
+                    style: t.small.copyWith(
+                      color: active ? c.foreground : c.mutedForeground,
+                      fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -270,7 +273,9 @@ class _TopBar extends ConsumerWidget {
 
     return Container(
       height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: KiteSpace.xl),
+      padding: EdgeInsets.symmetric(
+        horizontal: mobile ? KiteSpace.md : KiteSpace.xl,
+      ),
       decoration: BoxDecoration(
         color: c.card,
         border: BorderDirectional(bottom: BorderSide(color: c.border)),
@@ -283,8 +288,15 @@ class _TopBar extends ConsumerWidget {
               color: c.mutedForeground,
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
-          Text(title, style: t.large),
-          const Spacer(),
+          Expanded(
+            child: Text(
+              title,
+              style: t.large,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+          const SizedBox(width: KiteSpace.sm),
           KiteTooltip(
             message: isDark ? l.lightMode : l.darkMode,
             child: IconButton(
