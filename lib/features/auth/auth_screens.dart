@@ -3,310 +3,224 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kite_ui/kite_ui.dart';
 
+import '../../core/auth/auth_repository.dart';
 import '../../core/auth/session.dart';
 import '../../core/router/routes.dart';
 import 'auth_scaffold.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
+
   @override
   ConsumerState<SignInScreen> createState() => _SignInScreenState();
 }
 
 class _SignInScreenState extends ConsumerState<SignInScreen> {
-  final _email = TextEditingController(text: 'admin@kite.dev');
-  final _password = TextEditingController(text: 'password');
-  bool _busy = false;
-  String? _error;
-
-  @override
-  void dispose() {
-    _email.dispose();
-    _password.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final email = _email.text.trim();
-    if (!email.contains('@')) {
-      setState(() => _error = 'Enter a valid email address.');
-      return;
-    }
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    await ref.read(sessionProvider.notifier).signIn(email: email);
-    if (mounted) setState(() => _busy = false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AuthScaffold(
-      title: 'Sign in',
-      subtitle: 'Any email works — this is the mock provider.',
-      fields: [
-        AuthField(
-          label: 'Email',
-          controller: _email,
-          hint: 'you@company.com',
-          keyboardType: TextInputType.emailAddress,
-          error: _error,
-        ),
-        AuthField(
-          label: 'Password',
-          controller: _password,
-          obscure: true,
-          onSubmitted: (_) => _submit(),
-        ),
-        KiteButton(
-          expands: true,
-          enabled: !_busy,
-          onPressed: _submit,
-          child: Text(_busy ? 'Signing in…' : 'Sign in'),
-        ),
-        const SizedBox(height: KiteSpace.md),
-        KiteButton.ghost(
-          expands: true,
-          onPressed: () => context.go(R.forgot),
-          child: const Text('Forgot password?'),
-        ),
-      ],
-      footer: GestureDetector(
-        onTap: () => context.go(R.signUp),
-        child: const Text('No account? Create one'),
-      ),
-    );
-  }
-}
-
-class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
-  @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
-}
-
-class _SignUpScreenState extends State<SignUpScreen> {
-  final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
-    _name.dispose();
     _email.dispose();
     _password.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) => AuthScaffold(
-    title: 'Create account',
-    subtitle: 'Fourteen days, no card required.',
-    fields: [
-      AuthField(label: 'Full name', controller: _name, hint: 'Ada Lovelace'),
-      AuthField(
-        label: 'Email',
-        controller: _email,
-        hint: 'you@company.com',
-        keyboardType: TextInputType.emailAddress,
-      ),
-      AuthField(label: 'Password', controller: _password, obscure: true),
-      KiteButton(
-        expands: true,
-        onPressed: () => context.go(R.otp),
-        child: const Text('Create account'),
-      ),
-    ],
-    footer: GestureDetector(
-      onTap: () => context.go(R.signIn),
-      child: const Text('Already have an account? Sign in'),
-    ),
-  );
-}
+  Future<void> _handleSignIn() async {
+    final sessionState = ref.read(sessionProvider);
+    if (_isLoading || sessionState.isRestoring) return;
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
-  @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
-}
+    final email = _email.text.trim();
+    final password = _password.text;
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final _email = TextEditingController();
-  bool _sent = false;
+    setState(() {
+      _errorMessage = null;
+    });
 
-  @override
-  void dispose() {
-    _email.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = KiteText.of(context);
-    return AuthScaffold(
-      title: 'Reset password',
-      subtitle: _sent
-          ? 'Check your inbox for the reset link.'
-          : 'We will email you a link to choose a new one.',
-      fields: [
-        if (!_sent) ...[
-          AuthField(
-            label: 'Email',
-            controller: _email,
-            hint: 'you@company.com',
-            keyboardType: TextInputType.emailAddress,
-          ),
-          KiteButton(
-            expands: true,
-            onPressed: () => setState(() => _sent = true),
-            child: const Text('Send reset link'),
-          ),
-        ] else
-          Row(
-            children: [
-              Icon(
-                Icons.mark_email_read_outlined,
-                size: 18,
-                color: KiteColors.of(context).mutedForeground,
-              ),
-              const SizedBox(width: KiteSpace.sm),
-              Expanded(child: Text('Sent to ${_email.text}', style: t.small)),
-            ],
-          ),
-      ],
-      footer: GestureDetector(
-        onTap: () => context.go(R.signIn),
-        child: const Text('Back to sign in'),
-      ),
-    );
-  }
-}
-
-class OtpScreen extends StatefulWidget {
-  const OtpScreen({super.key});
-  @override
-  State<OtpScreen> createState() => _OtpScreenState();
-}
-
-class _OtpScreenState extends State<OtpScreen> {
-  final _controllers = List.generate(6, (_) => TextEditingController());
-  final _nodes = List.generate(6, (_) => FocusNode());
-
-  @override
-  void dispose() {
-    for (final c in _controllers) {
-      c.dispose();
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Vui lòng nhập đầy đủ email và mật khẩu.';
+      });
+      return;
     }
-    for (final n in _nodes) {
-      n.dispose();
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await ref
+          .read(sessionProvider.notifier)
+          .signIn(email: email, password: password);
+    } on AuthException catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.message;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Đã xảy ra sự cố xác thực. Vui lòng thử lại sau.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final c = KiteColors.of(context);
     final t = KiteText.of(context);
+    final sessionState = ref.watch(sessionProvider);
+    final isBusy = _isLoading || sessionState.isRestoring;
+
     return AuthScaffold(
-      title: 'Verify your email',
-      subtitle: 'Enter the six-digit code we just sent.',
+      title: 'Đăng nhập',
+      subtitle: 'Hệ thống Quản lý IoT & Digital Twin',
       fields: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (var i = 0; i < 6; i++)
-              SizedBox(
-                width: 46,
-                child: TextField(
-                  controller: _controllers[i],
-                  focusNode: _nodes[i],
-                  textAlign: TextAlign.center,
-                  maxLength: 1,
-                  keyboardType: TextInputType.number,
-                  style: t.h4,
-                  onChanged: (v) {
-                    if (v.isNotEmpty && i < 5) _nodes[i + 1].requestFocus();
-                    if (v.isEmpty && i > 0) _nodes[i - 1].requestFocus();
-                  },
-                  decoration: InputDecoration(
-                    counterText: '',
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                    filled: true,
-                    fillColor: c.background,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: KiteRadius.allSm,
-                      borderSide: BorderSide(color: c.border),
+        // Information notice regarding centralized account management
+        Container(
+          padding: const EdgeInsets.all(KiteSpace.md),
+          decoration: BoxDecoration(
+            color: c.muted,
+            borderRadius: KiteRadius.allSm,
+            border: Border.all(color: c.border),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.shield_outlined, size: 18, color: c.primary),
+              const SizedBox(width: KiteSpace.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Quản lý tài khoản tập trung',
+                      style: t.small.copyWith(fontWeight: FontWeight.w600),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: KiteRadius.allSm,
-                      borderSide: BorderSide(color: c.ring, width: 1.5),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Tài khoản người dùng và trạm đo được cấp phát bởi Quản trị viên hệ thống. Không hỗ trợ tự đăng ký công khai.',
+                      style: t.muted.copyWith(fontSize: 11.5),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: KiteSpace.lg),
+
+        if (sessionState.isRestoring)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: KiteSpace.md),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: c.primary,
+                  ),
+                ),
+                const SizedBox(width: KiteSpace.sm),
+                Text(
+                  'Đang khôi phục phiên làm việc...',
+                  style: t.muted.copyWith(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+
+        if (_errorMessage != null) ...[
+          Container(
+            padding: const EdgeInsets.all(KiteSpace.md),
+            decoration: BoxDecoration(
+              color: c.destructive.withValues(alpha: 0.08),
+              borderRadius: KiteRadius.allSm,
+              border: Border.all(color: c.destructive.withValues(alpha: 0.4)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.error_outline, size: 18, color: c.destructive),
+                const SizedBox(width: KiteSpace.sm),
+                Expanded(
+                  child: Text(
+                    _errorMessage!,
+                    style: t.small.copyWith(
+                      color: c.destructive,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-              ),
-          ],
-        ),
-        const SizedBox(height: KiteSpace.xl),
-        KiteButton(
-          expands: true,
-          onPressed: () => context.go(R.signIn),
-          child: const Text('Verify'),
-        ),
-      ],
-      footer: const Text("Didn't get it? Resend in 0:30"),
-    );
-  }
-}
-
-class LockScreen extends ConsumerStatefulWidget {
-  const LockScreen({super.key});
-  @override
-  ConsumerState<LockScreen> createState() => _LockScreenState();
-}
-
-class _LockScreenState extends ConsumerState<LockScreen> {
-  final _password = TextEditingController();
-
-  @override
-  void dispose() {
-    _password.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final c = KiteColors.of(context);
-    final t = KiteText.of(context);
-    return AuthScaffold(
-      title: 'Screen locked',
-      subtitle: 'Enter your password to pick up where you left off.',
-      fields: [
-        Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(color: c.muted, shape: BoxShape.circle),
-              child: Text('AL', style: t.small),
+              ],
             ),
-            const SizedBox(width: KiteSpace.md),
-            Text('Ada Lovelace', style: t.p),
-          ],
-        ),
-        const SizedBox(height: KiteSpace.xl),
-        AuthField(label: 'Password', controller: _password, obscure: true),
-        KiteButton(
-          expands: true,
-          onPressed: () =>
-              ref.read(sessionProvider.notifier).signIn(email: 'ada@kite.dev'),
-          child: const Text('Unlock'),
+          ),
+          const SizedBox(height: KiteSpace.md),
+        ],
+
+        Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AuthField(
+                label: 'Email',
+                controller: _email,
+                hint: 'user@company.com',
+                keyboardType: TextInputType.emailAddress,
+                onSubmitted: isBusy ? null : (_) => _handleSignIn(),
+              ),
+              const SizedBox(height: KiteSpace.md),
+              AuthField(
+                label: 'Mật khẩu',
+                controller: _password,
+                obscure: true,
+                onSubmitted: isBusy ? null : (_) => _handleSignIn(),
+              ),
+              const SizedBox(height: KiteSpace.lg),
+              KiteButton(
+                expands: true,
+                enabled: !isBusy,
+                onPressed: _handleSignIn,
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Đăng nhập'),
+              ),
+            ],
+          ),
         ),
       ],
-      footer: GestureDetector(
-        onTap: () => context.go(R.signIn),
-        child: const Text('Sign in as someone else'),
+      footer: KiteButton.ghost(
+        onPressed: () => context.go(R.license),
+        child: Text(
+          'Giấy phép (License)',
+          style: t.small.copyWith(
+            color: c.primary,
+            decoration: TextDecoration.underline,
+          ),
+        ),
       ),
     );
   }
