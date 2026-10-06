@@ -88,40 +88,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       title: 'Đăng nhập',
       subtitle: 'Hệ thống Quản lý IoT & Digital Twin',
       fields: [
-        // Information notice regarding centralized account management
-        Container(
-          padding: const EdgeInsets.all(KiteSpace.md),
-          decoration: BoxDecoration(
-            color: c.muted,
-            borderRadius: KiteRadius.allSm,
-            border: Border.all(color: c.border),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.shield_outlined, size: 18, color: c.primary),
-              const SizedBox(width: KiteSpace.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Quản lý tài khoản tập trung',
-                      style: t.small.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Tài khoản người dùng và trạm đo được cấp phát bởi Quản trị viên hệ thống. Không hỗ trợ tự đăng ký công khai.',
-                      style: t.muted.copyWith(fontSize: 11.5),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: KiteSpace.lg),
-
         if (sessionState.isRestoring)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: KiteSpace.md),
