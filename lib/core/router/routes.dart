@@ -7,6 +7,9 @@ import '../../l10n/app_localizations.dart';
 abstract final class R {
   static const signIn = '/sign-in';
   static const dashboard = '/';
+  static const gateways = '/gateways';
+  static const gatewayDetailPattern = '/gateways/:gatewayId';
+  static String gatewayDetail(String gatewayId) => '/gateways/$gatewayId';
   static const account = '/account';
   static const license = '/license';
   static const serverError = '/500';
@@ -29,6 +32,7 @@ class NavItem {
   /// Localised label.
   String labelOf(L l) => switch (path) {
     R.dashboard => l.navDashboard,
+    R.gateways => l.navGateways,
     _ => label,
   };
 }
@@ -48,6 +52,7 @@ class NavGroup {
 const kNavGroups = <NavGroup>[
   NavGroup('Overview', [
     NavItem('Bảng điều khiển', R.dashboard, Icons.dashboard_outlined),
+    NavItem('Quản lý Gateway', R.gateways, Icons.router_outlined),
     NavItem('Giấy phép', R.license, Icons.description_outlined),
   ]),
 ];

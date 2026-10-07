@@ -127,7 +127,13 @@ class _SidebarBody extends StatelessWidget {
                 ),
                 for (final item in group.items)
                   if (item.inSidebar)
-                    _NavTile(item: item, active: location == item.path),
+                    _NavTile(
+                      item: item,
+                      active:
+                          location == item.path ||
+                          (item.path != '/' &&
+                              location.startsWith('${item.path}/')),
+                    ),
               ],
             ],
           ),
@@ -412,8 +418,13 @@ class _BottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = KiteColors.of(context);
+    final l = L.of(context);
     final items = kNav;
-    var index = items.indexWhere((n) => n.path == location);
+    var index = items.indexWhere(
+      (n) =>
+          n.path == location ||
+          (n.path != '/' && location.startsWith('${n.path}/')),
+    );
     if (index < 0) index = 0;
 
     return NavigationBar(
@@ -422,7 +433,10 @@ class _BottomBar extends StatelessWidget {
       onDestinationSelected: (i) => context.go(items[i].path),
       destinations: [
         for (final n in items)
-          NavigationDestination(icon: Icon(n.icon, size: 20), label: n.label),
+          NavigationDestination(
+            icon: Icon(n.icon, size: 20),
+            label: n.labelOf(l),
+          ),
       ],
     );
   }

@@ -160,4 +160,184 @@ class LEn extends L {
   String rangeOfTotal(int first, int last, int total) {
     return '$first–$last of $total';
   }
+
+  @override
+  String get accountInfo => 'Account Information';
+
+  @override
+  String get accountSubtitle =>
+      'View identity and active session details for this account.';
+
+  @override
+  String get accountIdentityTitle => 'Identity Information';
+
+  @override
+  String get accountUserId => 'User ID (UUID)';
+
+  @override
+  String get accountEmail => 'Account Email';
+
+  @override
+  String get accountFullName => 'Full Name';
+
+  @override
+  String get accountRole => 'Gateway Role';
+
+  @override
+  String get accountRoleUnassigned => 'No gateway role assigned';
+
+  @override
+  String get accountRoleNote =>
+      'Gateway permissions (owner, operator, viewer) and Platform Admin privileges are evaluated dynamically per request on Go Backend. Identity session does not assert or infer permissions.';
+
+  @override
+  String get accountSessionTitle => 'Session & Security';
+
+  @override
+  String get accountSessionStatus => 'Session Status';
+
+  @override
+  String get accountStatusActive => 'Active';
+
+  @override
+  String get accountAuthMethod => 'Authentication Method';
+
+  @override
+  String get accountAuthMethodValue =>
+      'Supabase Auth (GoTrue) · Local HS256 JWT Verification on Go Backend';
+
+  @override
+  String get accountAdminNoteTitle => 'Account Management Policy';
+
+  @override
+  String get accountAdminNote =>
+      'Accounts are managed centrally by Platform Administrators. Direct self-modification from client UI is disabled. Platform Admin privileges are maintained separately in public.platform_admins.';
+
+  @override
+  String get accountCopyId => 'Copy ID';
+
+  @override
+  String get accountCopiedId => 'Copied User ID to clipboard';
+
+  @override
+  String get accountBackToDashboard => 'Back to Dashboard';
+
+  @override
+  String get navGateways => 'Gateways';
+
+  @override
+  String get gatewayListTitle => 'Gateways';
+
+  @override
+  String get gatewayListSubtitle =>
+      'List of accessible gateway devices in the platform.';
+
+  @override
+  String get gatewayId => 'Gateway ID';
+
+  @override
+  String get gatewayName => 'Name';
+
+  @override
+  String get gatewayDescription => 'Description';
+
+  @override
+  String get gatewayRole => 'Role';
+
+  @override
+  String get gatewayCreatedAt => 'Created At';
+
+  @override
+  String get gatewaySearchPlaceholder => 'Search by ID, name or description...';
+
+  @override
+  String get gatewayEmptyTitle => 'No gateways found';
+
+  @override
+  String get gatewayEmptyMessage =>
+      'Your account has not been assigned access to any gateways yet.';
+
+  @override
+  String get gatewaySearchEmptyTitle => 'No matching gateways';
+
+  @override
+  String get gatewaySearchEmptyMessage =>
+      'No gateways match your search query.';
+
+  @override
+  String get gatewayRoleOwner => 'Owner';
+
+  @override
+  String get gatewayRoleOperator => 'Operator';
+
+  @override
+  String get gatewayRoleViewer => 'Viewer';
+
+  @override
+  String get gatewayActionDetail => 'Details';
+
+  @override
+  String get gatewayDetailTitle => 'Gateway Details';
+
+  @override
+  String get gatewayDetailSubtitle =>
+      'Overview of station configuration and associated sensors.';
+
+  @override
+  String get gatewayNotFoundTitle => 'Gateway not found';
+
+  @override
+  String get gatewayNotFoundMessage =>
+      'The requested gateway was not found or your account does not have access permission.';
+
+  @override
+  String get gatewayInvalidIdMessage =>
+      'Invalid gateway identifier or reserved identifier.';
+
+  @override
+  String get gatewayBackToList => 'Back to Gateways';
+
+  @override
+  String get gatewaySectionMetadata => 'Gateway Information';
+
+  @override
+  String get gatewaySectionSensors => 'Sensor Catalog';
+
+  @override
+  String get sensorId => 'Sensor ID';
+
+  @override
+  String get sensorName => 'Sensor Name';
+
+  @override
+  String get sensorUnit => 'Unit';
+
+  @override
+  String get sensorCreatedAt => 'Created At';
+
+  @override
+  String get sensorEmptyTitle => 'No sensors configured';
+
+  @override
+  String get sensorEmptyMessage =>
+      'No sensors have been added to this gateway station yet.';
+
+  @override
+  String get sensorSearchPlaceholder => 'Search sensors by ID, name or unit...';
+
+  @override
+  String get sensorSearchEmptyTitle => 'No matching sensors';
+
+  @override
+  String get sensorSearchEmptyMessage => 'No sensors match your search query.';
+
+  @override
+  String get sensorErrorTitle => 'Failed to load sensors';
+
+  @override
+  String get sensorErrorRetry => 'Retry loading sensors';
+
+  @override
+  String get gatewayReadOnlyNotice =>
+      'Read-only mode (Stage 2). Remote control, downlink commands, and real-time telemetry streaming are not active.';
 }

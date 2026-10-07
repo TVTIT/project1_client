@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/account/account_screen.dart';
 import '../../features/auth/auth_screens.dart';
 import '../../features/dashboard/placeholder_screen.dart';
+import '../../features/gateways/presentation/gateway_detail_screen.dart';
+import '../../features/gateways/presentation/gateway_list_screen.dart';
 import '../../features/system/error_screen.dart';
 import '../../features/system/license_screen.dart';
 import '../../shared/layout/app_shell.dart';
@@ -62,6 +64,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: R.dashboard,
             builder: (_, _) => const PlaceholderScreen(),
+          ),
+          GoRoute(
+            path: R.gateways,
+            builder: (_, _) => const GatewayListScreen(),
+          ),
+          GoRoute(
+            path: R.gatewayDetailPattern,
+            builder: (_, state) => GatewayDetailScreen(
+              gatewayId: state.pathParameters['gatewayId'] ?? '',
+            ),
           ),
           GoRoute(path: R.account, builder: (_, _) => const AccountScreen()),
         ],

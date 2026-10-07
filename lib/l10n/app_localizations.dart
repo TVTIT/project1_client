@@ -398,6 +398,342 @@ abstract class L {
   /// In en, this message translates to:
   /// **'{first}–{last} of {total}'**
   String rangeOfTotal(int first, int last, int total);
+
+  /// No description provided for @accountInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Information'**
+  String get accountInfo;
+
+  /// No description provided for @accountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View identity and active session details for this account.'**
+  String get accountSubtitle;
+
+  /// No description provided for @accountIdentityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity Information'**
+  String get accountIdentityTitle;
+
+  /// No description provided for @accountUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID (UUID)'**
+  String get accountUserId;
+
+  /// No description provided for @accountEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Email'**
+  String get accountEmail;
+
+  /// No description provided for @accountFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get accountFullName;
+
+  /// No description provided for @accountRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway Role'**
+  String get accountRole;
+
+  /// No description provided for @accountRoleUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No gateway role assigned'**
+  String get accountRoleUnassigned;
+
+  /// No description provided for @accountRoleNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway permissions (owner, operator, viewer) and Platform Admin privileges are evaluated dynamically per request on Go Backend. Identity session does not assert or infer permissions.'**
+  String get accountRoleNote;
+
+  /// No description provided for @accountSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session & Security'**
+  String get accountSessionTitle;
+
+  /// No description provided for @accountSessionStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Status'**
+  String get accountSessionStatus;
+
+  /// No description provided for @accountStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get accountStatusActive;
+
+  /// No description provided for @accountAuthMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication Method'**
+  String get accountAuthMethod;
+
+  /// No description provided for @accountAuthMethodValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase Auth (GoTrue) · Local HS256 JWT Verification on Go Backend'**
+  String get accountAuthMethodValue;
+
+  /// No description provided for @accountAdminNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Management Policy'**
+  String get accountAdminNoteTitle;
+
+  /// No description provided for @accountAdminNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts are managed centrally by Platform Administrators. Direct self-modification from client UI is disabled. Platform Admin privileges are maintained separately in public.platform_admins.'**
+  String get accountAdminNote;
+
+  /// No description provided for @accountCopyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy ID'**
+  String get accountCopyId;
+
+  /// No description provided for @accountCopiedId.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied User ID to clipboard'**
+  String get accountCopiedId;
+
+  /// No description provided for @accountBackToDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Dashboard'**
+  String get accountBackToDashboard;
+
+  /// No description provided for @navGateways.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateways'**
+  String get navGateways;
+
+  /// No description provided for @gatewayListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateways'**
+  String get gatewayListTitle;
+
+  /// No description provided for @gatewayListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'List of accessible gateway devices in the platform.'**
+  String get gatewayListSubtitle;
+
+  /// No description provided for @gatewayId.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway ID'**
+  String get gatewayId;
+
+  /// No description provided for @gatewayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get gatewayName;
+
+  /// No description provided for @gatewayDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get gatewayDescription;
+
+  /// No description provided for @gatewayRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get gatewayRole;
+
+  /// No description provided for @gatewayCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created At'**
+  String get gatewayCreatedAt;
+
+  /// No description provided for @gatewaySearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by ID, name or description...'**
+  String get gatewaySearchPlaceholder;
+
+  /// No description provided for @gatewayEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No gateways found'**
+  String get gatewayEmptyTitle;
+
+  /// No description provided for @gatewayEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has not been assigned access to any gateways yet.'**
+  String get gatewayEmptyMessage;
+
+  /// No description provided for @gatewaySearchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching gateways'**
+  String get gatewaySearchEmptyTitle;
+
+  /// No description provided for @gatewaySearchEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No gateways match your search query.'**
+  String get gatewaySearchEmptyMessage;
+
+  /// No description provided for @gatewayRoleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get gatewayRoleOwner;
+
+  /// No description provided for @gatewayRoleOperator.
+  ///
+  /// In en, this message translates to:
+  /// **'Operator'**
+  String get gatewayRoleOperator;
+
+  /// No description provided for @gatewayRoleViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewer'**
+  String get gatewayRoleViewer;
+
+  /// No description provided for @gatewayActionDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get gatewayActionDetail;
+
+  /// No description provided for @gatewayDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway Details'**
+  String get gatewayDetailTitle;
+
+  /// No description provided for @gatewayDetailSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview of station configuration and associated sensors.'**
+  String get gatewayDetailSubtitle;
+
+  /// No description provided for @gatewayNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway not found'**
+  String get gatewayNotFoundTitle;
+
+  /// No description provided for @gatewayNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested gateway was not found or your account does not have access permission.'**
+  String get gatewayNotFoundMessage;
+
+  /// No description provided for @gatewayInvalidIdMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid gateway identifier or reserved identifier.'**
+  String get gatewayInvalidIdMessage;
+
+  /// No description provided for @gatewayBackToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Gateways'**
+  String get gatewayBackToList;
+
+  /// No description provided for @gatewaySectionMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway Information'**
+  String get gatewaySectionMetadata;
+
+  /// No description provided for @gatewaySectionSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor Catalog'**
+  String get gatewaySectionSensors;
+
+  /// No description provided for @sensorId.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor ID'**
+  String get sensorId;
+
+  /// No description provided for @sensorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor Name'**
+  String get sensorName;
+
+  /// No description provided for @sensorUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get sensorUnit;
+
+  /// No description provided for @sensorCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created At'**
+  String get sensorCreatedAt;
+
+  /// No description provided for @sensorEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No sensors configured'**
+  String get sensorEmptyTitle;
+
+  /// No description provided for @sensorEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No sensors have been added to this gateway station yet.'**
+  String get sensorEmptyMessage;
+
+  /// No description provided for @sensorSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search sensors by ID, name or unit...'**
+  String get sensorSearchPlaceholder;
+
+  /// No description provided for @sensorSearchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching sensors'**
+  String get sensorSearchEmptyTitle;
+
+  /// No description provided for @sensorSearchEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No sensors match your search query.'**
+  String get sensorSearchEmptyMessage;
+
+  /// No description provided for @sensorErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load sensors'**
+  String get sensorErrorTitle;
+
+  /// No description provided for @sensorErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry loading sensors'**
+  String get sensorErrorRetry;
+
+  /// No description provided for @gatewayReadOnlyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only mode (Stage 2). Remote control, downlink commands, and real-time telemetry streaming are not active.'**
+  String get gatewayReadOnlyNotice;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

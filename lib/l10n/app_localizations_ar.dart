@@ -159,4 +159,179 @@ class LAr extends L {
   String rangeOfTotal(int first, int last, int total) {
     return '$first–$last من $total';
   }
+
+  @override
+  String get accountInfo => 'معلومات الحساب';
+
+  @override
+  String get accountSubtitle =>
+      'عرض تفاصيل الهوية والجلسة الحالية لهذا الحساب.';
+
+  @override
+  String get accountIdentityTitle => 'معلومات الهوية';
+
+  @override
+  String get accountUserId => 'معرف المستخدم (UUID)';
+
+  @override
+  String get accountEmail => 'البريد الإلكتروني';
+
+  @override
+  String get accountFullName => 'الاسم الكامل';
+
+  @override
+  String get accountRole => 'دور البوابة';
+
+  @override
+  String get accountRoleUnassigned => 'لم يتم تعيين دور';
+
+  @override
+  String get accountRoleNote =>
+      'يتم التحقق من الصلاحيات ديناميكيًا لكل بوابة في الخادم الخلفي.';
+
+  @override
+  String get accountSessionTitle => 'الجلسة والأمان';
+
+  @override
+  String get accountSessionStatus => 'حالة الجلسة';
+
+  @override
+  String get accountStatusActive => 'نشط';
+
+  @override
+  String get accountAuthMethod => 'طريقة المصادقة';
+
+  @override
+  String get accountAuthMethodValue => 'Supabase Auth (GoTrue) · Local HS256';
+
+  @override
+  String get accountAdminNoteTitle => 'سياسة إدارة الحسابات';
+
+  @override
+  String get accountAdminNote =>
+      'تتم إدارة الحسابات مركزيًا بواسطة مديري النظام.';
+
+  @override
+  String get accountCopyId => 'نسخ المعرف';
+
+  @override
+  String get accountCopiedId => 'تم نسخ معرف المستخدم';
+
+  @override
+  String get accountBackToDashboard => 'العودة إلى لوحة التحكم';
+
+  @override
+  String get navGateways => 'البوابات';
+
+  @override
+  String get gatewayListTitle => 'البوابات';
+
+  @override
+  String get gatewayListSubtitle => 'قائمة البوابات المتاحة في المنصة.';
+
+  @override
+  String get gatewayId => 'معرف البوابة';
+
+  @override
+  String get gatewayName => 'الاسم';
+
+  @override
+  String get gatewayDescription => 'الوصف';
+
+  @override
+  String get gatewayRole => 'الدور';
+
+  @override
+  String get gatewayCreatedAt => 'تاريخ الإنشاء';
+
+  @override
+  String get gatewaySearchPlaceholder => 'البحث بالمعرف أو الاسم...';
+
+  @override
+  String get gatewayEmptyTitle => 'لا توجد بوابات';
+
+  @override
+  String get gatewayEmptyMessage => 'لم يتم تعيين أي بوابات لحسابك بعد.';
+
+  @override
+  String get gatewaySearchEmptyTitle => 'لا توجد نتائج مطابقة';
+
+  @override
+  String get gatewaySearchEmptyMessage => 'لا توجد بوابات تطابق بحثك.';
+
+  @override
+  String get gatewayRoleOwner => 'مالك';
+
+  @override
+  String get gatewayRoleOperator => 'مشغل';
+
+  @override
+  String get gatewayRoleViewer => 'مشاهد';
+
+  @override
+  String get gatewayActionDetail => 'تفاصيل';
+
+  @override
+  String get gatewayDetailTitle => 'تفاصيل البوابة';
+
+  @override
+  String get gatewayDetailSubtitle =>
+      'نظرة عامة على تكوين المحطة وأجهزة الاستشعار المرتبطة بها.';
+
+  @override
+  String get gatewayNotFoundTitle => 'لم يتم العثور على البوابة';
+
+  @override
+  String get gatewayNotFoundMessage =>
+      'لم يتم العثور على البوابة المطلوبة أو ليس لديك إذن بالوصول.';
+
+  @override
+  String get gatewayInvalidIdMessage => 'معرف البوابة غير صالح أو محجوز.';
+
+  @override
+  String get gatewayBackToList => 'العودة إلى البوابات';
+
+  @override
+  String get gatewaySectionMetadata => 'معلومات البوابة';
+
+  @override
+  String get gatewaySectionSensors => 'كتالوج أجهزة الاستشعار';
+
+  @override
+  String get sensorId => 'معرف الحساس';
+
+  @override
+  String get sensorName => 'اسم الحساس';
+
+  @override
+  String get sensorUnit => 'الوحدة';
+
+  @override
+  String get sensorCreatedAt => 'تاريخ الإنشاء';
+
+  @override
+  String get sensorEmptyTitle => 'لا توجد أجهزة استشعار';
+
+  @override
+  String get sensorEmptyMessage =>
+      'لم تتم إضافة أي أجهزة استشعار إلى هذه المحطة بعد.';
+
+  @override
+  String get sensorSearchPlaceholder => 'البحث بالمعرف أو الاسم أو الوحدة...';
+
+  @override
+  String get sensorSearchEmptyTitle => 'لا توجد نتائج مطابقة';
+
+  @override
+  String get sensorSearchEmptyMessage => 'لا توجد أجهزة استشعار تطابق بحثك.';
+
+  @override
+  String get sensorErrorTitle => 'فشل تحميل أجهزة الاستشعار';
+
+  @override
+  String get sensorErrorRetry => 'إعادة المحاولة';
+
+  @override
+  String get gatewayReadOnlyNotice =>
+      'وضع القراءة فقط (المرحلة 2). التحكم عن بعد غير مفعل.';
 }

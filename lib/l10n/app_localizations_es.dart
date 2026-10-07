@@ -161,4 +161,187 @@ class LEs extends L {
   String rangeOfTotal(int first, int last, int total) {
     return '$first–$last de $total';
   }
+
+  @override
+  String get accountInfo => 'Información de la cuenta';
+
+  @override
+  String get accountSubtitle =>
+      'Ver detalles de identidad y sesión activa para esta cuenta.';
+
+  @override
+  String get accountIdentityTitle => 'Información de identidad';
+
+  @override
+  String get accountUserId => 'ID de usuario (UUID)';
+
+  @override
+  String get accountEmail => 'Correo electrónico';
+
+  @override
+  String get accountFullName => 'Nombre completo';
+
+  @override
+  String get accountRole => 'Rol de puerta de enlace';
+
+  @override
+  String get accountRoleUnassigned => 'Sin rol asignado';
+
+  @override
+  String get accountRoleNote =>
+      'Los permisos se verifican dinámicamente por puerta de enlace en el backend.';
+
+  @override
+  String get accountSessionTitle => 'Sesión y seguridad';
+
+  @override
+  String get accountSessionStatus => 'Estado de la sesión';
+
+  @override
+  String get accountStatusActive => 'Activa';
+
+  @override
+  String get accountAuthMethod => 'Método de autenticación';
+
+  @override
+  String get accountAuthMethodValue =>
+      'Supabase Auth (GoTrue) · Verificación local HS256';
+
+  @override
+  String get accountAdminNoteTitle => 'Política de gestión de cuentas';
+
+  @override
+  String get accountAdminNote =>
+      'Las cuentas se gestionan de forma centralizada por los administradores.';
+
+  @override
+  String get accountCopyId => 'Copiar ID';
+
+  @override
+  String get accountCopiedId => 'ID de usuario copiado al portapapeles';
+
+  @override
+  String get accountBackToDashboard => 'Volver al panel';
+
+  @override
+  String get navGateways => 'Pasarelas';
+
+  @override
+  String get gatewayListTitle => 'Pasarelas';
+
+  @override
+  String get gatewayListSubtitle =>
+      'Lista de pasarelas accesibles en la plataforma.';
+
+  @override
+  String get gatewayId => 'ID de pasarela';
+
+  @override
+  String get gatewayName => 'Nombre';
+
+  @override
+  String get gatewayDescription => 'Descripción';
+
+  @override
+  String get gatewayRole => 'Rol';
+
+  @override
+  String get gatewayCreatedAt => 'Fecha de creación';
+
+  @override
+  String get gatewaySearchPlaceholder =>
+      'Buscar por ID, nombre o descripción...';
+
+  @override
+  String get gatewayEmptyTitle => 'No hay pasarelas';
+
+  @override
+  String get gatewayEmptyMessage =>
+      'Su cuenta aún no tiene acceso a ninguna pasarela.';
+
+  @override
+  String get gatewaySearchEmptyTitle => 'Sin coincidencias';
+
+  @override
+  String get gatewaySearchEmptyMessage =>
+      'Ninguna pasarela coincide con su búsqueda.';
+
+  @override
+  String get gatewayRoleOwner => 'Propietario';
+
+  @override
+  String get gatewayRoleOperator => 'Operador';
+
+  @override
+  String get gatewayRoleViewer => 'Visualizador';
+
+  @override
+  String get gatewayActionDetail => 'Detalles';
+
+  @override
+  String get gatewayDetailTitle => 'Detalles de la Pasarela';
+
+  @override
+  String get gatewayDetailSubtitle =>
+      'Descripción general de la estación y sensores asociados.';
+
+  @override
+  String get gatewayNotFoundTitle => 'Pasarela no encontrada';
+
+  @override
+  String get gatewayNotFoundMessage =>
+      'No se encontró la pasarela solicitada o no tiene permisos de acceso.';
+
+  @override
+  String get gatewayInvalidIdMessage =>
+      'Identificador de pasarela no válido o reservado.';
+
+  @override
+  String get gatewayBackToList => 'Volver a Pasarelas';
+
+  @override
+  String get gatewaySectionMetadata => 'Información de la Pasarela';
+
+  @override
+  String get gatewaySectionSensors => 'Catálogo de Sensores';
+
+  @override
+  String get sensorId => 'ID de Sensor';
+
+  @override
+  String get sensorName => 'Nombre del Sensor';
+
+  @override
+  String get sensorUnit => 'Unidad';
+
+  @override
+  String get sensorCreatedAt => 'Fecha de creación';
+
+  @override
+  String get sensorEmptyTitle => 'No hay sensores configurados';
+
+  @override
+  String get sensorEmptyMessage =>
+      'Aún no se han configurado sensores para esta pasarela.';
+
+  @override
+  String get sensorSearchPlaceholder =>
+      'Buscar sensores por ID, nombre o unidad...';
+
+  @override
+  String get sensorSearchEmptyTitle => 'Sin coincidencias de sensores';
+
+  @override
+  String get sensorSearchEmptyMessage =>
+      'Ningún sensor coincide con su búsqueda.';
+
+  @override
+  String get sensorErrorTitle => 'Error al cargar sensores';
+
+  @override
+  String get sensorErrorRetry => 'Reintentar cargar sensores';
+
+  @override
+  String get gatewayReadOnlyNotice =>
+      'Modo de solo lectura (Fase 2). El control remoto no está activo.';
 }

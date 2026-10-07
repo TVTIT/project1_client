@@ -159,4 +159,173 @@ class LJa extends L {
   String rangeOfTotal(int first, int last, int total) {
     return '$total 件中 $first〜$last 件';
   }
+
+  @override
+  String get accountInfo => 'アカウント情報';
+
+  @override
+  String get accountSubtitle => 'このアカウントのIDとアクティブなセッション情報を表示します。';
+
+  @override
+  String get accountIdentityTitle => 'ID情報';
+
+  @override
+  String get accountUserId => 'ユーザーID (UUID)';
+
+  @override
+  String get accountEmail => 'アカウントメール';
+
+  @override
+  String get accountFullName => '氏名';
+
+  @override
+  String get accountRole => 'ゲートウェイロール';
+
+  @override
+  String get accountRoleUnassigned => 'ロール未割り当て';
+
+  @override
+  String get accountRoleNote => '権限はGoバックエンドでゲートウェイごとに動的に検証されます。';
+
+  @override
+  String get accountSessionTitle => 'セッションとセキュリティ';
+
+  @override
+  String get accountSessionStatus => 'セッション状態';
+
+  @override
+  String get accountStatusActive => 'アクティブ';
+
+  @override
+  String get accountAuthMethod => '認証方式';
+
+  @override
+  String get accountAuthMethodValue =>
+      'Supabase Auth (GoTrue) · GoバックエンドローカルHS256検証';
+
+  @override
+  String get accountAdminNoteTitle => 'アカウント管理ポリシー';
+
+  @override
+  String get accountAdminNote => 'アカウントは管理者によって一元管理されています。';
+
+  @override
+  String get accountCopyId => 'IDをコピー';
+
+  @override
+  String get accountCopiedId => 'ユーザーIDをクリップボードにコピーしました';
+
+  @override
+  String get accountBackToDashboard => 'ダッシュボードに戻る';
+
+  @override
+  String get navGateways => 'ゲートウェイ';
+
+  @override
+  String get gatewayListTitle => 'ゲートウェイ管理';
+
+  @override
+  String get gatewayListSubtitle => 'アクセス可能なゲートウェイ一覧を表示します。';
+
+  @override
+  String get gatewayId => 'ゲートウェイID';
+
+  @override
+  String get gatewayName => '名前';
+
+  @override
+  String get gatewayDescription => '説明';
+
+  @override
+  String get gatewayRole => 'ロール';
+
+  @override
+  String get gatewayCreatedAt => '作成日時';
+
+  @override
+  String get gatewaySearchPlaceholder => 'ID、名前、説明で検索...';
+
+  @override
+  String get gatewayEmptyTitle => 'ゲートウェイがありません';
+
+  @override
+  String get gatewayEmptyMessage => '現在アクセス可能なゲートウェイが割り当てられていません。';
+
+  @override
+  String get gatewaySearchEmptyTitle => '一致する結果がありません';
+
+  @override
+  String get gatewaySearchEmptyMessage => '検索条件に一致するゲートウェイはありません。';
+
+  @override
+  String get gatewayRoleOwner => 'オーナー';
+
+  @override
+  String get gatewayRoleOperator => 'オペレーター';
+
+  @override
+  String get gatewayRoleViewer => '閲覧者';
+
+  @override
+  String get gatewayActionDetail => '詳細';
+
+  @override
+  String get gatewayDetailTitle => 'ゲートウェイ詳細';
+
+  @override
+  String get gatewayDetailSubtitle => 'ステーション構成と接続センサーの概要。';
+
+  @override
+  String get gatewayNotFoundTitle => 'ゲートウェイが見つかりません';
+
+  @override
+  String get gatewayNotFoundMessage => '指定されたゲートウェイが存在しないか、アクセス権限がありません。';
+
+  @override
+  String get gatewayInvalidIdMessage => 'ゲートウェイ識別子の形式が無効であるか、予約された識別子です。';
+
+  @override
+  String get gatewayBackToList => 'ゲートウェイ一覧に戻る';
+
+  @override
+  String get gatewaySectionMetadata => 'ゲートウェイ情報';
+
+  @override
+  String get gatewaySectionSensors => 'センサー一覧';
+
+  @override
+  String get sensorId => 'センサーID';
+
+  @override
+  String get sensorName => 'センサー名';
+
+  @override
+  String get sensorUnit => '単位';
+
+  @override
+  String get sensorCreatedAt => '作成日時';
+
+  @override
+  String get sensorEmptyTitle => 'センサーが登録されていません';
+
+  @override
+  String get sensorEmptyMessage => 'このゲートウェイにはまだセンサーが登録されていません。';
+
+  @override
+  String get sensorSearchPlaceholder => 'センサーID、名前、単位で検索...';
+
+  @override
+  String get sensorSearchEmptyTitle => '一致するセンサーがありません';
+
+  @override
+  String get sensorSearchEmptyMessage => '検索条件に一致するセンサーはありません。';
+
+  @override
+  String get sensorErrorTitle => 'センサーの取得に失敗しました';
+
+  @override
+  String get sensorErrorRetry => 'センサーを再読み込み';
+
+  @override
+  String get gatewayReadOnlyNotice => '読み取り専用モード（ステージ2）。リモート制御は有効化されていません。';
 }
