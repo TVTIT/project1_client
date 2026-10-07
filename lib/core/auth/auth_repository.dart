@@ -20,7 +20,8 @@ class AuthException implements Exception {
 abstract class AuthRepository {
   Stream<SessionUser?> get authStateChanges;
   Future<SessionUser?> restoreSession();
-  Future<String?> getAccessToken();
+  Future<String?> getAccessToken({bool forceRefresh = false});
+  Future<String?> refreshSession();
   Future<SessionUser> signInWithPassword({
     required String email,
     required String password,
@@ -134,7 +135,7 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<String?> getAccessToken() async {
+  Future<String?> getAccessToken({bool forceRefresh = false}) async {
     if (!_disposed && _refreshCompleter != null) {
       return _refreshCompleter!.future;
     }
@@ -147,7 +148,9 @@ class SupabaseAuthRepository implements AuthRepository {
     final now = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
     final isExpiringSoon = expiresAt != null && (expiresAt - now < 30);
 
-    if (!isExpiringSoon && currentSession.accessToken.isNotEmpty) {
+    if (!forceRefresh &&
+        !isExpiringSoon &&
+        currentSession.accessToken.isNotEmpty) {
       return currentSession.accessToken;
     }
 
@@ -201,6 +204,18 @@ class SupabaseAuthRepository implements AuthRepository {
     } finally {
       _refreshCompleter = null;
     }
+  }
+
+  @override
+  Future<String?> refreshSession() async {
+    final token = await getAccessToken(forceRefresh: true);
+    if (token == null && _client.auth.currentSession == null) {
+      throw const AuthException(
+        'Phiên làm việc đã hết hạn hoặc không hợp lệ.',
+        code: 'invalid_grant',
+      );
+    }
+    return token;
   }
 
   @override

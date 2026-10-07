@@ -10,6 +10,9 @@ class FakeAuthRepository implements AuthRepository {
   SessionUser? _currentSession;
   final String _mockToken = 'mock_jwt_token';
   bool throwOnSignIn = false;
+  bool throwInvalidOnRefresh = false;
+  bool throwTransientOnRefresh = false;
+  int refreshCallCount = 0;
   String? signInErrorMessage;
   int signInDelayMs = 0;
   int signInCallCount = 0;
@@ -29,8 +32,22 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<String?> getAccessToken() async {
+  Future<String?> getAccessToken({bool forceRefresh = false}) async {
     return _currentSession != null ? _mockToken : null;
+  }
+
+  @override
+  Future<String?> refreshSession() async {
+    refreshCallCount++;
+    if (throwInvalidOnRefresh) {
+      _currentSession = null;
+      _controller.add(null);
+      throw const AuthException('invalid_grant', code: 'invalid_grant');
+    }
+    if (throwTransientOnRefresh) {
+      throw Exception('Network error');
+    }
+    return getAccessToken(forceRefresh: true);
   }
 
   @override
