@@ -10,7 +10,7 @@ class LJa extends L {
   LJa([String locale = 'ja']) : super(locale);
 
   @override
-  String get appName => 'Kite';
+  String get appName => 'SANSLAB IoT Server';
 
   @override
   String get navOverview => '概要';

@@ -10,7 +10,7 @@ class LAr extends L {
   LAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get appName => 'Kite';
+  String get appName => 'SANSLAB IoT Server';
 
   @override
   String get navOverview => 'نظرة عامة';

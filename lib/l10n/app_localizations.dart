@@ -108,7 +108,7 @@ abstract class L {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'Kite'**
+  /// **'SANSLAB IoT Server'**
   String get appName;
 
   /// No description provided for @navOverview.

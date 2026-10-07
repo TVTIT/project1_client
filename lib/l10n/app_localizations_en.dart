@@ -10,7 +10,7 @@ class LEn extends L {
   LEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'Kite';
+  String get appName => 'SANSLAB IoT Server';
 
   @override
   String get navOverview => 'Overview';

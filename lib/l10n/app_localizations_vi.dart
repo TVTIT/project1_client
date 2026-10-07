@@ -10,7 +10,7 @@ class LVi extends L {
   LVi([String locale = 'vi']) : super(locale);
 
   @override
-  String get appName => 'Kite';
+  String get appName => 'SANSLAB IoT Server';
 
   @override
   String get navOverview => 'Tổng quan';

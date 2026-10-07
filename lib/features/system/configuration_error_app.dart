@@ -14,7 +14,8 @@ class ConfigurationErrorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ShadApp(
-      title: 'Kite — Configuration Error',
+      onGenerateTitle: (context) =>
+          '${L.of(context).appName} — Configuration Error',
       supportedLocales: L.supportedLocales,
       localizationsDelegates: L.localizationsDelegates,
       home: ConfigurationErrorScreen(message: message),
