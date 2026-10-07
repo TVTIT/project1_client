@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 abstract final class R {
   static const signIn = '/sign-in';
   static const dashboard = '/';
+  static const account = '/account';
   static const license = '/license';
   static const serverError = '/500';
 

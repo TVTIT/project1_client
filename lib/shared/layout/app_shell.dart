@@ -256,13 +256,18 @@ class _TopBar extends ConsumerWidget {
     final c = KiteColors.of(context);
     final t = KiteText.of(context);
     final l = L.of(context);
-    final matches = [
-      for (final n in kNav)
-        if (location == n.path ||
-            (n.path != '/' && location.startsWith('${n.path}/')))
-          n,
-    ]..sort((a, b) => b.path.length.compareTo(a.path.length));
-    final title = matches.isEmpty ? l.appName : matches.first.labelOf(l);
+    final String title;
+    if (location == R.account) {
+      title = l.accountInfo;
+    } else {
+      final matches = [
+        for (final n in kNav)
+          if (location == n.path ||
+              (n.path != '/' && location.startsWith('${n.path}/')))
+            n,
+      ]..sort((a, b) => b.path.length.compareTo(a.path.length));
+      title = matches.isEmpty ? l.appName : matches.first.labelOf(l);
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -353,6 +358,11 @@ class _AccountMenu extends ConsumerWidget {
         ),
       ),
       items: [
+        KiteMenuItem(
+          label: 'Thông tin tài khoản',
+          icon: Icons.person_outline,
+          onPressed: () => context.go(R.account),
+        ),
         KiteMenuItem(
           label: 'Giấy phép bản quyền',
           icon: Icons.description_outlined,
