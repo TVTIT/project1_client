@@ -45,3 +45,4 @@ flutter:
   assets:
     - LICENSE
     - assets/client.env
+    - assets/images/

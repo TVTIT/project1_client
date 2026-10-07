@@ -7,6 +7,7 @@ import '../../core/auth/session.dart';
 import '../../core/router/routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../l10n/app_localizations.dart';
+import '../widgets/app_brand.dart';
 
 /// The persistent shell.
 ///
@@ -90,25 +91,18 @@ class _SidebarBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = KiteColors.of(context);
     final t = KiteText.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
+        const Padding(
+          padding: EdgeInsets.fromLTRB(
             KiteSpace.xl,
             KiteSpace.xl,
             KiteSpace.xl,
             KiteSpace.lg,
           ),
-          child: Row(
-            children: [
-              Icon(Icons.change_history, size: 20, color: c.primary),
-              const SizedBox(width: KiteSpace.sm),
-              Text('Kite', style: t.h4),
-            ],
-          ),
+          child: AppBrand(logoSize: 20),
         ),
         Expanded(
           child: ListView(
@@ -268,7 +262,7 @@ class _TopBar extends ConsumerWidget {
             (n.path != '/' && location.startsWith('${n.path}/')))
           n,
     ]..sort((a, b) => b.path.length.compareTo(a.path.length));
-    final title = matches.isEmpty ? 'Kite' : matches.first.labelOf(l);
+    final title = matches.isEmpty ? l.appName : matches.first.labelOf(l);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -331,7 +325,7 @@ class _AccountMenu extends ConsumerWidget {
     final displayName = user?.name ?? 'Người dùng';
 
     return KiteMenu(
-      width: 248,
+      width: 300,
       header: Padding(
         padding: const EdgeInsets.symmetric(horizontal: KiteSpace.sm),
         child: Row(

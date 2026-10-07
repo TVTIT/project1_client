@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kite_ui/kite_ui.dart';
 
+import '../../shared/widgets/app_brand.dart';
+
 class ConfigurationErrorScreen extends StatelessWidget {
   const ConfigurationErrorScreen({
     super.key,
@@ -28,13 +30,9 @@ class ConfigurationErrorScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
+                  const AppBrand(
+                    logoSize: 24,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.change_history, size: 24, color: c.primary),
-                      const SizedBox(width: KiteSpace.sm),
-                      Text('Kite', style: t.h4),
-                    ],
                   ),
                   const SizedBox(height: KiteSpace.xxl),
                   KiteCard(

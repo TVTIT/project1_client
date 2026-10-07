@@ -6,6 +6,7 @@ import 'package:kite_ui/kite_ui.dart';
 
 import '../../core/auth/session.dart';
 import '../../core/router/routes.dart';
+import '../../shared/widgets/app_brand.dart';
 
 const _kFallbackLicense = '''MIT License
 
@@ -102,18 +103,13 @@ class LicenseScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      const Spacer(),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.change_history,
-                            size: 18,
-                            color: c.primary,
-                          ),
-                          const SizedBox(width: KiteSpace.xs),
-                          Text('Kite', style: t.h4),
-                        ],
+                      const SizedBox(width: KiteSpace.sm),
+                      const Expanded(
+                        child: AppBrand(
+                          logoSize: 18,
+                          spacing: KiteSpace.xs,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                        ),
                       ),
                     ],
                   ),
