@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kite/app.dart';
 import 'package:kite/core/auth/session.dart';
+import 'package:kite/shared/widgets/app_brand.dart';
 import 'package:kite_ui/kite_ui.dart';
 
 import 'session_test.dart';
@@ -97,7 +98,8 @@ void main() {
 
     // Verify UI components exist
     expect(find.text('Đăng nhập'), findsWidgets);
-    expect(find.text('Quản lý tài khoản tập trung'), findsOneWidget);
+    expect(find.text('Hệ thống Quản lý IoT & Digital Twin'), findsOneWidget);
+    expect(find.byType(AppBrand), findsOneWidget);
 
     // Click Sign In with empty fields
     await tester.tap(find.widgetWithText(KiteButton, 'Đăng nhập'));

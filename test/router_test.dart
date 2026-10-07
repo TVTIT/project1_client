@@ -5,6 +5,7 @@ import 'package:kite/app.dart';
 import 'package:kite/core/auth/session.dart';
 import 'package:kite/core/router/app_router.dart';
 import 'package:kite/core/router/routes.dart';
+import 'package:kite/shared/widgets/app_brand.dart';
 
 import 'session_test.dart';
 
@@ -41,7 +42,7 @@ void main() {
     // Verify redirected to sign-in screen
     expect(find.text('Đăng nhập'), findsWidgets);
     expect(find.text('Hệ thống Quản lý IoT & Digital Twin'), findsOneWidget);
-    expect(find.text('Quản lý tài khoản tập trung'), findsOneWidget);
+    expect(find.byType(AppBrand), findsOneWidget);
     expect(find.text('Giấy phép (License)'), findsOneWidget);
   });
 
