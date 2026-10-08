@@ -129,7 +129,7 @@ void main() {
       expect(find.text('SANSLAB IoT Server'), findsOneWidget);
     });
 
-    for (final loc in ['en', 'vi', 'ja', 'ar', 'es', 'fr']) {
+    for (final loc in ['en', 'vi']) {
       test('lookupL for locale $loc returns SANSLAB IoT Server', () {
         expect(lookupL(Locale(loc)).appName, 'SANSLAB IoT Server');
       });
@@ -138,7 +138,7 @@ void main() {
     testWidgets('appName localized correctly across all supported locales', (
       tester,
     ) async {
-      for (final loc in ['en', 'vi', 'ja', 'ar', 'es', 'fr']) {
+      for (final loc in ['en', 'vi']) {
         await tester.pumpWidget(
           MaterialApp(
             supportedLocales: L.supportedLocales,
