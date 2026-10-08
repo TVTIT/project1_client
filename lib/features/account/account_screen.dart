@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kite_ui/kite_ui.dart';
 
+import '../../core/auth/permissions.dart';
 import '../../core/auth/session.dart';
 import '../../core/router/routes.dart';
 import '../../l10n/app_localizations.dart';
@@ -31,6 +32,7 @@ class AccountScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
+    final permissionsState = ref.watch(userPermissionsProvider);
     final c = KiteColors.of(context);
     final t = KiteText.of(context);
     final l = L.of(context);
@@ -139,6 +141,64 @@ class AccountScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: KiteSpace.xl),
+
+                // Permissions Information Card
+                KiteCard(
+                  title: 'Cơ chế phân quyền trạm & quản trị',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildPlatformAdminField(permissionsState, c, t, l),
+                      const SizedBox(height: KiteSpace.lg),
+                      _buildFieldRow(
+                        label: 'Ghi chú phân quyền trạm',
+                        value: l.accountRoleNote,
+                        c: c,
+                        t: t,
+                      ),
+                      const SizedBox(height: KiteSpace.lg),
+                      _buildFieldRow(
+                        label: l.accountAdminNoteTitle,
+                        value: l.accountAdminNote,
+                        c: c,
+                        t: t,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: KiteSpace.xl),
+
+                // Session & Security Card
+                KiteCard(
+                  title: l.accountSessionTitle,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: _buildFieldRow(
+                              label: l.accountSessionStatus,
+                              value: l.accountStatusActive,
+                              c: c,
+                              t: t,
+                            ),
+                          ),
+                          const KiteBadge('Active', tone: KiteTone.success),
+                        ],
+                      ),
+                      const SizedBox(height: KiteSpace.lg),
+                      _buildFieldRow(
+                        label: l.accountAuthMethod,
+                        value: l.accountAuthMethodValue,
+                        c: c,
+                        t: t,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: KiteSpace.xl),
               ],
             ),
           ),
@@ -183,6 +243,50 @@ class AccountScreen extends ConsumerWidget {
         Text(label, style: t.muted.copyWith(fontSize: 13)),
         const SizedBox(height: KiteSpace.xs),
         Text(value, style: t.p.copyWith(fontWeight: FontWeight.w500)),
+      ],
+    );
+  }
+
+  Widget _buildPlatformAdminField(
+    UserPermissionsState permissionsState,
+    KiteColors c,
+    KiteText t,
+    L l,
+  ) {
+    final String statusText;
+    final KiteTone badgeTone;
+    final String badgeLabel;
+
+    if (permissionsState.isLoading) {
+      statusText = l.accountPlatformAdminChecking;
+      badgeTone = KiteTone.neutral;
+      badgeLabel = 'Đang kiểm tra';
+    } else if (permissionsState.isPlatformAdmin) {
+      statusText = l.accountPlatformAdminTrue;
+      badgeTone = KiteTone.info;
+      badgeLabel = 'Quản trị viên nền tảng';
+    } else {
+      statusText = l.accountPlatformAdminFalse;
+      badgeTone = KiteTone.neutral;
+      badgeLabel = 'Người dùng tiêu chuẩn';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l.accountPlatformAdminStatus,
+          style: t.muted.copyWith(fontSize: 13),
+        ),
+        const SizedBox(height: KiteSpace.xs),
+        Wrap(
+          spacing: KiteSpace.sm,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(statusText, style: t.p.copyWith(fontWeight: FontWeight.w500)),
+            KiteBadge(badgeLabel, tone: badgeTone),
+          ],
+        ),
       ],
     );
   }
