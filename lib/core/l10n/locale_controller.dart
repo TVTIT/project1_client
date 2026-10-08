@@ -8,11 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// padding nobody noticed.
 enum KiteLocale {
   vi('Vietnamese', 'Tiếng Việt'),
-  en('English', 'English'),
-  es('Spanish', 'Español'),
-  fr('French', 'Français'),
-  ja('Japanese', '日本語'),
-  ar('Arabic', 'العربية');
+  en('English', 'English');
 
   const KiteLocale(this.englishName, this.nativeName);
 
@@ -20,8 +16,6 @@ enum KiteLocale {
   final String nativeName;
 
   Locale get locale => Locale(name);
-
-  bool get isRtl => this == KiteLocale.ar;
 }
 
 class LocaleController extends Notifier<KiteLocale> {

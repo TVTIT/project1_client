@@ -6,6 +6,7 @@ import 'package:kite/core/auth/session.dart';
 import 'package:kite/core/network/api_exception.dart';
 import 'package:kite/features/gateways/data/gateway_dto.dart';
 import 'package:kite/features/gateways/data/gateway_repository.dart';
+import 'package:kite/features/gateways/data/mqtt_credential_dto.dart';
 import 'package:kite/features/gateways/providers/gateway_list_provider.dart';
 
 import 'session_test.dart';
@@ -56,6 +57,235 @@ class FakeGatewayRepository implements GatewayRepository {
     }
     final list = sensorsMap[gatewayId] ?? [];
     return SensorListResponse(gatewayId: gatewayId, items: list);
+  }
+
+  Completer<ProvisionGatewayResult>? pendingProvisionCompleter;
+  bool shouldThrowProvision = false;
+  ApiException? provisionErrorToThrow;
+  int provisionCallCount = 0;
+  ProvisionGatewayInput? lastProvisionInput;
+  ProvisionGatewayResult? provisionResultToReturn;
+
+  @override
+  Future<ProvisionGatewayResult> provisionGateway(
+    ProvisionGatewayInput input,
+  ) async {
+    provisionCallCount++;
+    lastProvisionInput = input;
+    if (pendingProvisionCompleter != null) {
+      return pendingProvisionCompleter!.future;
+    }
+    if (shouldThrowProvision) {
+      throw provisionErrorToThrow ??
+          const ApiException(
+            statusCode: 500,
+            code: 'internal_error',
+            message: 'Provision server error',
+          );
+    }
+    return provisionResultToReturn ??
+        ProvisionGatewayResult(
+          isCreated: true,
+          gatewayId: input.gatewayId,
+          name: input.name,
+          description: input.description,
+          ownerUserId: input.ownerUserId,
+          entityId: 'urn:ngsi-ld:Gateway:${input.gatewayId}',
+          createdAt: DateTime.now().toUtc(),
+        );
+  }
+
+  Completer<ProvisionSensorResult>? pendingProvisionSensorCompleter;
+  bool shouldThrowProvisionSensor = false;
+  ApiException? provisionSensorErrorToThrow;
+  int provisionSensorCallCount = 0;
+  ProvisionSensorInput? lastProvisionSensorInput;
+  ProvisionSensorResult? provisionSensorResultToReturn;
+
+  @override
+  Future<ProvisionSensorResult> provisionSensor(
+    ProvisionSensorInput input,
+  ) async {
+    provisionSensorCallCount++;
+    lastProvisionSensorInput = input;
+    if (pendingProvisionSensorCompleter != null) {
+      return pendingProvisionSensorCompleter!.future;
+    }
+    if (shouldThrowProvisionSensor) {
+      throw provisionSensorErrorToThrow ??
+          const ApiException(
+            statusCode: 500,
+            code: 'internal_error',
+            message: 'Sensor provision server error',
+          );
+    }
+    return provisionSensorResultToReturn ??
+        ProvisionSensorResult(
+          isCreated: true,
+          gatewayId: input.gatewayId,
+          sensorId: input.sensorId,
+          name: input.name,
+          unit: input.unit,
+          entityId: 'urn:ngsi-ld:Sensor:${input.gatewayId}:${input.sensorId}',
+          createdAt: DateTime.now().toUtc(),
+        );
+  }
+
+  Completer<MqttCredentialMetadata>? pendingMetadataCompleter;
+  bool shouldThrowMetadata = false;
+  ApiException? metadataErrorToThrow;
+  int metadataCallCount = 0;
+  MqttCredentialMetadata? metadataResultToReturn;
+
+  @override
+  Future<MqttCredentialMetadata> getMqttCredential(String gatewayId) async {
+    metadataCallCount++;
+    if (pendingMetadataCompleter != null) {
+      return pendingMetadataCompleter!.future;
+    }
+    if (shouldThrowMetadata) {
+      throw metadataErrorToThrow ??
+          const ApiException(
+            statusCode: 500,
+            code: 'internal_error',
+            message: 'Metadata server error',
+          );
+    }
+    return metadataResultToReturn ??
+        MqttCredentialMetadata(
+          gatewayId: gatewayId,
+          username: gatewayId,
+          credentialVersion: 1,
+          status: MqttCredentialStatus.active,
+          lastOperationId: '00000000-0000-0000-0000-000000000001',
+          operationStatus: MqttOperationStatus.succeeded,
+          activatedAt: DateTime.now().toUtc(),
+        );
+  }
+
+  Completer<Object>? pendingProvisionMqttCompleter;
+  bool shouldThrowProvisionMqtt = false;
+  ApiException? provisionMqttErrorToThrow;
+  int provisionMqttCallCount = 0;
+  String? lastProvisionMqttIdempotencyKey;
+  Object? provisionMqttResultToReturn;
+
+  @override
+  Future<Object> provisionMqttCredential(
+    String gatewayId, {
+    required String idempotencyKey,
+  }) async {
+    provisionMqttCallCount++;
+    lastProvisionMqttIdempotencyKey = idempotencyKey;
+    if (pendingProvisionMqttCompleter != null) {
+      return pendingProvisionMqttCompleter!.future;
+    }
+    if (shouldThrowProvisionMqtt) {
+      throw provisionMqttErrorToThrow ??
+          const ApiException(
+            statusCode: 500,
+            code: 'internal_error',
+            message: 'Provision MQTT server error',
+          );
+    }
+    return provisionMqttResultToReturn ??
+        MqttCredentialSecretResult(
+          metadata: MqttCredentialMetadata(
+            gatewayId: gatewayId,
+            username: gatewayId,
+            credentialVersion: 1,
+            status: MqttCredentialStatus.active,
+            lastOperationId: '00000000-0000-0000-0000-000000000002',
+            operationStatus: MqttOperationStatus.succeeded,
+            activatedAt: DateTime.now().toUtc(),
+          ),
+          operationId: '00000000-0000-0000-0000-000000000002',
+          password: 'mock_plaintext_secret_123',
+          secretReturned: true,
+        );
+  }
+
+  Completer<Object>? pendingRotateMqttCompleter;
+  bool shouldThrowRotateMqtt = false;
+  ApiException? rotateMqttErrorToThrow;
+  int rotateMqttCallCount = 0;
+  String? lastRotateMqttIdempotencyKey;
+  Object? rotateMqttResultToReturn;
+
+  @override
+  Future<Object> rotateMqttCredential(
+    String gatewayId, {
+    required String idempotencyKey,
+  }) async {
+    rotateMqttCallCount++;
+    lastRotateMqttIdempotencyKey = idempotencyKey;
+    if (pendingRotateMqttCompleter != null) {
+      return pendingRotateMqttCompleter!.future;
+    }
+    if (shouldThrowRotateMqtt) {
+      throw rotateMqttErrorToThrow ??
+          const ApiException(
+            statusCode: 500,
+            code: 'internal_error',
+            message: 'Rotate MQTT server error',
+          );
+    }
+    return rotateMqttResultToReturn ??
+        MqttCredentialSecretResult(
+          metadata: MqttCredentialMetadata(
+            gatewayId: gatewayId,
+            username: gatewayId,
+            credentialVersion: 2,
+            status: MqttCredentialStatus.active,
+            lastOperationId: '00000000-0000-0000-0000-000000000003',
+            operationStatus: MqttOperationStatus.succeeded,
+            activatedAt: DateTime.now().toUtc(),
+          ),
+          operationId: '00000000-0000-0000-0000-000000000003',
+          password: 'mock_rotated_secret_456',
+          secretReturned: true,
+        );
+  }
+
+  Completer<MqttCredentialMutationResult>? pendingRevokeMqttCompleter;
+  bool shouldThrowRevokeMqtt = false;
+  ApiException? revokeMqttErrorToThrow;
+  int revokeMqttCallCount = 0;
+  String? lastRevokeMqttIdempotencyKey;
+  MqttCredentialMutationResult? revokeMqttResultToReturn;
+
+  @override
+  Future<MqttCredentialMutationResult> revokeMqttCredential(
+    String gatewayId, {
+    required String idempotencyKey,
+  }) async {
+    revokeMqttCallCount++;
+    lastRevokeMqttIdempotencyKey = idempotencyKey;
+    if (pendingRevokeMqttCompleter != null) {
+      return pendingRevokeMqttCompleter!.future;
+    }
+    if (shouldThrowRevokeMqtt) {
+      throw revokeMqttErrorToThrow ??
+          const ApiException(
+            statusCode: 500,
+            code: 'internal_error',
+            message: 'Revoke MQTT server error',
+          );
+    }
+    return revokeMqttResultToReturn ??
+        MqttCredentialMutationResult(
+          metadata: MqttCredentialMetadata(
+            gatewayId: gatewayId,
+            username: gatewayId,
+            credentialVersion: 1,
+            status: MqttCredentialStatus.revoked,
+            lastOperationId: '00000000-0000-0000-0000-000000000004',
+            operationStatus: MqttOperationStatus.succeeded,
+            revokedAt: DateTime.now().toUtc(),
+          ),
+          operationId: '00000000-0000-0000-0000-000000000004',
+          secretReturned: false,
+        );
   }
 }
 

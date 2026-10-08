@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kite_ui/kite_ui.dart';
 
+import '../../../core/auth/permissions.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/states.dart';
 import '../data/gateway_dto.dart';
 import '../providers/gateway_list_provider.dart';
+import 'mqtt_credential_dialog.dart';
 
 /// Screen presenting the user's accessible Gateway catalog.
 ///
@@ -60,6 +62,7 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(gatewayListProvider);
+    final isPlatformAdmin = ref.watch(isPlatformAdminProvider);
     final c = KiteColors.of(context);
     final t = KiteText.of(context);
     final l = L.of(context);
@@ -78,7 +81,16 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Page Header
-                  _buildHeader(context, ref, state, isMobile, c, t, l),
+                  _buildHeader(
+                    context,
+                    ref,
+                    state,
+                    isPlatformAdmin,
+                    isMobile,
+                    c,
+                    t,
+                    l,
+                  ),
                   const SizedBox(height: KiteSpace.lg),
 
                   // Search input (only shown when catalog is loaded or has items)
@@ -102,6 +114,7 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
     BuildContext context,
     WidgetRef ref,
     GatewayListState state,
+    bool isPlatformAdmin,
     bool isMobile,
     KiteColors c,
     KiteText t,
@@ -121,12 +134,30 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
             Text(l.gatewayListSubtitle, style: t.muted),
           ],
         ),
-        KiteButton.outline(
-          onPressed: state.isLoading
-              ? null
-              : () => ref.read(gatewayListProvider.notifier).loadGateways(),
-          leading: const Icon(Icons.refresh, size: 16),
-          child: Text(l.actionRefresh),
+        Wrap(
+          spacing: KiteSpace.sm,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            if (isPlatformAdmin) ...[
+              KiteButton(
+                onPressed: () => context.go(R.gatewayProvision),
+                leading: const Icon(Icons.add, size: 16),
+                child: Text(l.gatewayAddButton),
+              ),
+              KiteButton.outline(
+                onPressed: () => showMqttCredentialDialog(context),
+                leading: const Icon(Icons.vpn_key_outlined, size: 16),
+                child: const Text('Quản lý MQTT theo mã trạm'),
+              ),
+            ],
+            KiteButton.outline(
+              onPressed: state.isLoading
+                  ? null
+                  : () => ref.read(gatewayListProvider.notifier).loadGateways(),
+              leading: const Icon(Icons.refresh, size: 16),
+              child: Text(l.actionRefresh),
+            ),
+          ],
         ),
       ],
     );
@@ -336,127 +367,137 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
       ),
       child: ClipRRect(
         borderRadius: KiteRadius.allMd,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 900),
-            child: DataTable(
-              headingRowColor: WidgetStateProperty.all(
-                c.muted.withValues(alpha: 0.3),
-              ),
-              dataRowMinHeight: 52,
-              dataRowMaxHeight: 64,
-              horizontalMargin: KiteSpace.xl,
-              columnSpacing: KiteSpace.xl,
-              showCheckboxColumn: false,
-              columns: [
-                DataColumn(
-                  label: Text(
-                    l.gatewayId,
-                    style: t.small.copyWith(fontWeight: FontWeight.w600),
-                  ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: constraints.maxWidth < 900
+                      ? 900
+                      : constraints.maxWidth,
                 ),
-                DataColumn(
-                  label: Text(
-                    l.gatewayName,
-                    style: t.small.copyWith(fontWeight: FontWeight.w600),
+                child: DataTable(
+                  headingRowColor: WidgetStateProperty.all(
+                    c.muted.withValues(alpha: 0.3),
                   ),
-                ),
-                DataColumn(
-                  label: Text(
-                    l.gatewayDescription,
-                    style: t.small.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    l.gatewayRole,
-                    style: t.small.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    l.gatewayCreatedAt,
-                    style: t.small.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                DataColumn(
-                  label: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      l.gatewayActionDetail,
-                      style: t.small.copyWith(fontWeight: FontWeight.w600),
+                  dataRowMinHeight: 52,
+                  dataRowMaxHeight: 64,
+                  horizontalMargin: KiteSpace.xl,
+                  columnSpacing: KiteSpace.xl,
+                  showCheckboxColumn: false,
+                  columns: [
+                    DataColumn(
+                      label: Text(
+                        l.gatewayId,
+                        style: t.small.copyWith(fontWeight: FontWeight.w600),
+                      ),
                     ),
-                  ),
-                ),
-              ],
-              rows: [
-                for (final item in items)
-                  DataRow(
-                    onSelectChanged: (_) =>
-                        context.go(R.gatewayDetail(item.gatewayId)),
-                    cells: [
-                      DataCell(
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.router_outlined,
-                              size: 16,
-                              color: c.primary,
+                    DataColumn(
+                      label: Text(
+                        l.gatewayName,
+                        style: t.small.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        l.gatewayDescription,
+                        style: t.small.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        l.gatewayRole,
+                        style: t.small.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        l.gatewayCreatedAt,
+                        style: t.small.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          l.gatewayActionDetail,
+                          style: t.small.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ],
+                  rows: [
+                    for (final item in items)
+                      DataRow(
+                        onSelectChanged: (_) =>
+                            context.go(R.gatewayDetail(item.gatewayId)),
+                        cells: [
+                          DataCell(
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.router_outlined,
+                                  size: 16,
+                                  color: c.primary,
+                                ),
+                                const SizedBox(width: KiteSpace.sm),
+                                Text(
+                                  item.gatewayId,
+                                  style: t.small.copyWith(
+                                    fontFamily: 'monospace',
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: KiteSpace.sm),
+                          ),
+                          DataCell(
                             Text(
-                              item.gatewayId,
+                              item.name,
                               style: t.small.copyWith(
-                                fontFamily: 'monospace',
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      DataCell(
-                        Text(
-                          item.name,
-                          style: t.small.copyWith(fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                      DataCell(
-                        Text(
-                          item.description ?? '—',
-                          style: t.muted.copyWith(fontSize: 12),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      DataCell(
-                        KiteBadge(item.role.label, tone: item.role.tone),
-                      ),
-                      DataCell(
-                        Text(
-                          _formatDate(item.createdAt),
-                          style: t.muted.copyWith(fontSize: 12),
-                        ),
-                      ),
-                      DataCell(
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: const Icon(Icons.arrow_forward, size: 16),
-                            tooltip: l.gatewayActionDetail,
-                            color: c.mutedForeground,
-                            splashRadius: 16,
-                            onPressed: () =>
-                                context.go(R.gatewayDetail(item.gatewayId)),
                           ),
-                        ),
+                          DataCell(
+                            Text(
+                              item.description ?? '—',
+                              style: t.muted.copyWith(fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          DataCell(
+                            KiteBadge(item.role.label, tone: item.role.tone),
+                          ),
+                          DataCell(
+                            Text(
+                              _formatDate(item.createdAt),
+                              style: t.muted.copyWith(fontSize: 12),
+                            ),
+                          ),
+                          DataCell(
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton(
+                                icon: const Icon(Icons.arrow_forward, size: 16),
+                                tooltip: l.gatewayActionDetail,
+                                color: c.mutedForeground,
+                                splashRadius: 16,
+                                onPressed: () =>
+                                    context.go(R.gatewayDetail(item.gatewayId)),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

@@ -5,11 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
-import 'app_localizations_ar.dart';
 import 'app_localizations_en.dart';
-import 'app_localizations_es.dart';
-import 'app_localizations_fr.dart';
-import 'app_localizations_ja.dart';
 import 'app_localizations_vi.dart';
 
 // ignore_for_file: type=lint
@@ -97,11 +93,7 @@ abstract class L {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('ar'),
     Locale('en'),
-    Locale('es'),
-    Locale('fr'),
-    Locale('ja'),
     Locale('vi'),
   ];
 
@@ -734,6 +726,288 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Read-only mode (Stage 2). Remote control, downlink commands, and real-time telemetry streaming are not active.'**
   String get gatewayReadOnlyNotice;
+
+  /// No description provided for @accountPermissionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cơ chế phân quyền trạm & quản trị'**
+  String get accountPermissionsTitle;
+
+  /// No description provided for @accountPlatformAdminStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Admin Status'**
+  String get accountPlatformAdminStatus;
+
+  /// No description provided for @accountPlatformAdminTrue.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Admin (Confirmed)'**
+  String get accountPlatformAdminTrue;
+
+  /// No description provided for @accountPlatformAdminFalse.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard User (No Admin privileges)'**
+  String get accountPlatformAdminFalse;
+
+  /// No description provided for @accountPlatformAdminChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking admin permissions...'**
+  String get accountPlatformAdminChecking;
+
+  /// No description provided for @gatewayAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Thêm Gateway mới'**
+  String get gatewayAddButton;
+
+  /// No description provided for @gatewayProvisionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Provision Gateway'**
+  String get gatewayProvisionTitle;
+
+  /// No description provided for @gatewayProvisionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Provision a new Gateway station and assign initial owner (Platform Admin only).'**
+  String get gatewayProvisionSubtitle;
+
+  /// No description provided for @gatewayProvisionSuccessCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway provisioned successfully (HTTP 201 Created)'**
+  String get gatewayProvisionSuccessCreated;
+
+  /// No description provided for @gatewayProvisionSuccessReplayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway already exists with identical payload (HTTP 200 OK - Idempotent Replay)'**
+  String get gatewayProvisionSuccessReplayed;
+
+  /// No description provided for @gatewayProvisionNoticeAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization notice: Platform Admin accounts are not automatically catalog members (user_gateways) unless assigned ownership. This gateway may not appear in your personal catalog unless you are the assigned owner.'**
+  String get gatewayProvisionNoticeAdmin;
+
+  /// No description provided for @gatewayProvisionCreateAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Provision another Gateway'**
+  String get gatewayProvisionCreateAnother;
+
+  /// No description provided for @gatewayProvisionSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Provision Gateway'**
+  String get gatewayProvisionSubmit;
+
+  /// No description provided for @gatewayProvisionSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisioning...'**
+  String get gatewayProvisionSubmitting;
+
+  /// No description provided for @gatewayProvisionFieldId.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway ID'**
+  String get gatewayProvisionFieldId;
+
+  /// No description provided for @gatewayProvisionFieldIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1–64 ASCII chars [A-Za-z0-9_-], backend_service forbidden'**
+  String get gatewayProvisionFieldIdHint;
+
+  /// No description provided for @gatewayProvisionFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway Name'**
+  String get gatewayProvisionFieldName;
+
+  /// No description provided for @gatewayProvisionFieldNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway display name (max 256 UTF-8 bytes)'**
+  String get gatewayProvisionFieldNameHint;
+
+  /// No description provided for @gatewayProvisionFieldDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (Optional)'**
+  String get gatewayProvisionFieldDesc;
+
+  /// No description provided for @gatewayProvisionFieldDescHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Location or function description (max 4096 UTF-8 bytes)'**
+  String get gatewayProvisionFieldDescHint;
+
+  /// No description provided for @gatewayProvisionFieldOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner User ID (owner_user_id)'**
+  String get gatewayProvisionFieldOwner;
+
+  /// No description provided for @gatewayProvisionFieldOwnerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'UUID of the owner user in the system (no nil UUID)'**
+  String get gatewayProvisionFieldOwnerHint;
+
+  /// No description provided for @gatewayProvisionEntityId.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Twin Entity ID'**
+  String get gatewayProvisionEntityId;
+
+  /// No description provided for @gatewayProvisionOwnerId.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial Owner User ID'**
+  String get gatewayProvisionOwnerId;
+
+  /// No description provided for @gatewayProvisionCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created At'**
+  String get gatewayProvisionCreatedAt;
+
+  /// No description provided for @gatewayProvisionAccessDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access Denied'**
+  String get gatewayProvisionAccessDeniedTitle;
+
+  /// No description provided for @gatewayProvisionAccessDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have Platform Admin privileges to perform this action.'**
+  String get gatewayProvisionAccessDeniedMessage;
+
+  /// No description provided for @gatewayProvisionRetrySamePayload.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry with same payload'**
+  String get gatewayProvisionRetrySamePayload;
+
+  /// No description provided for @gatewayProvisionConflictError.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway already exists with different payload (HTTP 409 Conflict). Provisioning endpoint does not support updating existing metadata.'**
+  String get gatewayProvisionConflictError;
+
+  /// No description provided for @gatewayProvisionNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner user ID not found in system (HTTP 404 Not Found). Please verify UUID.'**
+  String get gatewayProvisionNotFoundError;
+
+  /// No description provided for @sensorAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Thêm cảm biến mới'**
+  String get sensorAddButton;
+
+  /// No description provided for @sensorCreateDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Sensor'**
+  String get sensorCreateDialogTitle;
+
+  /// No description provided for @sensorCreateDialogSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new sensor associated with this Gateway station (Platform Admin only).'**
+  String get sensorCreateDialogSubtitle;
+
+  /// No description provided for @sensorParentGateway.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Gateway ID (Fixed, read-only)'**
+  String get sensorParentGateway;
+
+  /// No description provided for @sensorFieldId.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor ID'**
+  String get sensorFieldId;
+
+  /// No description provided for @sensorFieldIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1–64 ASCII chars [A-Za-z0-9_-], backend_service allowed'**
+  String get sensorFieldIdHint;
+
+  /// No description provided for @sensorFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor Name'**
+  String get sensorFieldName;
+
+  /// No description provided for @sensorFieldNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor display name (max 256 UTF-8 bytes)'**
+  String get sensorFieldNameHint;
+
+  /// No description provided for @sensorFieldUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Measurement Unit (Optional)'**
+  String get sensorFieldUnit;
+
+  /// No description provided for @sensorFieldUnitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. °C, %, ppm (max 64 UTF-8 bytes)'**
+  String get sensorFieldUnitHint;
+
+  /// No description provided for @sensorCreateSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Sensor'**
+  String get sensorCreateSubmit;
+
+  /// No description provided for @sensorCreateSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating...'**
+  String get sensorCreateSubmitting;
+
+  /// No description provided for @sensorCreateSuccessCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor created successfully (HTTP 201 Created)'**
+  String get sensorCreateSuccessCreated;
+
+  /// No description provided for @sensorCreateSuccessReplayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor already exists with identical payload (HTTP 200 OK - Idempotent Replay)'**
+  String get sensorCreateSuccessReplayed;
+
+  /// No description provided for @sensorProvisionConflictError.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor already exists with different payload (HTTP 409 Conflict). Provisioning endpoint does not support updating existing metadata.'**
+  String get sensorProvisionConflictError;
+
+  /// No description provided for @sensorProvisionNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Gateway not found (HTTP 404 Not Found).'**
+  String get sensorProvisionNotFoundError;
+
+  /// No description provided for @sensorProvisionForbiddenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied. You do not have Platform Admin privileges.'**
+  String get sensorProvisionForbiddenError;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {
@@ -745,14 +1019,8 @@ class _LDelegate extends LocalizationsDelegate<L> {
   }
 
   @override
-  bool isSupported(Locale locale) => <String>[
-    'ar',
-    'en',
-    'es',
-    'fr',
-    'ja',
-    'vi',
-  ].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'vi'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_LDelegate old) => false;
@@ -761,16 +1029,8 @@ class _LDelegate extends LocalizationsDelegate<L> {
 L lookupL(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar':
-      return LAr();
     case 'en':
       return LEn();
-    case 'es':
-      return LEs();
-    case 'fr':
-      return LFr();
-    case 'ja':
-      return LJa();
     case 'vi':
       return LVi();
   }

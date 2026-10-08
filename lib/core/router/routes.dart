@@ -8,6 +8,7 @@ abstract final class R {
   static const signIn = '/sign-in';
   static const dashboard = '/';
   static const gateways = '/gateways';
+  static const gatewayProvision = '/gateways/provision';
   static const gatewayDetailPattern = '/gateways/:gatewayId';
   static String gatewayDetail(String gatewayId) => '/gateways/$gatewayId';
   static const account = '/account';

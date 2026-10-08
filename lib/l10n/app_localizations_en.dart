@@ -340,4 +340,163 @@ class LEn extends L {
   @override
   String get gatewayReadOnlyNotice =>
       'Read-only mode (Stage 2). Remote control, downlink commands, and real-time telemetry streaming are not active.';
+
+  @override
+  String get accountPermissionsTitle => 'Cơ chế phân quyền trạm & quản trị';
+
+  @override
+  String get accountPlatformAdminStatus => 'Platform Admin Status';
+
+  @override
+  String get accountPlatformAdminTrue => 'Platform Admin (Confirmed)';
+
+  @override
+  String get accountPlatformAdminFalse => 'Standard User (No Admin privileges)';
+
+  @override
+  String get accountPlatformAdminChecking => 'Checking admin permissions...';
+
+  @override
+  String get gatewayAddButton => 'Thêm Gateway mới';
+
+  @override
+  String get gatewayProvisionTitle => 'Provision Gateway';
+
+  @override
+  String get gatewayProvisionSubtitle =>
+      'Provision a new Gateway station and assign initial owner (Platform Admin only).';
+
+  @override
+  String get gatewayProvisionSuccessCreated =>
+      'Gateway provisioned successfully (HTTP 201 Created)';
+
+  @override
+  String get gatewayProvisionSuccessReplayed =>
+      'Gateway already exists with identical payload (HTTP 200 OK - Idempotent Replay)';
+
+  @override
+  String get gatewayProvisionNoticeAdmin =>
+      'Authorization notice: Platform Admin accounts are not automatically catalog members (user_gateways) unless assigned ownership. This gateway may not appear in your personal catalog unless you are the assigned owner.';
+
+  @override
+  String get gatewayProvisionCreateAnother => 'Provision another Gateway';
+
+  @override
+  String get gatewayProvisionSubmit => 'Provision Gateway';
+
+  @override
+  String get gatewayProvisionSubmitting => 'Provisioning...';
+
+  @override
+  String get gatewayProvisionFieldId => 'Gateway ID';
+
+  @override
+  String get gatewayProvisionFieldIdHint =>
+      '1–64 ASCII chars [A-Za-z0-9_-], backend_service forbidden';
+
+  @override
+  String get gatewayProvisionFieldName => 'Gateway Name';
+
+  @override
+  String get gatewayProvisionFieldNameHint =>
+      'Gateway display name (max 256 UTF-8 bytes)';
+
+  @override
+  String get gatewayProvisionFieldDesc => 'Description (Optional)';
+
+  @override
+  String get gatewayProvisionFieldDescHint =>
+      'Location or function description (max 4096 UTF-8 bytes)';
+
+  @override
+  String get gatewayProvisionFieldOwner => 'Owner User ID (owner_user_id)';
+
+  @override
+  String get gatewayProvisionFieldOwnerHint =>
+      'UUID of the owner user in the system (no nil UUID)';
+
+  @override
+  String get gatewayProvisionEntityId => 'Digital Twin Entity ID';
+
+  @override
+  String get gatewayProvisionOwnerId => 'Initial Owner User ID';
+
+  @override
+  String get gatewayProvisionCreatedAt => 'Created At';
+
+  @override
+  String get gatewayProvisionAccessDeniedTitle => 'Access Denied';
+
+  @override
+  String get gatewayProvisionAccessDeniedMessage =>
+      'You do not have Platform Admin privileges to perform this action.';
+
+  @override
+  String get gatewayProvisionRetrySamePayload => 'Retry with same payload';
+
+  @override
+  String get gatewayProvisionConflictError =>
+      'Gateway already exists with different payload (HTTP 409 Conflict). Provisioning endpoint does not support updating existing metadata.';
+
+  @override
+  String get gatewayProvisionNotFoundError =>
+      'Owner user ID not found in system (HTTP 404 Not Found). Please verify UUID.';
+
+  @override
+  String get sensorAddButton => 'Thêm cảm biến mới';
+
+  @override
+  String get sensorCreateDialogTitle => 'Create New Sensor';
+
+  @override
+  String get sensorCreateDialogSubtitle =>
+      'Add a new sensor associated with this Gateway station (Platform Admin only).';
+
+  @override
+  String get sensorParentGateway => 'Parent Gateway ID (Fixed, read-only)';
+
+  @override
+  String get sensorFieldId => 'Sensor ID';
+
+  @override
+  String get sensorFieldIdHint =>
+      '1–64 ASCII chars [A-Za-z0-9_-], backend_service allowed';
+
+  @override
+  String get sensorFieldName => 'Sensor Name';
+
+  @override
+  String get sensorFieldNameHint => 'Sensor display name (max 256 UTF-8 bytes)';
+
+  @override
+  String get sensorFieldUnit => 'Measurement Unit (Optional)';
+
+  @override
+  String get sensorFieldUnitHint => 'e.g. °C, %, ppm (max 64 UTF-8 bytes)';
+
+  @override
+  String get sensorCreateSubmit => 'Create Sensor';
+
+  @override
+  String get sensorCreateSubmitting => 'Creating...';
+
+  @override
+  String get sensorCreateSuccessCreated =>
+      'Sensor created successfully (HTTP 201 Created)';
+
+  @override
+  String get sensorCreateSuccessReplayed =>
+      'Sensor already exists with identical payload (HTTP 200 OK - Idempotent Replay)';
+
+  @override
+  String get sensorProvisionConflictError =>
+      'Sensor already exists with different payload (HTTP 409 Conflict). Provisioning endpoint does not support updating existing metadata.';
+
+  @override
+  String get sensorProvisionNotFoundError =>
+      'Parent Gateway not found (HTTP 404 Not Found).';
+
+  @override
+  String get sensorProvisionForbiddenError =>
+      'Access denied. You do not have Platform Admin privileges.';
 }

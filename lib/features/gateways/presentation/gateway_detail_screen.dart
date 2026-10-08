@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kite_ui/kite_ui.dart';
 
+import '../../../core/auth/permissions.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/states.dart';
 import '../data/gateway_dto.dart';
 import '../providers/gateway_detail_provider.dart';
+import 'create_sensor_dialog.dart';
+import 'mqtt_credential_dialog.dart';
 
 /// Screen presenting Gateway Details and associated Sensor Catalog.
 ///
@@ -77,6 +80,7 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(gatewayDetailProvider(widget.gatewayId));
+    final isPlatformAdmin = ref.watch(isPlatformAdminProvider);
     final c = KiteColors.of(context);
     final t = KiteText.of(context);
     final l = L.of(context);
@@ -96,7 +100,16 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Back button and header
-                  _buildHeader(context, ref, state, isMobile, c, t, l),
+                  _buildHeader(
+                    context,
+                    ref,
+                    state,
+                    isPlatformAdmin,
+                    isMobile,
+                    c,
+                    t,
+                    l,
+                  ),
                   const SizedBox(height: KiteSpace.lg),
 
                   // Stage 2 read-only banner
@@ -118,6 +131,7 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
     BuildContext context,
     WidgetRef ref,
     GatewayDetailState state,
+    bool isPlatformAdmin,
     bool isMobile,
     KiteColors c,
     KiteText t,
@@ -152,14 +166,31 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
                 Text(l.gatewayDetailSubtitle, style: t.muted),
               ],
             ),
-            KiteButton.outline(
-              onPressed: state.isLoading
-                  ? null
-                  : () => ref
-                        .read(gatewayDetailProvider(widget.gatewayId).notifier)
-                        .load(),
-              leading: const Icon(Icons.refresh, size: 16),
-              child: Text(l.actionRefresh),
+            Wrap(
+              spacing: KiteSpace.sm,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (isPlatformAdmin)
+                  KiteButton.outline(
+                    onPressed: () => showMqttCredentialDialog(
+                      context,
+                      initialGatewayId: widget.gatewayId,
+                    ),
+                    leading: const Icon(Icons.vpn_key_outlined, size: 16),
+                    child: Text(isMobile ? 'MQTT' : 'Thông tin xác thực MQTT'),
+                  ),
+                KiteButton.outline(
+                  onPressed: state.isLoading
+                      ? null
+                      : () => ref
+                            .read(
+                              gatewayDetailProvider(widget.gatewayId).notifier,
+                            )
+                            .load(),
+                  leading: const Icon(Icons.refresh, size: 16),
+                  child: Text(l.actionRefresh),
+                ),
+              ],
             ),
           ],
         ),
@@ -395,6 +426,7 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
     L l,
   ) {
     final filtered = state.filteredSensors;
+    final isPlatformAdmin = ref.watch(isPlatformAdminProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -430,6 +462,15 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
                 ),
               ],
             ),
+            if (isPlatformAdmin)
+              KiteButton(
+                onPressed: () => showCreateSensorDialog(
+                  context,
+                  gatewayId: widget.gatewayId,
+                ),
+                leading: const Icon(Icons.add, size: 16),
+                child: Text(l.sensorAddButton),
+              ),
           ],
         ),
         const SizedBox(height: KiteSpace.lg),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:kite_ui/kite_ui.dart';
 
@@ -246,4 +248,251 @@ class SensorListResponse {
           .toList(),
     );
   }
+}
+
+/// UUID validation constants.
+final RegExp kUuidRegex = RegExp(
+  r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+);
+const String kNilUuid = '00000000-0000-0000-0000-000000000000';
+
+/// Input payload for Platform Admin provisioning `PUT /v1/admin/gateways/{gateway_id}`.
+///
+/// Complies with Go backend `parseGatewayProvisioning`:
+/// - `gateway_id`: 1–64 ASCII chars, `backend_service` strictly forbidden.
+/// - `name`: required string, max 256 UTF-8 bytes.
+/// - `description`: optional string (or null), max 4096 UTF-8 bytes.
+/// - `owner_user_id`: required non-nil UUID string.
+@immutable
+class ProvisionGatewayInput {
+  const ProvisionGatewayInput({
+    required this.gatewayId,
+    required this.name,
+    this.description,
+    required this.ownerUserId,
+  });
+
+  final String gatewayId;
+  final String name;
+  final String? description;
+  final String ownerUserId;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      if (description != null && description!.trim().isNotEmpty)
+        'description': description!.trim()
+      else
+        'description': null,
+      'owner_user_id': ownerUserId.trim(),
+    };
+  }
+}
+
+/// Result returned from `PUT /v1/admin/gateways/{gateway_id}`.
+///
+/// Status code is preserved:
+/// - [isCreated] == true for 201 Created (newly created)
+/// - [isCreated] == false for 200 OK (identical idempotent replay)
+@immutable
+class ProvisionGatewayResult {
+  const ProvisionGatewayResult({
+    required this.isCreated,
+    required this.gatewayId,
+    required this.name,
+    this.description,
+    required this.ownerUserId,
+    required this.entityId,
+    this.createdAt,
+  });
+
+  final bool isCreated;
+  final String gatewayId;
+  final String name;
+  final String? description;
+  final String ownerUserId;
+  final String entityId;
+  final DateTime? createdAt;
+
+  factory ProvisionGatewayResult.fromJson(
+    Map<String, dynamic> json, {
+    required int statusCode,
+  }) {
+    return ProvisionGatewayResult(
+      isCreated: statusCode == 201,
+      gatewayId: json['gateway_id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      description: json['description'] as String?,
+      ownerUserId: json['owner_user_id'] as String? ?? '',
+      entityId: json['entity_id'] as String? ?? '',
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'] as String)?.toUtc()
+          : null,
+    );
+  }
+}
+
+/// Validates gateway_id for provisioning input.
+String? validateProvisionGatewayId(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Vui lòng nhập mã Gateway.';
+  }
+  final trimmed = value.trim();
+  if (trimmed == kReservedGatewayId) {
+    return 'Mã "$kReservedGatewayId" là định danh hệ thống dành riêng.';
+  }
+  if (!kGatewayIdRegex.hasMatch(trimmed)) {
+    return 'Mã Gateway phải từ 1–64 ký tự (chữ cái, số, gạch ngang hoặc gạch dưới).';
+  }
+  return null;
+}
+
+/// Validates name for provisioning input (max 256 UTF-8 bytes).
+String? validateProvisionName(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Vui lòng nhập tên trạm Gateway.';
+  }
+  final trimmed = value.trim();
+  if (utf8.encode(trimmed).length > 256) {
+    return 'Tên trạm Gateway không được vượt quá 256 bytes UTF-8.';
+  }
+  return null;
+}
+
+/// Validates description for provisioning input (optional, max 4096 UTF-8 bytes).
+String? validateProvisionDescription(String? value) {
+  if (value == null || value.isEmpty) return null;
+  if (utf8.encode(value).length > 4096) {
+    return 'Mô tả trạm không được vượt quá 4096 bytes UTF-8.';
+  }
+  return null;
+}
+
+/// Validates owner_user_id for provisioning input (valid non-nil UUID).
+String? validateProvisionOwnerUserId(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Vui lòng nhập mã người dùng sở hữu (owner_user_id).';
+  }
+  final trimmed = value.trim();
+  if (!kUuidRegex.hasMatch(trimmed)) {
+    return 'Mã người dùng phải là chuỗi định dạng UUID hợp lệ.';
+  }
+  if (trimmed.toLowerCase() == kNilUuid) {
+    return 'Không được sử dụng nil UUID.';
+  }
+  return null;
+}
+
+/// Regex pattern for validating sensor ID (1–64 ASCII characters matching `^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$`).
+/// Note: backend_service IS allowed for sensors (unlike gateways).
+final RegExp kSensorIdRegex = RegExp(r'^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$');
+
+/// Validates sensor ID according to Stage 2 Go Backend contract:
+/// - Exact ASCII 1-64 characters matching `^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$`.
+/// - Preserves exact casing.
+/// - `backend_service` IS allowed for sensors.
+bool isValidSensorId(String sensorId) {
+  if (sensorId.isEmpty || sensorId.length > 64) return false;
+  return kSensorIdRegex.hasMatch(sensorId);
+}
+
+/// Input payload for Platform Admin sensor provisioning `PUT /v1/admin/gateways/{gateway_id}/sensors/{sensor_id}`.
+///
+/// Complies with Go backend `parseSensorProvisioning`:
+/// - `name`: required string, max 256 UTF-8 bytes.
+/// - `unit`: optional string (or null), max 64 UTF-8 bytes.
+/// - Strictly NO `sensor_type` or extra fields.
+@immutable
+class ProvisionSensorInput {
+  const ProvisionSensorInput({
+    required this.gatewayId,
+    required this.sensorId,
+    required this.name,
+    this.unit,
+  });
+
+  final String gatewayId;
+  final String sensorId;
+  final String name;
+  final String? unit;
+
+  Map<String, dynamic> toJson() {
+    return {'name': name.trim(), 'unit': unit};
+  }
+}
+
+/// Result returned from `PUT /v1/admin/gateways/{gateway_id}/sensors/{sensor_id}`.
+///
+/// Status code is preserved:
+/// - [isCreated] == true for 201 Created (newly created)
+/// - [isCreated] == false for 200 OK (identical idempotent replay)
+@immutable
+class ProvisionSensorResult {
+  const ProvisionSensorResult({
+    required this.isCreated,
+    required this.gatewayId,
+    required this.sensorId,
+    required this.name,
+    this.unit,
+    required this.entityId,
+    this.createdAt,
+  });
+
+  final bool isCreated;
+  final String gatewayId;
+  final String sensorId;
+  final String name;
+  final String? unit;
+  final String entityId;
+  final DateTime? createdAt;
+
+  factory ProvisionSensorResult.fromJson(
+    Map<String, dynamic> json, {
+    required int statusCode,
+  }) {
+    return ProvisionSensorResult(
+      isCreated: statusCode == 201,
+      gatewayId: json['gateway_id'] as String? ?? '',
+      sensorId: json['sensor_id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      unit: json['unit'] as String?,
+      entityId: json['entity_id'] as String? ?? '',
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'] as String)?.toUtc()
+          : null,
+    );
+  }
+}
+
+/// Validates sensor_id for provisioning input.
+String? validateProvisionSensorId(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Vui lòng nhập mã cảm biến (Sensor ID).';
+  }
+  final trimmed = value.trim();
+  if (!kSensorIdRegex.hasMatch(trimmed)) {
+    return 'Mã cảm biến phải từ 1–64 ký tự (chữ cái, số, gạch ngang hoặc gạch dưới).';
+  }
+  return null;
+}
+
+/// Validates name for sensor provisioning input (max 256 UTF-8 bytes).
+String? validateProvisionSensorName(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Vui lòng nhập tên cảm biến.';
+  }
+  final trimmed = value.trim();
+  if (utf8.encode(trimmed).length > 256) {
+    return 'Tên cảm biến không được vượt quá 256 bytes UTF-8.';
+  }
+  return null;
+}
+
+/// Validates unit for sensor provisioning input (optional, max 64 UTF-8 bytes).
+String? validateProvisionSensorUnit(String? value) {
+  if (value == null) return null;
+  if (utf8.encode(value).length > 64) {
+    return 'Đơn vị đo không được vượt quá 64 bytes UTF-8.';
+  }
+  return null;
 }

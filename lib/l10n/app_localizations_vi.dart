@@ -342,4 +342,167 @@ class LVi extends L {
   @override
   String get gatewayReadOnlyNotice =>
       'Chế độ chỉ đọc (Giai đoạn 2). Tính năng điều khiển từ xa, lệnh downlink và đo từ xa thời gian thực chưa được kích hoạt.';
+
+  @override
+  String get accountPermissionsTitle => 'Cơ chế phân quyền trạm & quản trị';
+
+  @override
+  String get accountPlatformAdminStatus =>
+      'Quyền Quản trị viên nền tảng (Platform Admin)';
+
+  @override
+  String get accountPlatformAdminTrue => 'Quản trị viên nền tảng (Đã xác thực)';
+
+  @override
+  String get accountPlatformAdminFalse =>
+      'Người dùng tiêu chuẩn (Không có quyền Admin)';
+
+  @override
+  String get accountPlatformAdminChecking => 'Đang kiểm tra quyền quản trị...';
+
+  @override
+  String get gatewayAddButton => 'Thêm Gateway mới';
+
+  @override
+  String get gatewayProvisionTitle => 'Khởi tạo Gateway';
+
+  @override
+  String get gatewayProvisionSubtitle =>
+      'Khởi tạo trạm Gateway mới và gán người sở hữu ban đầu (Dành cho Quản trị viên nền tảng).';
+
+  @override
+  String get gatewayProvisionSuccessCreated =>
+      'Khởi tạo Gateway thành công (HTTP 201 Created)';
+
+  @override
+  String get gatewayProvisionSuccessReplayed =>
+      'Trạm Gateway đã tồn tại với thông tin trùng khớp (HTTP 200 OK - Lặp lại an toàn)';
+
+  @override
+  String get gatewayProvisionNoticeAdmin =>
+      'Lưu ý phân quyền: Quản trị viên nền tảng không tự động là thành viên danh mục trạm (user_gateways) trừ khi được phân quyền sở hữu. Trạm này có thể không xuất hiện trong danh mục cá nhân của bạn nếu bạn không phải là người sở hữu được gán.';
+
+  @override
+  String get gatewayProvisionCreateAnother => 'Khởi tạo thêm Gateway khác';
+
+  @override
+  String get gatewayProvisionSubmit => 'Khởi tạo Gateway';
+
+  @override
+  String get gatewayProvisionSubmitting => 'Đang khởi tạo...';
+
+  @override
+  String get gatewayProvisionFieldId => 'Mã trạm (Gateway ID)';
+
+  @override
+  String get gatewayProvisionFieldIdHint =>
+      '1–64 ký tự ASCII [A-Za-z0-9_-], không dùng backend_service';
+
+  @override
+  String get gatewayProvisionFieldName => 'Tên trạm Gateway';
+
+  @override
+  String get gatewayProvisionFieldNameHint =>
+      'Tên hiển thị trạm (tối đa 256 bytes UTF-8)';
+
+  @override
+  String get gatewayProvisionFieldDesc => 'Mô tả trạm (Tùy chọn)';
+
+  @override
+  String get gatewayProvisionFieldDescHint =>
+      'Mô tả vị trí, chức năng trạm (tối đa 4096 bytes UTF-8)';
+
+  @override
+  String get gatewayProvisionFieldOwner =>
+      'Mã người dùng sở hữu (owner_user_id)';
+
+  @override
+  String get gatewayProvisionFieldOwnerHint =>
+      'Định danh UUID người sở hữu trong hệ thống (không dùng nil UUID)';
+
+  @override
+  String get gatewayProvisionEntityId => 'Mã thực thể Digital Twin (Entity ID)';
+
+  @override
+  String get gatewayProvisionOwnerId => 'Người dùng sở hữu ban đầu';
+
+  @override
+  String get gatewayProvisionCreatedAt => 'Thời điểm tạo';
+
+  @override
+  String get gatewayProvisionAccessDeniedTitle => 'Từ chối truy cập';
+
+  @override
+  String get gatewayProvisionAccessDeniedMessage =>
+      'Bạn không có quyền Quản trị viên nền tảng (Platform Admin) để thực hiện thao tác này.';
+
+  @override
+  String get gatewayProvisionRetrySamePayload => 'Thử lại (Retry)';
+
+  @override
+  String get gatewayProvisionConflictError =>
+      'Trạm Gateway đã tồn tại với thông tin khác biệt (HTTP 409 Conflict). Cơ chế khởi tạo không hỗ trợ cập nhật thay đổi dữ liệu.';
+
+  @override
+  String get gatewayProvisionNotFoundError =>
+      'Không tìm thấy người dùng sở hữu trong hệ thống (HTTP 404 Not Found). Vui lòng kiểm tra lại UUID.';
+
+  @override
+  String get sensorAddButton => 'Thêm cảm biến mới';
+
+  @override
+  String get sensorCreateDialogTitle => 'Khởi tạo Cảm biến mới';
+
+  @override
+  String get sensorCreateDialogSubtitle =>
+      'Thêm cảm biến mới trực thuộc trạm Gateway này (Dành cho Quản trị viên nền tảng).';
+
+  @override
+  String get sensorParentGateway => 'Mã trạm Gateway cha (Cố định, chỉ đọc)';
+
+  @override
+  String get sensorFieldId => 'Mã cảm biến (Sensor ID)';
+
+  @override
+  String get sensorFieldIdHint =>
+      '1–64 ký tự ASCII [A-Za-z0-9_-], cho phép backend_service';
+
+  @override
+  String get sensorFieldName => 'Tên cảm biến';
+
+  @override
+  String get sensorFieldNameHint =>
+      'Tên hiển thị cảm biến (tối đa 256 bytes UTF-8)';
+
+  @override
+  String get sensorFieldUnit => 'Đơn vị đo (Tùy chọn)';
+
+  @override
+  String get sensorFieldUnitHint => 'ví dụ: °C, %, ppm (tối đa 64 bytes UTF-8)';
+
+  @override
+  String get sensorCreateSubmit => 'Khởi tạo Cảm biến';
+
+  @override
+  String get sensorCreateSubmitting => 'Đang khởi tạo...';
+
+  @override
+  String get sensorCreateSuccessCreated =>
+      'Đã khởi tạo cảm biến thành công (HTTP 201 Created)';
+
+  @override
+  String get sensorCreateSuccessReplayed =>
+      'Cảm biến đã tồn tại với thông tin trùng khớp (HTTP 200 OK - Lặp lại an toàn)';
+
+  @override
+  String get sensorProvisionConflictError =>
+      'Cảm biến đã tồn tại với thông tin khác biệt (HTTP 409 Conflict). Cơ chế khởi tạo không hỗ trợ cập nhật thay đổi dữ liệu.';
+
+  @override
+  String get sensorProvisionNotFoundError =>
+      'Trạm Gateway cha không tồn tại (HTTP 404 Not Found).';
+
+  @override
+  String get sensorProvisionForbiddenError =>
+      'Từ chối truy cập. Bạn không có quyền Quản trị viên nền tảng.';
 }

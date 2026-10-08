@@ -9,6 +9,22 @@ import '../auth/session.dart';
 import '../config/app_config.dart';
 import 'api_exception.dart';
 
+/// Result of an API mutation request, preserving response HTTP status code.
+class ApiResponse {
+  const ApiResponse({
+    required this.statusCode,
+    required this.data,
+    this.requestId,
+  });
+
+  final int statusCode;
+  final Map<String, dynamic> data;
+  final String? requestId;
+
+  bool get isCreated => statusCode == 201;
+  bool get isOk => statusCode == 200;
+}
+
 /// HTTP Client providing shared transport for Go REST API (`/v1/*`).
 ///
 /// Complies with Stage 2 Client boundaries:
@@ -118,6 +134,245 @@ class ApiClient {
       customRequestId: customRequestId,
       timeout: timeout,
     );
+  }
+
+  /// Sends an authenticated PUT mutation to the given relative [path] with [body].
+  ///
+  /// Safe mutation rules:
+  /// - Sets `Content-Type: application/json; charset=utf-8`.
+  /// - Serializes [body] as JSON string.
+  /// - Preserves response status code (e.g. 201 Created vs 200 OK replay).
+  /// - Does NOT auto-retry on 401 or network errors (no auto replay mutation).
+  /// - Enforces session epoch and user identity fencing before request, after token, and after response.
+  /// - Parses standard error envelope on 4xx/5xx with Request ID.
+  Future<ApiResponse> put(
+    String path, {
+    required Map<String, dynamic> body,
+    String? idempotencyKey,
+    String? customRequestId,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    return _sendMutation(
+      method: 'PUT',
+      path: path,
+      body: body,
+      idempotencyKey: idempotencyKey,
+      customRequestId: customRequestId,
+      timeout: timeout,
+    );
+  }
+
+  /// Sends an authenticated POST mutation to the given relative [path].
+  ///
+  /// Safe mutation rules:
+  /// - If [body] is null, sends empty body (0 bytes) without Content-Type header.
+  /// - Transmits `Idempotency-Key` header if provided.
+  /// - Does NOT auto-retry on 401 or network errors (no auto replay mutation).
+  /// - Preserves response status code (e.g. 201 Created vs 200 OK).
+  Future<ApiResponse> post(
+    String path, {
+    Map<String, dynamic>? body,
+    String? idempotencyKey,
+    String? customRequestId,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    return _sendMutation(
+      method: 'POST',
+      path: path,
+      body: body,
+      idempotencyKey: idempotencyKey,
+      customRequestId: customRequestId,
+      timeout: timeout,
+    );
+  }
+
+  /// Sends an authenticated DELETE mutation to the given relative [path].
+  ///
+  /// Safe mutation rules:
+  /// - If [body] is null, sends empty body (0 bytes).
+  /// - Transmits `Idempotency-Key` header if provided.
+  /// - Does NOT auto-retry on 401 or network errors (no auto replay mutation).
+  /// - Preserves response status code (e.g. 200 OK for revoke).
+  Future<ApiResponse> delete(
+    String path, {
+    Map<String, dynamic>? body,
+    String? idempotencyKey,
+    String? customRequestId,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    return _sendMutation(
+      method: 'DELETE',
+      path: path,
+      body: body,
+      idempotencyKey: idempotencyKey,
+      customRequestId: customRequestId,
+      timeout: timeout,
+    );
+  }
+
+  Future<ApiResponse> _sendMutation({
+    required String method,
+    required String path,
+    Map<String, dynamic>? body,
+    String? idempotencyKey,
+    String? customRequestId,
+    required Duration timeout,
+  }) async {
+    final uri = buildUri(path);
+    final reqId = customRequestId ?? _generateRequestId();
+
+    final opEpoch = sessionEpochReader?.call();
+    final opUserId = userIdReader?.call();
+
+    // Guard before starting request:
+    if (_isSessionMismatch(opEpoch, opUserId)) {
+      throw const ApiException(
+        statusCode: 401,
+        code: 'session_mismatch',
+        message: 'Yêu cầu bị hủy do phiên làm việc đã thay đổi.',
+      );
+    }
+
+    final token = await authRepository.getAccessToken();
+
+    // Guard after acquiring token:
+    if (_isSessionMismatch(opEpoch, opUserId)) {
+      throw const ApiException(
+        statusCode: 401,
+        code: 'session_mismatch',
+        message: 'Yêu cầu bị hủy do phiên làm việc đã thay đổi.',
+      );
+    }
+
+    if (token == null || token.isEmpty) {
+      throw ApiException(
+        statusCode: 401,
+        code: 'unauthorized',
+        message: 'Yêu cầu xác thực. Vui lòng đăng nhập.',
+        requestId: reqId,
+      );
+    }
+
+    final headers = <String, String>{
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+      'X-Request-ID': reqId,
+    };
+
+    if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
+      headers['Idempotency-Key'] = idempotencyKey;
+    }
+
+    Object? encodedBody;
+    if (body != null) {
+      headers['Content-Type'] = 'application/json; charset=utf-8';
+      encodedBody = jsonEncode(body);
+    } else {
+      // Empty body: transmit empty string (0 bytes) without Content-Type
+      encodedBody = '';
+    }
+
+    final http.Response response;
+    try {
+      if (method == 'PUT') {
+        response = await _httpClient
+            .put(uri, headers: headers, body: encodedBody)
+            .timeout(timeout);
+      } else if (method == 'POST') {
+        response = await _httpClient
+            .post(uri, headers: headers, body: encodedBody)
+            .timeout(timeout);
+      } else if (method == 'DELETE') {
+        response = await _httpClient
+            .delete(uri, headers: headers, body: encodedBody)
+            .timeout(timeout);
+      } else {
+        throw UnsupportedError('Unsupported mutation method: $method');
+      }
+    } on http.ClientException catch (e) {
+      if (_isSessionMismatch(opEpoch, opUserId)) {
+        throw const ApiException(
+          statusCode: 401,
+          code: 'session_mismatch',
+          message: 'Yêu cầu bị hủy do phiên làm việc đã thay đổi.',
+        );
+      }
+      throw NetworkException(
+        'Không thể kết nối đến máy chủ hoặc request bị chặn bởi chính sách CORS của trình duyệt.',
+        cause: e,
+      );
+    } on TimeoutException catch (e) {
+      if (_isSessionMismatch(opEpoch, opUserId)) {
+        throw const ApiException(
+          statusCode: 401,
+          code: 'session_mismatch',
+          message: 'Yêu cầu bị hủy do phiên làm việc đã thay đổi.',
+        );
+      }
+      throw NetworkException(
+        'Quá thời gian chờ phản hồi từ máy chủ. Vui lòng thử lại.',
+        cause: e,
+      );
+    } catch (e) {
+      if (_isSessionMismatch(opEpoch, opUserId)) {
+        throw const ApiException(
+          statusCode: 401,
+          code: 'session_mismatch',
+          message: 'Yêu cầu bị hủy do phiên làm việc đã thay đổi.',
+        );
+      }
+      if (e is ApiException || e is NetworkException) rethrow;
+      throw NetworkException(
+        'Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng.',
+        cause: e,
+      );
+    }
+
+    // Guard immediately after HTTP response:
+    if (_isSessionMismatch(opEpoch, opUserId)) {
+      throw const ApiException(
+        statusCode: 401,
+        code: 'session_mismatch',
+        message: 'Phản hồi bị loại bỏ do phiên làm việc đã thay đổi.',
+      );
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      try {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) {
+          return ApiResponse(
+            statusCode: response.statusCode,
+            data: decoded,
+            requestId: response.headers['x-request-id'] ?? reqId,
+          );
+        }
+        throw FormatException(
+          'Expected JSON map but got ${decoded.runtimeType}',
+        );
+      } on FormatException {
+        throw ApiException(
+          statusCode: response.statusCode,
+          code: 'invalid_response',
+          message: 'Dữ liệu phản hồi từ máy chủ không hợp lệ.',
+          requestId: response.headers['x-request-id'] ?? reqId,
+        );
+      }
+    }
+
+    // Handle 401 Unauthorized for mutations: NO auto retry mutation!
+    if (response.statusCode == 401) {
+      if (!_isSessionMismatch(opEpoch, opUserId)) {
+        try {
+          final activeUser = await authRepository.restoreSession();
+          if (activeUser == null && !_isSessionMismatch(opEpoch, opUserId)) {
+            await _terminateSession();
+          }
+        } catch (_) {}
+      }
+    }
+
+    throw _parseErrorResponse(response, fallbackReqId: reqId);
   }
 
   Future<Map<String, dynamic>> _sendWithRetry({

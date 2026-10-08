@@ -645,4 +645,445 @@ void main() {
       expect(identical(client1, client2), isFalse);
     });
   });
+
+  group('ApiClient PUT Mutations', () {
+    test('sends PUT with JSON body, Content-Type, Accept, Auth, and preserves 201 Created', () async {
+      await authRepo.signInWithPassword(
+        email: 'admin@example.com',
+        password: 'pwd',
+      );
+
+      late http.Request capturedRequest;
+      final mockHttp = MockClient((request) async {
+        capturedRequest = request;
+        return http.Response(
+          jsonEncode({
+            'gateway_id': 'gw-001',
+            'name': 'Gateway 1',
+            'description': 'Test',
+            'owner_user_id': '550e8400-e29b-41d4-a716-446655440000',
+            'entity_id': 'urn:ngsi-ld:Gateway:gw-001',
+            'created_at': '2026-10-05T08:30:00Z',
+          }),
+          201,
+          headers: {
+            'content-type': 'application/json',
+            'x-request-id': 'req-put-201',
+          },
+        );
+      });
+
+      final client = ApiClient(
+        authRepository: authRepo,
+        httpClient: mockHttp,
+        baseUrl: 'http://localhost/v1/',
+      );
+
+      final res = await client.put(
+        'admin/gateways/gw-001',
+        body: {
+          'name': 'Gateway 1',
+          'description': 'Test',
+          'owner_user_id': '550e8400-e29b-41d4-a716-446655440000',
+        },
+      );
+
+      expect(res.statusCode, 201);
+      expect(res.isCreated, isTrue);
+      expect(res.isOk, isFalse);
+      expect(res.data['gateway_id'], 'gw-001');
+      expect(res.requestId, 'req-put-201');
+
+      expect(capturedRequest.method, 'PUT');
+      expect(
+        capturedRequest.headers['Content-Type'],
+        contains('application/json'),
+      );
+      expect(capturedRequest.headers['Accept'], 'application/json');
+      expect(capturedRequest.headers['Authorization'], 'Bearer mock_jwt_token');
+      expect(capturedRequest.headers['X-Request-ID'], isNotNull);
+      final decodedBody =
+          jsonDecode(capturedRequest.body) as Map<String, dynamic>;
+      expect(decodedBody['name'], 'Gateway 1');
+      expect(
+        decodedBody['owner_user_id'],
+        '550e8400-e29b-41d4-a716-446655440000',
+      );
+    });
+
+    test('preserves 200 OK on identical idempotent replay', () async {
+      await authRepo.signInWithPassword(
+        email: 'admin@example.com',
+        password: 'pwd',
+      );
+
+      final mockHttp = MockClient((request) async {
+        return http.Response(
+          jsonEncode({
+            'gateway_id': 'gw-001',
+            'name': 'Gateway 1',
+            'description': 'Test',
+            'owner_user_id': '550e8400-e29b-41d4-a716-446655440000',
+            'entity_id': 'urn:ngsi-ld:Gateway:gw-001',
+            'created_at': '2026-10-05T08:30:00Z',
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final client = ApiClient(
+        authRepository: authRepo,
+        httpClient: mockHttp,
+        baseUrl: 'http://localhost/v1/',
+      );
+
+      final res = await client.put(
+        'admin/gateways/gw-001',
+        body: {
+          'name': 'Gateway 1',
+          'description': 'Test',
+          'owner_user_id': '550e8400-e29b-41d4-a716-446655440000',
+        },
+      );
+
+      expect(res.statusCode, 200);
+      expect(res.isCreated, isFalse);
+      expect(res.isOk, isTrue);
+    });
+
+    test('strictly does NOT auto-retry mutation on 401 Unauthorized', () async {
+      await authRepo.signInWithPassword(
+        email: 'admin@example.com',
+        password: 'pwd',
+      );
+
+      int requestCount = 0;
+      final mockHttp = MockClient((request) async {
+        requestCount++;
+        return http.Response(
+          jsonEncode({
+            'error': {
+              'code': 'unauthorized',
+              'message': 'authentication required',
+              'request_id': 'req-put-401',
+            },
+          }),
+          401,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final client = ApiClient(
+        authRepository: authRepo,
+        httpClient: mockHttp,
+        baseUrl: 'http://localhost/v1/',
+      );
+
+      await expectLater(
+        () => client.put(
+          'admin/gateways/gw-001',
+          body: {
+            'name': 'Gateway 1',
+            'owner_user_id': '550e8400-e29b-41d4-a716-446655440000',
+          },
+        ),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'statusCode', 401)
+              .having((e) => e.code, 'code', 'unauthorized')
+              .having((e) => e.requestId, 'requestId', 'req-put-401'),
+        ),
+      );
+
+      // Exactly 1 request: NO replay of the mutation!
+      expect(requestCount, 1);
+    });
+
+    test(
+      'parses 409 conflict, 404 not_found, 400 invalid_request error envelopes',
+      () async {
+        await authRepo.signInWithPassword(
+          email: 'admin@example.com',
+          password: 'pwd',
+        );
+
+        for (final entry in [
+          {'code': 409, 'errCode': 'conflict', 'msg': 'resource conflict'},
+          {'code': 404, 'errCode': 'not_found', 'msg': 'resource not found'},
+          {'code': 400, 'errCode': 'invalid_request', 'msg': 'invalid request'},
+        ]) {
+          final mockHttp = MockClient((request) async {
+            return http.Response(
+              jsonEncode({
+                'error': {
+                  'code': entry['errCode'],
+                  'message': entry['msg'],
+                  'request_id': 'req-err-${entry['code']}',
+                },
+              }),
+              entry['code'] as int,
+              headers: {'content-type': 'application/json'},
+            );
+          });
+
+          final client = ApiClient(
+            authRepository: authRepo,
+            httpClient: mockHttp,
+            baseUrl: 'http://localhost/v1/',
+          );
+
+          await expectLater(
+            () => client.put(
+              'admin/gateways/gw-001',
+              body: {
+                'name': 'Gateway 1',
+                'owner_user_id': '550e8400-e29b-41d4-a716-446655440000',
+              },
+            ),
+            throwsA(
+              isA<ApiException>()
+                  .having((e) => e.statusCode, 'statusCode', entry['code'])
+                  .having((e) => e.code, 'code', entry['errCode'])
+                  .having((e) => e.message, 'message', entry['msg']),
+            ),
+          );
+        }
+      },
+    );
+
+    test(
+      'wraps transport timeout in NetworkException without auto-retry',
+      () async {
+        await authRepo.signInWithPassword(
+          email: 'admin@example.com',
+          password: 'pwd',
+        );
+
+        int requestCount = 0;
+        final mockHttp = MockClient((request) async {
+          requestCount++;
+          throw TimeoutException('Connection timed out');
+        });
+
+        final client = ApiClient(
+          authRepository: authRepo,
+          httpClient: mockHttp,
+          baseUrl: 'http://localhost/v1/',
+        );
+
+        await expectLater(
+          () => client.put(
+            'admin/gateways/gw-001',
+            body: {
+              'name': 'Gateway 1',
+              'owner_user_id': '550e8400-e29b-41d4-a716-446655440000',
+            },
+          ),
+          throwsA(isA<NetworkException>()),
+        );
+
+        expect(requestCount, 1);
+      },
+    );
+
+    test('epoch fencing on PUT rejects request if session epoch changes while in-flight', () async {
+      int epoch = 1;
+      final completer = Completer<http.Response>();
+      final mockHttp = MockClient((request) async => completer.future);
+
+      final client = ApiClient(
+        authRepository: authRepo,
+        httpClient: mockHttp,
+        baseUrl: 'http://localhost/v1/',
+        sessionEpochReader: () => epoch,
+      );
+
+      await authRepo.signInWithPassword(
+        email: 'admin@example.com',
+        password: 'pwd',
+      );
+
+      final putFuture = client.put(
+        'admin/gateways/gw-001',
+        body: {
+          'name': 'Gateway 1',
+          'owner_user_id': '550e8400-e29b-41d4-a716-446655440000',
+        },
+      );
+
+      final expectation = expectLater(
+        putFuture,
+        throwsA(
+          isA<ApiException>().having((e) => e.code, 'code', 'session_mismatch'),
+        ),
+      );
+
+      // Epoch changes while request in-flight
+      epoch = 2;
+
+      completer.complete(
+        http.Response(
+          jsonEncode({
+            'gateway_id': 'gw-001',
+            'name': 'Gateway 1',
+            'owner_user_id': '550e8400-e29b-41d4-a716-446655440000',
+            'entity_id': 'urn:ngsi-ld:Gateway:gw-001',
+          }),
+          201,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+
+      await expectation;
+    });
+
+    test('POST with null body transmits empty body (0 bytes) and Idempotency-Key header', () async {
+      await authRepo.signInWithPassword(
+        email: 'admin@example.com',
+        password: 'pwd',
+      );
+
+      late http.Request capturedRequest;
+      final mockHttp = MockClient((request) async {
+        capturedRequest = request;
+        return http.Response(
+          jsonEncode({
+            'gateway_id': 'gw-001',
+            'username': 'gw-001',
+            'credential_version': 1,
+            'status': 'active',
+            'last_operation_id': '00000000-0000-0000-0000-000000000001',
+            'operation_status': 'succeeded',
+            'password': 'secret_password_123',
+            'secret_returned': true,
+          }),
+          201,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final client = ApiClient(
+        authRepository: authRepo,
+        httpClient: mockHttp,
+        baseUrl: 'http://localhost/v1/',
+      );
+
+      final res = await client.post(
+        'admin/gateways/gw-001/mqtt-credential',
+        idempotencyKey: 'c4b1e6e0-2495-4e3a-97a6-6f8d38e21a41',
+      );
+
+      expect(res.statusCode, 201);
+      expect(res.data['password'], 'secret_password_123');
+      expect(capturedRequest.method, 'POST');
+      expect(
+        capturedRequest.headers['Idempotency-Key'],
+        'c4b1e6e0-2495-4e3a-97a6-6f8d38e21a41',
+      );
+      expect(capturedRequest.body, isEmpty); // Empty body contract (0 bytes)
+    });
+
+    test(
+      'DELETE with null body transmits empty body and preserves 200 OK',
+      () async {
+        await authRepo.signInWithPassword(
+          email: 'admin@example.com',
+          password: 'pwd',
+        );
+
+        late http.Request capturedRequest;
+        final mockHttp = MockClient((request) async {
+          capturedRequest = request;
+          return http.Response(
+            jsonEncode({
+              'gateway_id': 'gw-001',
+              'username': 'gw-001',
+              'credential_version': 1,
+              'status': 'revoked',
+              'last_operation_id': '00000000-0000-0000-0000-000000000002',
+              'operation_status': 'succeeded',
+              'secret_returned': false,
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final client = ApiClient(
+          authRepository: authRepo,
+          httpClient: mockHttp,
+          baseUrl: 'http://localhost/v1/',
+        );
+
+        final res = await client.delete(
+          'admin/gateways/gw-001/mqtt-credential',
+          idempotencyKey: 'd4b1e6e0-2495-4e3a-97a6-6f8d38e21a42',
+        );
+
+        expect(res.statusCode, 200);
+        expect(res.data['status'], 'revoked');
+        expect(capturedRequest.method, 'DELETE');
+        expect(
+          capturedRequest.headers['Idempotency-Key'],
+          'd4b1e6e0-2495-4e3a-97a6-6f8d38e21a42',
+        );
+        expect(capturedRequest.body, isEmpty);
+      },
+    );
+
+    test(
+      'POST and DELETE strictly do NOT auto-retry on 401 or timeout',
+      () async {
+        await authRepo.signInWithPassword(
+          email: 'admin@example.com',
+          password: 'pwd',
+        );
+
+        int requestCount = 0;
+        final mockHttp = MockClient((request) async {
+          requestCount++;
+          return http.Response(
+            jsonEncode({
+              'error': {
+                'code': 'unauthorized',
+                'message': 'authentication required',
+              },
+            }),
+            401,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final client = ApiClient(
+          authRepository: authRepo,
+          httpClient: mockHttp,
+          baseUrl: 'http://localhost/v1/',
+        );
+
+        await expectLater(
+          () => client.post(
+            'admin/gateways/gw-001/mqtt-credential',
+            idempotencyKey: 'key-1',
+          ),
+          throwsA(
+            isA<ApiException>().having((e) => e.statusCode, 'statusCode', 401),
+          ),
+        );
+        expect(requestCount, 1);
+
+        requestCount = 0;
+        await expectLater(
+          () => client.delete(
+            'admin/gateways/gw-001/mqtt-credential',
+            idempotencyKey: 'key-2',
+          ),
+          throwsA(
+            isA<ApiException>().having((e) => e.statusCode, 'statusCode', 401),
+          ),
+        );
+        expect(requestCount, 1);
+      },
+    );
+  });
 }
