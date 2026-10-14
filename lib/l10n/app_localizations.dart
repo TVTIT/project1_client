@@ -292,7 +292,7 @@ abstract class L {
   /// No description provided for @signInSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Any email works — this is the mock provider.'**
+  /// **'Type your email and password to continue'**
   String get signInSubtitle;
 
   /// No description provided for @fieldEmail.
@@ -412,7 +412,7 @@ abstract class L {
   /// No description provided for @accountUserId.
   ///
   /// In en, this message translates to:
-  /// **'User ID (UUID)'**
+  /// **'User ID'**
   String get accountUserId;
 
   /// No description provided for @accountEmail.
@@ -820,7 +820,7 @@ abstract class L {
   /// No description provided for @gatewayProvisionFieldIdHint.
   ///
   /// In en, this message translates to:
-  /// **'1–64 ASCII chars [A-Za-z0-9_-], backend_service forbidden'**
+  /// **'Gateway\'s identification, must not be a duplicate of other gateways'**
   String get gatewayProvisionFieldIdHint;
 
   /// No description provided for @gatewayProvisionFieldName.
@@ -832,7 +832,7 @@ abstract class L {
   /// No description provided for @gatewayProvisionFieldNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Gateway display name (max 256 UTF-8 bytes)'**
+  /// **'Gateway display name'**
   String get gatewayProvisionFieldNameHint;
 
   /// No description provided for @gatewayProvisionFieldDesc.
@@ -844,7 +844,7 @@ abstract class L {
   /// No description provided for @gatewayProvisionFieldDescHint.
   ///
   /// In en, this message translates to:
-  /// **'Location or function description (max 4096 UTF-8 bytes)'**
+  /// **'Location or function description'**
   String get gatewayProvisionFieldDescHint;
 
   /// No description provided for @gatewayProvisionFieldOwner.
@@ -856,7 +856,7 @@ abstract class L {
   /// No description provided for @gatewayProvisionFieldOwnerHint.
   ///
   /// In en, this message translates to:
-  /// **'UUID of the owner user in the system (no nil UUID)'**
+  /// **'UUID of the owner user in the system'**
   String get gatewayProvisionFieldOwnerHint;
 
   /// No description provided for @gatewayProvisionEntityId.
@@ -922,13 +922,13 @@ abstract class L {
   /// No description provided for @sensorCreateDialogSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Add a new sensor associated with this Gateway station (Platform Admin only).'**
+  /// **'Add a new sensor associated with this Gateway station'**
   String get sensorCreateDialogSubtitle;
 
   /// No description provided for @sensorParentGateway.
   ///
   /// In en, this message translates to:
-  /// **'Parent Gateway ID (Fixed, read-only)'**
+  /// **'Parent Gateway ID'**
   String get sensorParentGateway;
 
   /// No description provided for @sensorFieldId.
@@ -940,7 +940,7 @@ abstract class L {
   /// No description provided for @sensorFieldIdHint.
   ///
   /// In en, this message translates to:
-  /// **'1–64 ASCII chars [A-Za-z0-9_-], backend_service allowed'**
+  /// **'Sensor\'s identification, must not be a duplicate of other sensors inside this Gateway'**
   String get sensorFieldIdHint;
 
   /// No description provided for @sensorFieldName.
@@ -952,7 +952,7 @@ abstract class L {
   /// No description provided for @sensorFieldNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Sensor display name (max 256 UTF-8 bytes)'**
+  /// **'Sensor display name'**
   String get sensorFieldNameHint;
 
   /// No description provided for @sensorFieldUnit.
@@ -964,7 +964,7 @@ abstract class L {
   /// No description provided for @sensorFieldUnitHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. °C, %, ppm (max 64 UTF-8 bytes)'**
+  /// **'e.g. °C, %, ppm'**
   String get sensorFieldUnitHint;
 
   /// No description provided for @sensorCreateSubmit.

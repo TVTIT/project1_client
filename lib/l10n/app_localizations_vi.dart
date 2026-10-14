@@ -172,7 +172,7 @@ class LVi extends L {
   String get accountIdentityTitle => 'Thông tin định danh';
 
   @override
-  String get accountUserId => 'Mã định danh người dùng (UUID)';
+  String get accountUserId => 'ID người dùng';
 
   @override
   String get accountEmail => 'Email tài khoản';
@@ -392,25 +392,23 @@ class LVi extends L {
   String get gatewayProvisionSubmitting => 'Đang khởi tạo...';
 
   @override
-  String get gatewayProvisionFieldId => 'Mã trạm (Gateway ID)';
+  String get gatewayProvisionFieldId => 'Gateway ID';
 
   @override
   String get gatewayProvisionFieldIdHint =>
-      '1–64 ký tự ASCII [A-Za-z0-9_-], không dùng backend_service';
+      'Mã định danh của Gateway, không được trùng với các Gateway khác';
 
   @override
   String get gatewayProvisionFieldName => 'Tên trạm Gateway';
 
   @override
-  String get gatewayProvisionFieldNameHint =>
-      'Tên hiển thị trạm (tối đa 256 bytes UTF-8)';
+  String get gatewayProvisionFieldNameHint => 'Tên hiển thị trạm';
 
   @override
-  String get gatewayProvisionFieldDesc => 'Mô tả trạm (Tùy chọn)';
+  String get gatewayProvisionFieldDesc => 'Mô tả trạm (Không bắt buộc)';
 
   @override
-  String get gatewayProvisionFieldDescHint =>
-      'Mô tả vị trí, chức năng trạm (tối đa 4096 bytes UTF-8)';
+  String get gatewayProvisionFieldDescHint => 'Mô tả vị trí, chức năng trạm';
 
   @override
   String get gatewayProvisionFieldOwner =>
@@ -418,7 +416,7 @@ class LVi extends L {
 
   @override
   String get gatewayProvisionFieldOwnerHint =>
-      'Định danh UUID người sở hữu trong hệ thống (không dùng nil UUID)';
+      'ID người dùng sẽ sở hữu Gateway trong hệ thống';
 
   @override
   String get gatewayProvisionEntityId => 'Mã thực thể Digital Twin (Entity ID)';
@@ -427,7 +425,7 @@ class LVi extends L {
   String get gatewayProvisionOwnerId => 'Người dùng sở hữu ban đầu';
 
   @override
-  String get gatewayProvisionCreatedAt => 'Thời điểm tạo';
+  String get gatewayProvisionCreatedAt => 'Thời gian tạo';
 
   @override
   String get gatewayProvisionAccessDeniedTitle => 'Từ chối truy cập';
@@ -455,30 +453,29 @@ class LVi extends L {
 
   @override
   String get sensorCreateDialogSubtitle =>
-      'Thêm cảm biến mới trực thuộc trạm Gateway này (Dành cho Quản trị viên nền tảng).';
+      'Thêm cảm biến mới trực thuộc trạm Gateway này.';
 
   @override
-  String get sensorParentGateway => 'Mã trạm Gateway cha (Cố định, chỉ đọc)';
+  String get sensorParentGateway => 'ID Gateway';
 
   @override
   String get sensorFieldId => 'Mã cảm biến (Sensor ID)';
 
   @override
   String get sensorFieldIdHint =>
-      '1–64 ký tự ASCII [A-Za-z0-9_-], cho phép backend_service';
+      'Mã định danh của cảm biến, không được trùng với các cảm biến khác trong Gateway này';
 
   @override
   String get sensorFieldName => 'Tên cảm biến';
 
   @override
-  String get sensorFieldNameHint =>
-      'Tên hiển thị cảm biến (tối đa 256 bytes UTF-8)';
+  String get sensorFieldNameHint => 'Tên hiển thị cảm biến';
 
   @override
   String get sensorFieldUnit => 'Đơn vị đo (Tùy chọn)';
 
   @override
-  String get sensorFieldUnitHint => 'ví dụ: °C, %, ppm (tối đa 64 bytes UTF-8)';
+  String get sensorFieldUnitHint => 'ví dụ: °C, %, ppm';
 
   @override
   String get sensorCreateSubmit => 'Khởi tạo Cảm biến';

@@ -106,7 +106,7 @@ class LEn extends L {
   String get signInTitle => 'Sign in';
 
   @override
-  String get signInSubtitle => 'Any email works — this is the mock provider.';
+  String get signInSubtitle => 'Type your email and password to continue';
 
   @override
   String get fieldEmail => 'Email';
@@ -172,7 +172,7 @@ class LEn extends L {
   String get accountIdentityTitle => 'Identity Information';
 
   @override
-  String get accountUserId => 'User ID (UUID)';
+  String get accountUserId => 'User ID';
 
   @override
   String get accountEmail => 'Account Email';
@@ -392,28 +392,27 @@ class LEn extends L {
 
   @override
   String get gatewayProvisionFieldIdHint =>
-      '1–64 ASCII chars [A-Za-z0-9_-], backend_service forbidden';
+      'Gateway\'s identification, must not be a duplicate of other gateways';
 
   @override
   String get gatewayProvisionFieldName => 'Gateway Name';
 
   @override
-  String get gatewayProvisionFieldNameHint =>
-      'Gateway display name (max 256 UTF-8 bytes)';
+  String get gatewayProvisionFieldNameHint => 'Gateway display name';
 
   @override
   String get gatewayProvisionFieldDesc => 'Description (Optional)';
 
   @override
   String get gatewayProvisionFieldDescHint =>
-      'Location or function description (max 4096 UTF-8 bytes)';
+      'Location or function description';
 
   @override
   String get gatewayProvisionFieldOwner => 'Owner User ID (owner_user_id)';
 
   @override
   String get gatewayProvisionFieldOwnerHint =>
-      'UUID of the owner user in the system (no nil UUID)';
+      'UUID of the owner user in the system';
 
   @override
   String get gatewayProvisionEntityId => 'Digital Twin Entity ID';
@@ -450,29 +449,29 @@ class LEn extends L {
 
   @override
   String get sensorCreateDialogSubtitle =>
-      'Add a new sensor associated with this Gateway station (Platform Admin only).';
+      'Add a new sensor associated with this Gateway station';
 
   @override
-  String get sensorParentGateway => 'Parent Gateway ID (Fixed, read-only)';
+  String get sensorParentGateway => 'Parent Gateway ID';
 
   @override
   String get sensorFieldId => 'Sensor ID';
 
   @override
   String get sensorFieldIdHint =>
-      '1–64 ASCII chars [A-Za-z0-9_-], backend_service allowed';
+      'Sensor\'s identification, must not be a duplicate of other sensors inside this Gateway';
 
   @override
   String get sensorFieldName => 'Sensor Name';
 
   @override
-  String get sensorFieldNameHint => 'Sensor display name (max 256 UTF-8 bytes)';
+  String get sensorFieldNameHint => 'Sensor display name';
 
   @override
   String get sensorFieldUnit => 'Measurement Unit (Optional)';
 
   @override
-  String get sensorFieldUnitHint => 'e.g. °C, %, ppm (max 64 UTF-8 bytes)';
+  String get sensorFieldUnitHint => 'e.g. °C, %, ppm';
 
   @override
   String get sensorCreateSubmit => 'Create Sensor';
