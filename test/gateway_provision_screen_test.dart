@@ -246,9 +246,9 @@ void main() {
         await tester.pumpAndSettle();
 
         // Check fields:
-        expect(find.text('Mã trạm (Gateway ID)'), findsOneWidget);
+        expect(find.text('Gateway ID'), findsOneWidget);
         expect(find.text('Tên trạm Gateway'), findsOneWidget);
-        expect(find.text('Mô tả trạm (Tùy chọn)'), findsOneWidget);
+        expect(find.text('Mô tả trạm (Không bắt buộc)'), findsOneWidget);
         expect(
           find.text('Mã người dùng sở hữu (owner_user_id)'),
           findsOneWidget,

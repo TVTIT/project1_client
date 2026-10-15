@@ -8,9 +8,16 @@ import 'mqtt_credential_dto.dart';
 /// Contract for accessing Gateway resources.
 abstract class GatewayRepository {
   Future<List<GatewayItem>> getGateways();
+  Future<AdminGatewayInventoryResponse> getAdminGateways({
+    int? limit,
+    String? after,
+  });
   Future<SensorListResponse> getGatewaySensors(String gatewayId);
   Future<ProvisionGatewayResult> provisionGateway(ProvisionGatewayInput input);
   Future<ProvisionSensorResult> provisionSensor(ProvisionSensorInput input);
+  Future<ProvisionSensorResult> provisionOwnerSensor(
+    ProvisionSensorInput input,
+  );
   Future<MqttCredentialMetadata> getMqttCredential(String gatewayId);
   Future<Object> provisionMqttCredential(
     String gatewayId, {
@@ -37,6 +44,43 @@ class HttpGatewayRepository implements GatewayRepository {
     final json = await _client.get('gateways');
     final response = GatewayListResponse.fromJson(json);
     return response.items;
+  }
+
+  @override
+  Future<AdminGatewayInventoryResponse> getAdminGateways({
+    int? limit,
+    String? after,
+  }) async {
+    if (limit != null && limit <= 0) {
+      throw const ApiException(
+        statusCode: 400,
+        code: 'invalid_request',
+        message: 'Limit phải là số nguyên dương.',
+      );
+    }
+    if (after != null) {
+      if (!isValidGatewayId(after)) {
+        throw const ApiException(
+          statusCode: 400,
+          code: 'invalid_request',
+          message: 'Con trỏ after không hợp lệ hoặc chứa định danh dành riêng.',
+        );
+      }
+    }
+
+    final queryParams = <String, String>{};
+    if (limit != null) {
+      queryParams['limit'] = limit.toString();
+    }
+    if (after != null) {
+      queryParams['after'] = after;
+    }
+
+    final json = await _client.get(
+      'admin/gateways',
+      queryParams: queryParams.isEmpty ? null : queryParams,
+    );
+    return AdminGatewayInventoryResponse.fromJson(json);
   }
 
   @override
@@ -99,6 +143,34 @@ class HttpGatewayRepository implements GatewayRepository {
 
     final response = await _client.put(
       'admin/gateways/${input.gatewayId.trim()}/sensors/${input.sensorId.trim()}',
+      body: input.toJson(),
+    );
+
+    return ProvisionSensorResult.fromJson(
+      response.data,
+      statusCode: response.statusCode,
+    );
+  }
+
+  @override
+  Future<ProvisionSensorResult> provisionOwnerSensor(
+    ProvisionSensorInput input,
+  ) async {
+    final validationErr =
+        validateProvisionGatewayId(input.gatewayId) ??
+        validateProvisionSensorId(input.sensorId) ??
+        validateProvisionSensorName(input.name) ??
+        validateProvisionSensorUnit(input.unit);
+    if (validationErr != null) {
+      throw ApiException(
+        statusCode: 400,
+        code: 'invalid_request',
+        message: validationErr,
+      );
+    }
+
+    final response = await _client.put(
+      'gateways/${input.gatewayId.trim()}/sensors/${input.sensorId.trim()}',
       body: input.toJson(),
     );
 

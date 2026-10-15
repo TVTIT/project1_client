@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kite/app.dart';
+import 'package:kite/core/auth/permissions.dart';
 import 'package:kite/core/auth/session.dart';
 import 'package:kite/core/network/api_exception.dart';
 import 'package:kite/core/router/app_router.dart';
@@ -10,15 +11,18 @@ import 'package:kite/features/gateways/data/gateway_repository.dart';
 import 'package:kite_ui/kite_ui.dart';
 
 import 'gateway_list_provider_test.dart';
+import 'permissions_test.dart';
 import 'session_test.dart';
 
 void main() {
   late FakeAuthRepository fakeAuthRepo;
   late FakeGatewayRepository fakeGatewayRepo;
+  late FakePermissionsRepository fakePermsRepo;
 
   setUp(() {
     fakeAuthRepo = FakeAuthRepository();
     fakeGatewayRepo = FakeGatewayRepository();
+    fakePermsRepo = FakePermissionsRepository();
   });
 
   tearDown(() {
@@ -56,6 +60,7 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(fakeAuthRepo),
           gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+          permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
         ],
       );
       addTearDown(container.dispose);
@@ -108,6 +113,7 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(fakeAuthRepo),
           gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+          permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
         ],
       );
       addTearDown(container.dispose);
@@ -164,6 +170,7 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(fakeAuthRepo),
           gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+          permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
         ],
       );
       addTearDown(container.dispose);
@@ -207,6 +214,7 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(fakeAuthRepo),
           gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+          permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
         ],
       );
       addTearDown(container.dispose);
@@ -254,6 +262,7 @@ void main() {
       overrides: [
         authRepositoryProvider.overrideWithValue(fakeAuthRepo),
         gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+        permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
       ],
     );
     addTearDown(container.dispose);
@@ -299,6 +308,7 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(fakeAuthRepo),
           gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+          permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
         ],
       );
       addTearDown(container.dispose);
@@ -374,6 +384,7 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(fakeAuthRepo),
           gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+          permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
         ],
       );
       addTearDown(container.dispose);
@@ -434,6 +445,7 @@ void main() {
           overrides: [
             authRepositoryProvider.overrideWithValue(fakeAuthRepo),
             gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+            permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
           ],
         );
         addTearDown(container.dispose);
@@ -450,5 +462,331 @@ void main() {
         expect(tester.takeException(), isNull);
       });
     }
+  });
+
+  group('Task 3: Admin Foreign Gateway & Sensor Access Denial Scenarios', () {
+    testWidgets(
+      'admin foreign deep link on later page resolves metadata, renders denial message, and allows create sensor',
+      (tester) async {
+        tester.view.physicalSize = const Size(1280, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        // Admin user
+        fakePermsRepo.resultToReturn = const UserPermissions(
+          isPlatformAdmin: true,
+        );
+        // User catalog has NO gateways for this admin
+        fakeGatewayRepo.items = [];
+
+        // Admin inventory has 2 pages; target gateway 'gw-page2-target' is on page 2
+        fakeGatewayRepo.adminGatewaysHandler = (limit, after) {
+          if (after == null) {
+            return const AdminGatewayInventoryResponse(
+              items: [
+                AdminGatewayItem(
+                  gatewayId: 'gw-page1-01',
+                  name: 'Page 1 First',
+                ),
+                AdminGatewayItem(
+                  gatewayId: 'gw-page1-02',
+                  name: 'Page 1 Second',
+                ),
+              ],
+              nextCursor: 'gw-page1-02',
+            );
+          } else if (after == 'gw-page1-02') {
+            return const AdminGatewayInventoryResponse(
+              items: [
+                AdminGatewayItem(
+                  gatewayId: 'gw-page2-target',
+                  name: 'Target Station on Page 2',
+                  description: 'Station found via cursor lookup',
+                ),
+              ],
+              nextCursor: null,
+            );
+          }
+          return const AdminGatewayInventoryResponse(
+            items: [],
+            nextCursor: null,
+          );
+        };
+
+        final container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(fakeAuthRepo),
+            gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+            permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        container
+            .read(sessionProvider.notifier)
+            .setSession(
+              const SessionUser(
+                userId: 'admin-1',
+                name: 'Admin',
+                email: 'admin@test.com',
+              ),
+            );
+
+        await tester.pumpWidget(createTestWidget(container));
+        await tester.pumpAndSettle();
+
+        container.read(routerProvider).go('/gateways/gw-page2-target');
+        await tester.pumpAndSettle();
+
+        // Real metadata resolved and displayed!
+        expect(find.text('Target Station on Page 2'), findsOneWidget);
+        expect(find.text('gw-page2-target'), findsWidgets);
+        expect(find.text('Station found via cursor lookup'), findsOneWidget);
+        // Role is "—" (null role, never fake admin/owner badge)
+        expect(find.text('—'), findsWidgets);
+        expect(find.text('Chủ sở hữu'), findsNothing);
+
+        // Sensor area shows exact Vietnamese text
+        expect(
+          find.text(
+            'Bạn không có quyền truy cập danh sách Sensor của Gateway này.',
+          ),
+          findsOneWidget,
+        );
+
+        // Does NOT show empty sensor state
+        expect(find.text('Chưa có cảm biến nào'), findsNothing);
+
+        // Admin still allowed to see "Thêm cảm biến mới" button
+        expect(find.text('Thêm cảm biến mới'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'admin assigned gateway renders normal user sensor reads with role badge',
+      (tester) async {
+        tester.view.physicalSize = const Size(1280, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        fakePermsRepo.resultToReturn = const UserPermissions(
+          isPlatformAdmin: true,
+        );
+        // Admin is assigned in user_gateways as owner
+        fakeGatewayRepo.items = [
+          const GatewayItem(
+            gatewayId: 'gw-admin-assigned',
+            name: 'Admin Assigned Gateway',
+            role: GatewayRole.owner,
+          ),
+        ];
+        fakeGatewayRepo.sensorsMap = {
+          'gw-admin-assigned': [
+            const SensorItem(
+              sensorId: 'sensor-temp',
+              name: 'Temperature Sensor',
+              unit: '°C',
+            ),
+            const SensorItem(
+              sensorId: 'sensor-hum',
+              name: 'Humidity Sensor',
+              unit: '%',
+            ),
+          ],
+        };
+
+        final container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(fakeAuthRepo),
+            gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+            permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        container
+            .read(sessionProvider.notifier)
+            .setSession(
+              const SessionUser(
+                userId: 'admin-1',
+                name: 'Admin',
+                email: 'admin@test.com',
+              ),
+            );
+
+        await tester.pumpWidget(createTestWidget(container));
+        await tester.pumpAndSettle();
+
+        container.read(routerProvider).go('/gateways/gw-admin-assigned');
+        await tester.pumpAndSettle();
+
+        // Metadata card has real role badge
+        expect(find.text('Admin Assigned Gateway'), findsOneWidget);
+        expect(find.text('Chủ sở hữu'), findsWidgets);
+
+        // Sensors are loaded normally
+        expect(find.text('Temperature Sensor'), findsOneWidget);
+        expect(find.text('Humidity Sensor'), findsOneWidget);
+        expect(
+          find.text(
+            'Bạn không có quyền truy cập danh sách Sensor của Gateway này.',
+          ),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets(
+      'transient membership error displays honest error and retry action, not denial',
+      (tester) async {
+        tester.view.physicalSize = const Size(1280, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        fakePermsRepo.resultToReturn = const UserPermissions(
+          isPlatformAdmin: true,
+        );
+        fakeGatewayRepo.shouldThrow = true;
+        fakeGatewayRepo.errorToThrow = const ApiException(
+          statusCode: 500,
+          code: 'internal_error',
+          message: 'Lỗi máy chủ khi truy vấn danh mục trạm',
+          requestId: 'req-member-err-500',
+        );
+
+        final container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(fakeAuthRepo),
+            gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+            permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        container
+            .read(sessionProvider.notifier)
+            .setSession(
+              const SessionUser(
+                userId: 'admin-1',
+                name: 'Admin',
+                email: 'admin@test.com',
+              ),
+            );
+
+        await tester.pumpWidget(createTestWidget(container));
+        await tester.pumpAndSettle();
+
+        container.read(routerProvider).go('/gateways/gw-any');
+        await tester.pumpAndSettle();
+
+        // Honest error state is displayed, NOT denied and NOT 404
+        expect(
+          find.textContaining('Lỗi máy chủ khi truy vấn danh mục trạm'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('req-member-err-500'), findsOneWidget);
+        expect(find.text('Try again'), findsOneWidget);
+        expect(
+          find.text(
+            'Bạn không có quyền truy cập danh sách Sensor của Gateway này.',
+          ),
+          findsNothing,
+        );
+        expect(find.text('Không tìm thấy Gateway'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'loaded gateway with retained metadata shows error and retry on refresh failure, clears stale sensors, and recovers on retry',
+      (tester) async {
+        tester.view.physicalSize = const Size(1280, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        fakePermsRepo.resultToReturn = const UserPermissions(
+          isPlatformAdmin: false,
+        );
+        fakeGatewayRepo.items = [
+          const GatewayItem(
+            gatewayId: 'gw-refresh-test',
+            name: 'Active Station Alpha',
+            role: GatewayRole.owner,
+            description: 'Station for testing refresh failures',
+          ),
+        ];
+        fakeGatewayRepo.sensorsMap = {
+          'gw-refresh-test': [
+            const SensorItem(
+              sensorId: 'sensor-temp-1',
+              name: 'Temperature Sensor',
+              unit: '°C',
+            ),
+          ],
+        };
+
+        final container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(fakeAuthRepo),
+            gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+            permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        setupAuthenticatedUser(container);
+
+        await tester.pumpWidget(createTestWidget(container));
+        await tester.pumpAndSettle();
+
+        container.read(routerProvider).go('/gateways/gw-refresh-test');
+        await tester.pumpAndSettle();
+
+        // Initially loaded successfully with metadata and sensors
+        expect(find.text('Active Station Alpha'), findsOneWidget);
+        expect(find.text('Temperature Sensor'), findsOneWidget);
+        expect(find.text('Try again'), findsNothing);
+
+        // Simulate refresh failure (server returns 500)
+        fakeGatewayRepo.shouldThrow = true;
+        fakeGatewayRepo.errorToThrow = const ApiException(
+          statusCode: 500,
+          code: 'internal_error',
+          message: 'Lỗi máy chủ khi làm mới thông tin trạm',
+          requestId: 'req-refresh-fail-500',
+        );
+
+        // Tap refresh button in header
+        await tester.tap(find.text('Làm mới'));
+        await tester.pumpAndSettle();
+
+        // Verify state: error is shown, stale metadata and stale sensors are NOT displayed
+        expect(
+          find.textContaining('Lỗi máy chủ khi làm mới thông tin trạm'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('req-refresh-fail-500'), findsOneWidget);
+        expect(find.text('Try again'), findsOneWidget);
+        expect(find.text('Active Station Alpha'), findsNothing);
+        expect(find.text('Temperature Sensor'), findsNothing);
+
+        // Recover on retry
+        fakeGatewayRepo.shouldThrow = false;
+        await tester.tap(find.text('Try again'));
+        await tester.pumpAndSettle();
+
+        // Metadata and sensors are restored
+        expect(find.text('Active Station Alpha'), findsOneWidget);
+        expect(find.text('Temperature Sensor'), findsOneWidget);
+        expect(find.text('Try again'), findsNothing);
+        expect(
+          find.textContaining('Lỗi máy chủ khi làm mới thông tin trạm'),
+          findsNothing,
+        );
+      },
+    );
   });
 }

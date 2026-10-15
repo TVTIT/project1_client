@@ -260,7 +260,7 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
     }
 
     // 3. Metadata Failure
-    if (state.hasGeneralError && state.gateway == null) {
+    if (state.hasGeneralError) {
       String errorMsg = 'Không thể tải thông tin Gateway.';
       if (state.metadataError is ApiException) {
         final apiErr = state.metadataError as ApiException;
@@ -304,7 +304,7 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
   }
 
   Widget _buildGatewayMetadataCard(
-    GatewayItem item,
+    GatewayCatalogItem item,
     bool isMobile,
     KiteColors c,
     KiteText t,
@@ -344,7 +344,10 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
                   ],
                 ),
               ),
-              KiteBadge(item.role.label, tone: item.role.tone),
+              if (item.role != null)
+                KiteBadge(item.role!.label, tone: item.role!.tone)
+              else
+                const Text('—'),
             ],
           ),
           const SizedBox(height: KiteSpace.xl),
@@ -365,7 +368,7 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
               ),
               _buildMetadataField(
                 label: l.gatewayRole,
-                value: item.role.label,
+                value: item.role != null ? item.role!.label : '—',
                 c: c,
                 t: t,
               ),
@@ -426,7 +429,14 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
     L l,
   ) {
     final filtered = state.filteredSensors;
-    final isPlatformAdmin = ref.watch(isPlatformAdminProvider);
+    final permissionsState = ref.watch(userPermissionsProvider);
+    final canAddSensor =
+        resolveSensorProvisionAuthority(
+          permissionsState: permissionsState,
+          detailState: state,
+          gatewayId: widget.gatewayId,
+        ) !=
+        null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -443,26 +453,27 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
               spacing: KiteSpace.sm,
               children: [
                 Text(l.gatewaySectionSensors, style: t.h4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: KiteSpace.sm,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: c.muted.withValues(alpha: 0.3),
-                    borderRadius: KiteRadius.allSm,
-                  ),
-                  child: Text(
-                    '${state.sensors.length}',
-                    style: t.small.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
+                if (!state.isSensorReadDenied)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: KiteSpace.sm,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: c.muted.withValues(alpha: 0.3),
+                      borderRadius: KiteRadius.allSm,
+                    ),
+                    child: Text(
+                      '${state.sensors.length}',
+                      style: t.small.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
-            if (isPlatformAdmin)
+            if (canAddSensor)
               KiteButton(
                 onPressed: () => showCreateSensorDialog(
                   context,
@@ -475,107 +486,130 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
         ),
         const SizedBox(height: KiteSpace.lg),
 
-        // Sensor Failure Banner (when metadata succeeded but sensors failed)
-        if (state.hasSensorsError) ...[
+        if (state.isSensorReadDenied) ...[
           Container(
-            padding: const EdgeInsets.all(KiteSpace.lg),
+            padding: const EdgeInsets.all(KiteSpace.xl),
             decoration: BoxDecoration(
-              color: c.destructive.withValues(alpha: 0.08),
+              color: c.muted.withValues(alpha: 0.2),
               borderRadius: KiteRadius.allMd,
-              border: Border.all(color: c.destructive.withValues(alpha: 0.3)),
+              border: Border.all(color: c.border),
             ),
-            child: Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: KiteSpace.md,
-              runSpacing: KiteSpace.sm,
+            child: Row(
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.error_outline, size: 20, color: c.destructive),
-                    const SizedBox(width: KiteSpace.md),
-                    Text(
-                      l.sensorErrorTitle,
-                      style: t.p.copyWith(
-                        color: c.destructive,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                KiteButton.outline(
-                  onPressed: () => ref
-                      .read(gatewayDetailProvider(widget.gatewayId).notifier)
-                      .load(reloadSensorsOnly: true),
-                  leading: const Icon(Icons.refresh, size: 14),
-                  child: Text(l.sensorErrorRetry),
+                Icon(Icons.lock_outline, size: 20, color: c.mutedForeground),
+                const SizedBox(width: KiteSpace.md),
+                Expanded(
+                  child: Text(
+                    l.gatewaySensorReadDeniedMessage,
+                    style: t.p.copyWith(color: c.mutedForeground),
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: KiteSpace.lg),
-        ],
-
-        // Search Bar (shown when sensor list has items)
-        if (state.sensors.isNotEmpty) ...[
-          KiteInput(
-            controller: _sensorSearchController,
-            placeholder: l.sensorSearchPlaceholder,
-            leading: Icon(Icons.search, size: 18, color: c.mutedForeground),
-            trailing: _sensorSearchController.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear, size: 16),
-                    splashRadius: 16,
-                    visualDensity: VisualDensity.compact,
-                    onPressed: () {
-                      _sensorSearchController.clear();
-                      ref
-                          .read(
-                            gatewayDetailProvider(widget.gatewayId).notifier,
-                          )
-                          .setSearchQuery('');
-                    },
-                  )
-                : null,
-            onChanged: (val) {
-              ref
-                  .read(gatewayDetailProvider(widget.gatewayId).notifier)
-                  .setSearchQuery(val);
-            },
-          ),
-          const SizedBox(height: KiteSpace.lg),
-        ],
-
-        // Empty sensors state
-        if (state.isSensorsEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: KiteSpace.xl),
-            child: EmptyState(
-              title: l.sensorEmptyTitle,
-              message: l.sensorEmptyMessage,
+        ] else ...[
+          // Sensor Failure Banner (when metadata succeeded but sensors failed)
+          if (state.hasSensorsError) ...[
+            Container(
+              padding: const EdgeInsets.all(KiteSpace.lg),
+              decoration: BoxDecoration(
+                color: c.destructive.withValues(alpha: 0.08),
+                borderRadius: KiteRadius.allMd,
+                border: Border.all(color: c.destructive.withValues(alpha: 0.3)),
+              ),
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: KiteSpace.md,
+                runSpacing: KiteSpace.sm,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.error_outline, size: 20, color: c.destructive),
+                      const SizedBox(width: KiteSpace.md),
+                      Text(
+                        l.sensorErrorTitle,
+                        style: t.p.copyWith(
+                          color: c.destructive,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  KiteButton.outline(
+                    onPressed: () => ref
+                        .read(gatewayDetailProvider(widget.gatewayId).notifier)
+                        .load(reloadSensorsOnly: true),
+                    leading: const Icon(Icons.refresh, size: 14),
+                    child: Text(l.sensorErrorRetry),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ] else if (state.sensors.isNotEmpty && filtered.isEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: KiteSpace.xl),
-            child: EmptyState(
-              title: l.sensorSearchEmptyTitle,
-              message: l.sensorSearchEmptyMessage,
-              actionLabel: l.actionClear,
-              onAction: () {
-                _sensorSearchController.clear();
+            const SizedBox(height: KiteSpace.lg),
+          ],
+
+          // Search Bar (shown when sensor list has items)
+          if (state.sensors.isNotEmpty) ...[
+            KiteInput(
+              controller: _sensorSearchController,
+              placeholder: l.sensorSearchPlaceholder,
+              leading: Icon(Icons.search, size: 18, color: c.mutedForeground),
+              trailing: _sensorSearchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, size: 16),
+                      splashRadius: 16,
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () {
+                        _sensorSearchController.clear();
+                        ref
+                            .read(
+                              gatewayDetailProvider(widget.gatewayId).notifier,
+                            )
+                            .setSearchQuery('');
+                      },
+                    )
+                  : null,
+              onChanged: (val) {
                 ref
                     .read(gatewayDetailProvider(widget.gatewayId).notifier)
-                    .setSearchQuery('');
+                    .setSearchQuery(val);
               },
             ),
-          ),
-        ] else if (filtered.isNotEmpty) ...[
-          if (isMobile)
-            _buildMobileSensorCards(filtered, c, t, l)
-          else
-            _buildDesktopSensorTable(filtered, c, t, l),
+            const SizedBox(height: KiteSpace.lg),
+          ],
+
+          // Empty sensors state
+          if (state.isSensorsEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: KiteSpace.xl),
+              child: EmptyState(
+                title: l.sensorEmptyTitle,
+                message: l.sensorEmptyMessage,
+              ),
+            ),
+          ] else if (state.sensors.isNotEmpty && filtered.isEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: KiteSpace.xl),
+              child: EmptyState(
+                title: l.sensorSearchEmptyTitle,
+                message: l.sensorSearchEmptyMessage,
+                actionLabel: l.actionClear,
+                onAction: () {
+                  _sensorSearchController.clear();
+                  ref
+                      .read(gatewayDetailProvider(widget.gatewayId).notifier)
+                      .setSearchQuery('');
+                },
+              ),
+            ),
+          ] else if (filtered.isNotEmpty) ...[
+            if (isMobile)
+              _buildMobileSensorCards(filtered, c, t, l)
+            else
+              _buildDesktopSensorTable(filtered, c, t, l),
+          ],
         ],
       ],
     );

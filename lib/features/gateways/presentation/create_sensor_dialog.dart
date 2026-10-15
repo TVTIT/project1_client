@@ -12,7 +12,49 @@ import '../data/gateway_dto.dart';
 import '../data/gateway_repository.dart';
 import '../providers/gateway_detail_provider.dart';
 
-/// Shows the create sensor modal dialog for confirmed platform administrators.
+/// Available authority modes for sensor provisioning.
+enum SensorProvisionAuthority { admin, owner }
+
+/// Resolves authoritative permission for sensor provisioning under a fixed gateway.
+///
+/// Authority matrix:
+/// - Confirmed Platform Admin takes precedence -> [SensorProvisionAuthority.admin]
+/// - Confirmed Non-Admin + Gateway Membership Owner -> [SensorProvisionAuthority.owner]
+/// - Capability resolver for OWNER requires: detail.isLoaded, exact gateway ID,
+///   verified membershipRole == GatewayRole.owner + isOwner == true.
+/// - notFound / initial / loading / error deny (cannot submit).
+/// - Confirmed Admin path stays independent of user sensor membership and
+///   must still create for known inventory foreign loaded gateways.
+/// - NO SessionUser.role inference.
+/// - All permission gates include state.isLoading/error not only boolean.
+SensorProvisionAuthority? resolveSensorProvisionAuthority({
+  required UserPermissionsState permissionsState,
+  required GatewayDetailState detailState,
+  required String gatewayId,
+}) {
+  if (detailState.gatewayId != gatewayId) return null;
+
+  // If system permissions are loading or in error, fail closed
+  if (permissionsState.isLoading || permissionsState.hasError) return null;
+
+  // 1. Confirmed platform admin takes precedence (stays independent of user sensor membership;
+  // must still create for known inventory foreign loaded gateways)
+  if (permissionsState.isPlatformAdmin) {
+    return SensorProvisionAuthority.admin;
+  }
+
+  // 2. Confirmed non-admin: must require detail.isLoaded (notfound/initial/loading/error deny)
+  if (!detailState.isLoaded) return null;
+
+  // Must be verified owner in user_gateways with verified membershipRole and isOwner
+  if (detailState.isOwner && detailState.membershipRole == GatewayRole.owner) {
+    return SensorProvisionAuthority.owner;
+  }
+
+  return null;
+}
+
+/// Shows the create sensor modal dialog for confirmed platform administrators or gateway owners.
 Future<ProvisionSensorResult?> showCreateSensorDialog(
   BuildContext context, {
   required String gatewayId,
@@ -24,7 +66,7 @@ Future<ProvisionSensorResult?> showCreateSensorDialog(
   );
 }
 
-/// Dialog allowing Platform Administrators to provision a new sensor under a fixed parent Gateway.
+/// Dialog allowing Platform Administrators or Gateway Owners to provision a new sensor under a fixed parent Gateway.
 ///
 /// Complies with Stage 2 requirements:
 /// - Parent gateway ID is fixed and read-only.
@@ -55,6 +97,7 @@ class _CreateSensorDialogState extends ConsumerState<CreateSensorDialog> {
   bool _isSubmitting = false;
   Object? _error;
   ProvisionSensorInput? _lastAttemptedInput;
+  SensorProvisionAuthority? _pinnedAuthority;
   int _submitSeq = 0;
 
   @override
@@ -77,6 +120,20 @@ class _CreateSensorDialogState extends ConsumerState<CreateSensorDialog> {
     if (_isSubmitting) return;
     if (_formKey.currentState?.validate() != true) return;
 
+    final permissionsState = ref.read(userPermissionsProvider);
+    final detailState = ref.read(gatewayDetailProvider(widget.gatewayId));
+    final authority = resolveSensorProvisionAuthority(
+      permissionsState: permissionsState,
+      detailState: detailState,
+      gatewayId: widget.gatewayId,
+    );
+    if (authority == null) {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+      return;
+    }
+
     final unitRaw = _unitController.text.trim();
     final String? unitValue = unitRaw.isNotEmpty ? unitRaw : null;
 
@@ -87,19 +144,52 @@ class _CreateSensorDialogState extends ConsumerState<CreateSensorDialog> {
       unit: unitValue,
     );
 
-    await _executeSubmit(input);
+    await _executeSubmit(input, authority: authority);
   }
 
   Future<void> _retry() async {
     final input = _lastAttemptedInput;
-    if (input == null || _isSubmitting) return;
-    await _executeSubmit(input);
+    final pinned = _pinnedAuthority;
+    if (input == null || pinned == null || _isSubmitting) return;
+
+    final permissionsState = ref.read(userPermissionsProvider);
+    final detailState = ref.read(gatewayDetailProvider(widget.gatewayId));
+    final currentAuthority = resolveSensorProvisionAuthority(
+      permissionsState: permissionsState,
+      detailState: detailState,
+      gatewayId: widget.gatewayId,
+    );
+
+    // Pin authority for each attempted payload/retry so permission change doesn't silently switch routes or auto-resubmit;
+    // keep existing explicit retry only if same authority still allowed.
+    if (currentAuthority == null || currentAuthority != pinned) {
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
+
+    await _executeSubmit(input, authority: pinned);
   }
 
-  Future<void> _executeSubmit(ProvisionSensorInput input) async {
+  Future<void> _executeSubmit(
+    ProvisionSensorInput input, {
+    required SensorProvisionAuthority authority,
+  }) async {
     // Permission & session check before starting:
-    final isAdmin = ref.read(isPlatformAdminProvider);
-    if (!isAdmin) {
+    final permissionsState = ref.read(userPermissionsProvider);
+    final detailState = ref.read(gatewayDetailProvider(widget.gatewayId));
+    final currentAuthority = resolveSensorProvisionAuthority(
+      permissionsState: permissionsState,
+      detailState: detailState,
+      gatewayId: widget.gatewayId,
+    );
+    if (currentAuthority == null || currentAuthority != authority) {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+      return;
+    }
+
+    if (input.gatewayId != widget.gatewayId) {
       if (mounted) {
         Navigator.of(context).pop();
       }
@@ -114,18 +204,34 @@ class _CreateSensorDialogState extends ConsumerState<CreateSensorDialog> {
       _isSubmitting = true;
       _error = null;
       _lastAttemptedInput = input;
+      _pinnedAuthority = authority;
     });
 
     try {
       final repo = ref.read(gatewayRepositoryProvider);
-      final result = await repo.provisionSensor(input);
+      final ProvisionSensorResult result;
+      if (authority == SensorProvisionAuthority.admin) {
+        result = await repo.provisionSensor(input);
+      } else {
+        result = await repo.provisionOwnerSensor(input);
+      }
 
       // Late response, disposal, or session switch guard:
       if (!mounted) return;
       if (seq != _submitSeq ||
           expectedEpoch != ref.read(sessionProvider.notifier).sessionEpoch ||
-          expectedUserId != ref.read(currentUserProvider)?.userId ||
-          !ref.read(isPlatformAdminProvider)) {
+          expectedUserId != ref.read(currentUserProvider)?.userId) {
+        _forceClose();
+        return;
+      }
+
+      final postAuthority = resolveSensorProvisionAuthority(
+        permissionsState: ref.read(userPermissionsProvider),
+        detailState: ref.read(gatewayDetailProvider(widget.gatewayId)),
+        gatewayId: widget.gatewayId,
+      );
+      if (postAuthority != authority) {
+        _forceClose();
         return;
       }
 
@@ -150,12 +256,29 @@ class _CreateSensorDialogState extends ConsumerState<CreateSensorDialog> {
       if (seq != _submitSeq ||
           expectedEpoch != ref.read(sessionProvider.notifier).sessionEpoch ||
           expectedUserId != ref.read(currentUserProvider)?.userId) {
+        _forceClose();
         return;
       }
 
-      // If backend returns 403 Forbidden, immediately invalidate permissions fail-closed:
+      // Admin 403 invalidates/rechecks admin permissions;
+      // OWNER 403 refreshes gateway membership, not globally invalidate admin.
+      // Owner 404 fail closed appropriately.
       if (e is ApiException && e.statusCode == 403) {
-        ref.read(userPermissionsProvider.notifier).invalidateAdminPermissions();
+        if (authority == SensorProvisionAuthority.admin) {
+          ref
+              .read(userPermissionsProvider.notifier)
+              .invalidateAdminPermissions();
+        } else {
+          unawaited(
+            ref.read(gatewayDetailProvider(widget.gatewayId).notifier).load(),
+          );
+        }
+      } else if (e is ApiException && e.statusCode == 404) {
+        if (authority == SensorProvisionAuthority.owner) {
+          unawaited(
+            ref.read(gatewayDetailProvider(widget.gatewayId).notifier).load(),
+          );
+        }
       }
 
       setState(() {
@@ -168,18 +291,33 @@ class _CreateSensorDialogState extends ConsumerState<CreateSensorDialog> {
   bool _forceClosing = false;
 
   void _forceClose() {
-    _forceClosing = true;
-    if (mounted) Navigator.of(context).pop();
+    if (_forceClosing || !mounted) return;
+    setState(() {
+      _forceClosing = true;
+      _isSubmitting = false;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Navigator.of(context).pop();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // If admin permission is revoked while dialog is open, auto-dismiss
-    final isPlatformAdmin = ref.watch(isPlatformAdminProvider);
-    if (!isPlatformAdmin) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _forceClose();
-      });
+    // If permission or authority is lost while dialog is open, auto-dismiss fail-closed
+    final permissionsState = ref.watch(userPermissionsProvider);
+    final detailState = ref.watch(gatewayDetailProvider(widget.gatewayId));
+    final authority = resolveSensorProvisionAuthority(
+      permissionsState: permissionsState,
+      detailState: detailState,
+      gatewayId: widget.gatewayId,
+    );
+    if (authority == null) {
+      if (!_forceClosing) {
+        _forceClosing = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) Navigator.of(context).pop();
+        });
+      }
       return const SizedBox.shrink();
     }
 

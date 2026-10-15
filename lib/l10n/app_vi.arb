@@ -76,7 +76,28 @@
   "gatewayDescription": "Mô tả",
   "gatewayRole": "Vai trò",
   "gatewayCreatedAt": "Ngày tạo",
-  "gatewaySearchPlaceholder": "Tìm theo mã trạm, tên hoặc mô tả...",
+  "gatewaySearchPlaceholder": "Tìm theo mã trạm, tên hoặc mô tả trong danh sách đã tải...",
+  "gatewayLoadedCount": "Đang hiển thị {count} trạm đã tải (không phải tổng số)",
+  "@gatewayLoadedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gatewayLoadedCountFiltered": "Đang hiển thị {filtered} trên {count} trạm đã tải (không phải tổng số)",
+  "@gatewayLoadedCountFiltered": {
+    "placeholders": {
+      "filtered": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gatewaySensorReadDeniedMessage": "Bạn không có quyền truy cập danh sách Sensor của Gateway này.",
+  "actionRetry": "Thử lại",
   "gatewayEmptyTitle": "Chưa có trạm Gateway nào",
   "gatewayEmptyMessage": "Tài khoản của bạn hiện chưa được phân quyền truy cập trạm Gateway nào.",
   "gatewaySearchEmptyTitle": "Không tìm thấy kết quả",

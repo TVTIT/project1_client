@@ -11,6 +11,7 @@ import 'package:kite/features/gateways/data/gateway_dto.dart';
 import 'package:kite/features/gateways/data/gateway_repository.dart';
 import 'package:kite/features/gateways/presentation/create_sensor_dialog.dart';
 import 'package:kite/features/gateways/presentation/gateway_detail_screen.dart';
+import 'package:kite/features/gateways/providers/gateway_detail_provider.dart';
 import 'package:kite_ui/kite_ui.dart';
 
 import 'gateway_list_provider_test.dart';
@@ -48,7 +49,7 @@ void main() {
 
   group('Create Sensor Button & Admin Permission Guard', () {
     testWidgets(
-      'non-admin user on GatewayDetailScreen does NOT see "Thêm cảm biến mới" button',
+      'non-admin operator on GatewayDetailScreen does NOT see "Thêm cảm biến mới" button',
       (tester) async {
         tester.view.physicalSize = const Size(1280, 800);
         tester.view.devicePixelRatio = 1.0;
@@ -58,6 +59,14 @@ void main() {
         fakePermsRepo.resultToReturn = const UserPermissions(
           isPlatformAdmin: false,
         );
+        fakeGatewayRepo.items = [
+          const GatewayItem(
+            gatewayId: 'gw-alpha',
+            name: 'Trạm Alpha',
+            description: 'Trạm thử nghiệm',
+            role: GatewayRole.operator,
+          ),
+        ];
 
         final container = ProviderContainer(
           overrides: [
@@ -83,8 +92,55 @@ void main() {
 
         expect(find.byType(GatewayDetailScreen), findsOneWidget);
         expect(find.text('Danh sách Cảm biến'), findsOneWidget);
-        // Non-admin must NOT see create sensor button
+        // Non-admin operator must NOT see create sensor button
         expect(find.text('Thêm cảm biến mới'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'non-admin owner on GatewayDetailScreen sees "Thêm cảm biến mới" button and clicking opens dialog',
+      (tester) async {
+        tester.view.physicalSize = const Size(1280, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        fakePermsRepo.resultToReturn = const UserPermissions(
+          isPlatformAdmin: false,
+        );
+        fakeGatewayRepo.items = [testGateway];
+
+        final container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(fakeAuthRepo),
+            gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+            permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        const user = SessionUser(
+          userId: '11111111-1111-1111-1111-111111111111',
+          name: 'Owner User',
+          email: 'owner@example.com',
+        );
+        container.read(sessionProvider.notifier).setSession(user);
+
+        await tester.pumpWidget(createTestWidget(container));
+        await tester.pumpAndSettle();
+
+        container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(GatewayDetailScreen), findsOneWidget);
+        expect(find.text('Danh sách Cảm biến'), findsOneWidget);
+        final addBtn = find.text('Thêm cảm biến mới');
+        expect(addBtn, findsOneWidget);
+
+        await tester.tap(addBtn);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(CreateSensorDialog), findsOneWidget);
       },
     );
 
@@ -176,10 +232,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Check fields:
-        expect(
-          find.text('Mã trạm Gateway cha (Cố định, chỉ đọc)'),
-          findsOneWidget,
-        );
+        expect(find.text('ID Gateway'), findsOneWidget);
         expect(find.text('Mã cảm biến (Sensor ID)'), findsOneWidget);
         expect(find.text('Tên cảm biến'), findsOneWidget);
         expect(find.text('Đơn vị đo (Tùy chọn)'), findsOneWidget);
@@ -688,6 +741,14 @@ void main() {
         fakePermsRepo.resultToReturn = const UserPermissions(
           isPlatformAdmin: true,
         );
+        fakeGatewayRepo.items = [
+          const GatewayItem(
+            gatewayId: 'gw-alpha',
+            name: 'Trạm Alpha',
+            description: 'Trạm thử nghiệm',
+            role: GatewayRole.operator,
+          ),
+        ];
 
         final container = ProviderContainer(
           overrides: [
@@ -727,6 +788,67 @@ void main() {
 
         // Dialog is dismissed fail-closed
         expect(find.byType(CreateSensorDialog), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'dialog opened as owner -> gateway notfound denies/close no mutation',
+      (tester) async {
+        tester.view.physicalSize = const Size(1280, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        fakePermsRepo.resultToReturn = const UserPermissions(
+          isPlatformAdmin: false,
+        );
+        fakeGatewayRepo.items = [
+          const GatewayItem(
+            gatewayId: 'gw-alpha',
+            name: 'Trạm Alpha',
+            description: 'Trạm thử nghiệm',
+            role: GatewayRole.owner,
+          ),
+        ];
+
+        final container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(fakeAuthRepo),
+            gatewayRepositoryProvider.overrideWithValue(fakeGatewayRepo),
+            permissionsRepositoryProvider.overrideWithValue(fakePermsRepo),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        const ownerUser = SessionUser(
+          userId: '11111111-1111-1111-1111-111111111111',
+          name: 'Owner User',
+          email: 'owner@example.com',
+        );
+        container.read(sessionProvider.notifier).setSession(ownerUser);
+
+        await tester.pumpWidget(createTestWidget(container));
+        await tester.pumpAndSettle();
+
+        container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Thêm cảm biến mới'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(CreateSensorDialog), findsOneWidget);
+
+        // Gateway becomes not found (e.g. gateway deleted or user loses access)
+        fakeGatewayRepo.items = [];
+        await container.read(gatewayDetailProvider('gw-alpha').notifier).load();
+        await tester.pumpAndSettle();
+
+        // Dialog must be closed fail-closed:
+        expect(find.byType(CreateSensorDialog), findsNothing);
+
+        // No mutation was triggered:
+        expect(fakeGatewayRepo.provisionOwnerSensorCallCount, 0);
+        expect(fakeGatewayRepo.provisionSensorCallCount, 0);
       },
     );
   });

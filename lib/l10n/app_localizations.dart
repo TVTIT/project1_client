@@ -556,8 +556,32 @@ abstract class L {
   /// No description provided for @gatewaySearchPlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'Search by ID, name or description...'**
+  /// **'Search loaded gateways by ID, name or description...'**
   String get gatewaySearchPlaceholder;
+
+  /// No description provided for @gatewayLoadedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {count} loaded gateways (not total)'**
+  String gatewayLoadedCount(int count);
+
+  /// No description provided for @gatewayLoadedCountFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {filtered} of {count} loaded gateways (not total)'**
+  String gatewayLoadedCountFiltered(int filtered, int count);
+
+  /// No description provided for @gatewaySensorReadDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to access the Sensor list for this Gateway.'**
+  String get gatewaySensorReadDeniedMessage;
+
+  /// No description provided for @actionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get actionRetry;
 
   /// No description provided for @gatewayEmptyTitle.
   ///

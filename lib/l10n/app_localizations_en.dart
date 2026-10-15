@@ -248,7 +248,25 @@ class LEn extends L {
   String get gatewayCreatedAt => 'Created At';
 
   @override
-  String get gatewaySearchPlaceholder => 'Search by ID, name or description...';
+  String get gatewaySearchPlaceholder =>
+      'Search loaded gateways by ID, name or description...';
+
+  @override
+  String gatewayLoadedCount(int count) {
+    return 'Showing $count loaded gateways (not total)';
+  }
+
+  @override
+  String gatewayLoadedCountFiltered(int filtered, int count) {
+    return 'Showing $filtered of $count loaded gateways (not total)';
+  }
+
+  @override
+  String get gatewaySensorReadDeniedMessage =>
+      'You do not have permission to access the Sensor list for this Gateway.';
+
+  @override
+  String get actionRetry => 'Retry';
 
   @override
   String get gatewayEmptyTitle => 'No gateways found';

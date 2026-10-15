@@ -496,3 +496,218 @@ String? validateProvisionSensorUnit(String? value) {
   }
   return null;
 }
+
+/// Typed DTO for an item from Admin Gateway Inventory `GET /v1/admin/gateways`.
+///
+/// Security & Data boundaries:
+/// - Contains ONLY: `gateway_id`, `name`, nullable `description`, nullable `created_at`.
+/// - Strictly DOES NOT contain `role`, `owner_user_id`, or any MQTT credentials/secrets.
+/// - Does NOT fabricate roles or reuse strict role-required [GatewayItem].
+@immutable
+class AdminGatewayItem {
+  const AdminGatewayItem({
+    required this.gatewayId,
+    required this.name,
+    this.description,
+    this.createdAt,
+  });
+
+  /// Authoritative unique gateway ID (regex `^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$`).
+  final String gatewayId;
+
+  /// Gateway display name.
+  final String name;
+
+  /// Optional plain text description (nullable).
+  final String? description;
+
+  /// ISO 8601 UTC creation timestamp (nullable).
+  final DateTime? createdAt;
+
+  factory AdminGatewayItem.fromJson(Map<String, dynamic> json) {
+    final rawGatewayId = json['gateway_id'];
+    if (rawGatewayId is! String || !isValidGatewayId(rawGatewayId)) {
+      throw const FormatException(
+        'Expected valid gateway_id in admin gateway item',
+      );
+    }
+    final rawName = json['name'];
+    if (rawName is! String) {
+      throw const FormatException(
+        'Expected string "name" in admin gateway item',
+      );
+    }
+
+    String? parsedDescription;
+    if (json.containsKey('description') && json['description'] != null) {
+      parsedDescription = json['description'] as String?;
+    }
+
+    DateTime? parsedCreatedAt;
+    if (json['created_at'] != null) {
+      parsedCreatedAt = DateTime.tryParse(json['created_at'].toString())
+          ?.toUtc();
+    }
+
+    return AdminGatewayItem(
+      gatewayId: rawGatewayId,
+      name: rawName,
+      description: parsedDescription,
+      createdAt: parsedCreatedAt,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'gateway_id': gatewayId,
+    'name': name,
+    'description': description,
+    'created_at': createdAt?.toIso8601String(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdminGatewayItem &&
+          runtimeType == other.runtimeType &&
+          gatewayId == other.gatewayId &&
+          name == other.name &&
+          description == other.description &&
+          createdAt == other.createdAt;
+
+  @override
+  int get hashCode => Object.hash(gatewayId, name, description, createdAt);
+}
+
+/// DTO for response payload of Admin Gateway Inventory `GET /v1/admin/gateways`.
+///
+/// Keyset cursor pagination contract:
+/// - [items]: Always a list, never null (empty list is valid empty state).
+/// - [nextCursor]: Cursor string (last item's gateway_id) if more pages exist; null if last page.
+/// - Strictly NO `total`, `count`, `page`, or `page_size`.
+@immutable
+class AdminGatewayInventoryResponse {
+  const AdminGatewayInventoryResponse({required this.items, this.nextCursor});
+
+  final List<AdminGatewayItem> items;
+  final String? nextCursor;
+
+  bool get hasMore => nextCursor != null && nextCursor!.isNotEmpty;
+
+  factory AdminGatewayInventoryResponse.fromJson(Map<String, dynamic> json) {
+    final rawItems = json['items'];
+    if (rawItems is! List) {
+      throw const FormatException(
+        'Expected "items" array in admin gateway inventory response',
+      );
+    }
+
+    final rawNextCursor = json['next_cursor'];
+    String? nextCursor;
+    if (rawNextCursor != null) {
+      if (rawNextCursor is! String) {
+        throw const FormatException(
+          'Expected string or null for "next_cursor" in admin gateway inventory response',
+        );
+      }
+      if (!isValidGatewayId(rawNextCursor)) {
+        throw FormatException(
+          'Invalid next_cursor "$rawNextCursor": must match gateway ID pattern and not be reserved.',
+        );
+      }
+      nextCursor = rawNextCursor;
+    }
+
+    return AdminGatewayInventoryResponse(
+      items: rawItems
+          .map((e) => AdminGatewayItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      nextCursor: nextCursor,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'items': items.map((e) => e.toJson()).toList(),
+    'next_cursor': nextCursor,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdminGatewayInventoryResponse &&
+          runtimeType == other.runtimeType &&
+          listEquals(items, other.items) &&
+          nextCursor == other.nextCursor;
+
+  @override
+  int get hashCode => Object.hash(Object.hashAll(items), nextCursor);
+}
+
+/// Unified typed presentation model for gateway catalog items.
+///
+/// Supports both:
+/// - User gateways from `GET /v1/gateways` (with strict non-null [role]).
+/// - Admin gateways from `GET /v1/admin/gateways` (strictly without role, [role] is null).
+///
+/// Security & Data boundaries:
+/// - Preserves strict typing of [GatewayItem] and [AdminGatewayItem] without corrupting DTOs.
+/// - Does not fabricate roles for admin inventory items.
+@immutable
+class GatewayCatalogItem {
+  const GatewayCatalogItem({
+    required this.gatewayId,
+    required this.name,
+    this.description,
+    this.role,
+    this.createdAt,
+  });
+
+  /// Authoritative unique gateway ID.
+  final String gatewayId;
+
+  /// Gateway display name.
+  final String name;
+
+  /// Optional plain text description (nullable).
+  final String? description;
+
+  /// Gateway role in user_gateways (null for admin inventory items).
+  final GatewayRole? role;
+
+  /// ISO 8601 UTC creation timestamp (nullable).
+  final DateTime? createdAt;
+
+  factory GatewayCatalogItem.fromUserGateway(GatewayItem item) {
+    return GatewayCatalogItem(
+      gatewayId: item.gatewayId,
+      name: item.name,
+      description: item.description,
+      role: item.role,
+      createdAt: item.createdAt,
+    );
+  }
+
+  factory GatewayCatalogItem.fromAdminGateway(AdminGatewayItem item) {
+    return GatewayCatalogItem(
+      gatewayId: item.gatewayId,
+      name: item.name,
+      description: item.description,
+      role: null,
+      createdAt: item.createdAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GatewayCatalogItem &&
+          runtimeType == other.runtimeType &&
+          gatewayId == other.gatewayId &&
+          name == other.name &&
+          description == other.description &&
+          role == other.role &&
+          createdAt == other.createdAt;
+
+  @override
+  int get hashCode =>
+      Object.hash(gatewayId, name, description, role, createdAt);
+}

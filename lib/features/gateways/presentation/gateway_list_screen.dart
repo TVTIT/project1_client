@@ -30,11 +30,17 @@ class GatewayListScreen extends ConsumerStatefulWidget {
 
 class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
   late final TextEditingController _searchController;
+  late final ScrollController _scrollController;
+  int _loadGeneration = 0;
+  bool _isFillScheduled = false;
 
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController();
+    _searchController = TextEditingController(
+      text: ref.read(gatewayListProvider).searchQuery,
+    );
+    _scrollController = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(gatewayListProvider.notifier).loadGateways();
@@ -44,8 +50,56 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
 
   @override
   void dispose() {
+    _resetViewportFill();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _resetViewportFill() {
+    _loadGeneration++;
+    _isFillScheduled = false;
+  }
+
+  void _triggerLoadMore() {
+    final state = ref.read(gatewayListProvider);
+    if (!state.isAdminMode) return;
+    if (!state.hasMore ||
+        state.isLoading ||
+        state.isLoadingMore ||
+        state.hasError ||
+        state.hasLoadMoreError ||
+        state.searchQuery.trim().isNotEmpty) {
+      return;
+    }
+    ref.read(gatewayListProvider.notifier).loadNextPage();
+  }
+
+  void _checkViewportFill() {
+    if (_isFillScheduled) return;
+    _isFillScheduled = true;
+    final capturedGeneration = _loadGeneration;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _isFillScheduled = false;
+      if (!mounted || _loadGeneration != capturedGeneration) return;
+      final state = ref.read(gatewayListProvider);
+      if (!state.isAdminMode ||
+          !state.hasMore ||
+          state.isLoading ||
+          state.isLoadingMore ||
+          state.hasError ||
+          state.hasLoadMoreError ||
+          state.searchQuery.trim().isNotEmpty) {
+        return;
+      }
+      if (_scrollController.hasClients) {
+        final position = _scrollController.position;
+        if (position.maxScrollExtent <= 0) {
+          ref.read(gatewayListProvider.notifier).loadNextPage();
+        }
+      }
+    });
   }
 
   String _formatDate(DateTime? dt) {
@@ -68,40 +122,77 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
     final l = L.of(context);
     final isMobile = KiteBreak.isMobile(context);
 
+    ref.listen<GatewayListState>(gatewayListProvider, (prev, next) {
+      if (next.isLoading) {
+        _resetViewportFill();
+      } else if (prev?.isLoading == true && !next.isLoading) {
+        _resetViewportFill();
+        if (!next.hasError) {
+          _checkViewportFill();
+        }
+      } else if (prev?.isLoadingMore == true && !next.isLoadingMore) {
+        if (!next.hasLoadMoreError) {
+          _checkViewportFill();
+        }
+      } else if (prev?.searchQuery.trim().isNotEmpty == true &&
+          next.searchQuery.trim().isEmpty) {
+        _checkViewportFill();
+      }
+    });
+
     return SelectionArea(
       child: RefreshIndicator(
-        onRefresh: () => ref.read(gatewayListProvider.notifier).loadGateways(),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(KiteSpace.xl),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Page Header
-                  _buildHeader(
-                    context,
-                    ref,
-                    state,
-                    isPlatformAdmin,
-                    isMobile,
-                    c,
-                    t,
-                    l,
-                  ),
-                  const SizedBox(height: KiteSpace.lg),
-
-                  // Search input (only shown when catalog is loaded or has items)
-                  if (!state.isLoading && state.gateways.isNotEmpty) ...[
-                    _buildSearchBar(ref, c),
+        onRefresh: () {
+          _resetViewportFill();
+          return ref.read(gatewayListProvider.notifier).loadGateways();
+        },
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.axis == Axis.vertical &&
+                notification.depth == 0 &&
+                (notification is ScrollUpdateNotification ||
+                    notification is ScrollEndNotification)) {
+              final metrics = notification.metrics;
+              if (metrics.maxScrollExtent > 0 &&
+                  metrics.pixels >= metrics.maxScrollExtent - 200) {
+                _triggerLoadMore();
+              }
+            }
+            return false;
+          },
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(KiteSpace.xl),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Page Header
+                    _buildHeader(
+                      context,
+                      ref,
+                      state,
+                      isPlatformAdmin,
+                      isMobile,
+                      c,
+                      t,
+                      l,
+                    ),
                     const SizedBox(height: KiteSpace.lg),
-                  ],
 
-                  // Content states
-                  _buildBody(context, ref, state, isMobile, c, t, l),
-                ],
+                    // Search input (only shown when catalog has items)
+                    if (state.gateways.isNotEmpty) ...[
+                      _buildSearchBar(ref, state, c, t, l),
+                      const SizedBox(height: KiteSpace.lg),
+                    ],
+
+                    // Content states
+                    _buildBody(context, ref, state, isMobile, c, t, l),
+                  ],
+                ),
               ),
             ),
           ),
@@ -153,7 +244,10 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
             KiteButton.outline(
               onPressed: state.isLoading
                   ? null
-                  : () => ref.read(gatewayListProvider.notifier).loadGateways(),
+                  : () {
+                      _resetViewportFill();
+                      ref.read(gatewayListProvider.notifier).loadGateways();
+                    },
               leading: const Icon(Icons.refresh, size: 16),
               child: Text(l.actionRefresh),
             ),
@@ -163,25 +257,48 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
     );
   }
 
-  Widget _buildSearchBar(WidgetRef ref, KiteColors c) {
-    return KiteInput(
-      controller: _searchController,
-      placeholder: L.of(context).gatewaySearchPlaceholder,
-      leading: Icon(Icons.search, size: 18, color: c.mutedForeground),
-      trailing: _searchController.text.isNotEmpty
-          ? IconButton(
-              icon: const Icon(Icons.clear, size: 16),
-              splashRadius: 16,
-              visualDensity: VisualDensity.compact,
-              onPressed: () {
-                _searchController.clear();
-                ref.read(gatewayListProvider.notifier).setSearchQuery('');
-              },
-            )
-          : null,
-      onChanged: (val) {
-        ref.read(gatewayListProvider.notifier).setSearchQuery(val);
-      },
+  Widget _buildSearchBar(
+    WidgetRef ref,
+    GatewayListState state,
+    KiteColors c,
+    KiteText t,
+    L l,
+  ) {
+    final countText = state.searchQuery.trim().isEmpty
+        ? l.gatewayLoadedCount(state.gateways.length)
+        : l.gatewayLoadedCountFiltered(
+            state.filteredGateways.length,
+            state.gateways.length,
+          );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        KiteInput(
+          controller: _searchController,
+          placeholder: l.gatewaySearchPlaceholder,
+          leading: Icon(Icons.search, size: 18, color: c.mutedForeground),
+          trailing: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 16),
+                  splashRadius: 16,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () {
+                    _searchController.clear();
+                    ref.read(gatewayListProvider.notifier).setSearchQuery('');
+                  },
+                )
+              : null,
+          onChanged: (val) {
+            ref.read(gatewayListProvider.notifier).setSearchQuery(val);
+          },
+        ),
+        const SizedBox(height: KiteSpace.xs),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: KiteSpace.xs),
+          child: Text(countText, style: t.muted.copyWith(fontSize: 12)),
+        ),
+      ],
     );
   }
 
@@ -249,15 +366,43 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
       );
     }
 
-    if (isMobile) {
-      return _buildMobileCardList(filtered, c, t, l);
+    final listWidget = isMobile
+        ? _buildMobileCardList(filtered, c, t, l)
+        : _buildDesktopTable(filtered, c, t, l);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        listWidget,
+        if (state.isLoadingMore) ...[
+          const SizedBox(height: KiteSpace.lg),
+          const Center(child: LoadingState()),
+        ],
+        if (state.hasLoadMoreError) ...[
+          const SizedBox(height: KiteSpace.lg),
+          _buildLoadMoreError(state),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildLoadMoreError(GatewayListState state) {
+    String errorMsg = 'Không thể tải thêm Gateway.';
+    if (state.loadMoreError is ApiException) {
+      final apiErr = state.loadMoreError as ApiException;
+      errorMsg = apiErr.message;
+      if (apiErr.requestId != null) {
+        errorMsg = '$errorMsg (Mã tra cứu: ${apiErr.requestId})';
+      }
+    } else if (state.loadMoreError is NetworkException) {
+      errorMsg = (state.loadMoreError as NetworkException).message;
     }
 
-    return _buildDesktopTable(filtered, c, t, l);
+    return KiteAlert(title: errorMsg, tone: KiteTone.danger);
   }
 
   Widget _buildMobileCardList(
-    List<GatewayItem> items,
+    List<GatewayCatalogItem> items,
     KiteColors c,
     KiteText t,
     L l,
@@ -307,7 +452,10 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
                           ],
                         ),
                       ),
-                      KiteBadge(item.role.label, tone: item.role.tone),
+                      if (item.role != null)
+                        KiteBadge(item.role!.label, tone: item.role!.tone)
+                      else
+                        const Text('—'),
                     ],
                   ),
                   if (item.description != null &&
@@ -354,7 +502,7 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
   }
 
   Widget _buildDesktopTable(
-    List<GatewayItem> items,
+    List<GatewayCatalogItem> items,
     KiteColors c,
     KiteText t,
     L l,
@@ -470,7 +618,12 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
                             ),
                           ),
                           DataCell(
-                            KiteBadge(item.role.label, tone: item.role.tone),
+                            item.role != null
+                                ? KiteBadge(
+                                    item.role!.label,
+                                    tone: item.role!.tone,
+                                  )
+                                : const Text('—'),
                           ),
                           DataCell(
                             Text(

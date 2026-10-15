@@ -248,7 +248,25 @@ class LVi extends L {
   String get gatewayCreatedAt => 'Ngày tạo';
 
   @override
-  String get gatewaySearchPlaceholder => 'Tìm theo mã trạm, tên hoặc mô tả...';
+  String get gatewaySearchPlaceholder =>
+      'Tìm theo mã trạm, tên hoặc mô tả trong danh sách đã tải...';
+
+  @override
+  String gatewayLoadedCount(int count) {
+    return 'Đang hiển thị $count trạm đã tải (không phải tổng số)';
+  }
+
+  @override
+  String gatewayLoadedCountFiltered(int filtered, int count) {
+    return 'Đang hiển thị $filtered trên $count trạm đã tải (không phải tổng số)';
+  }
+
+  @override
+  String get gatewaySensorReadDeniedMessage =>
+      'Bạn không có quyền truy cập danh sách Sensor của Gateway này.';
+
+  @override
+  String get actionRetry => 'Thử lại';
 
   @override
   String get gatewayEmptyTitle => 'Chưa có trạm Gateway nào';

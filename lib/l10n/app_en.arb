@@ -99,7 +99,28 @@
   "gatewayDescription": "Description",
   "gatewayRole": "Role",
   "gatewayCreatedAt": "Created At",
-  "gatewaySearchPlaceholder": "Search by ID, name or description...",
+  "gatewaySearchPlaceholder": "Search loaded gateways by ID, name or description...",
+  "gatewayLoadedCount": "Showing {count} loaded gateways (not total)",
+  "@gatewayLoadedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gatewayLoadedCountFiltered": "Showing {filtered} of {count} loaded gateways (not total)",
+  "@gatewayLoadedCountFiltered": {
+    "placeholders": {
+      "filtered": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gatewaySensorReadDeniedMessage": "You do not have permission to access the Sensor list for this Gateway.",
+  "actionRetry": "Retry",
   "gatewayEmptyTitle": "No gateways found",
   "gatewayEmptyMessage": "Your account has not been assigned access to any gateways yet.",
   "gatewaySearchEmptyTitle": "No matching gateways",
