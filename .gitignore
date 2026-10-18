@@ -20,5 +20,6 @@ node_modules/
 AGENTS.md
 .opencode
 
-.env
+.env*
+!.env.example
 /assets/client.env
