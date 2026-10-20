@@ -2,11 +2,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kite/app.dart';
+import 'package:kite/core/auth/permissions.dart';
 import 'package:kite/core/auth/session.dart';
 import 'package:kite/core/router/app_router.dart';
 import 'package:kite/core/router/routes.dart';
+import 'package:kite/features/users/presentation/user_list_screen.dart';
 import 'package:kite/shared/widgets/app_brand.dart';
 
+import 'permissions_test.dart';
 import 'session_test.dart';
 
 void main() {
@@ -247,6 +250,97 @@ void main() {
 
       expect(find.text('That page does not exist'), findsOneWidget);
       expect(find.text('404'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'non-admin user does not see "Quản lý Người dùng" in sidebar; router redirects from /admin/users',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fakePerms = FakePermissionsRepository()
+        ..resultToReturn = const UserPermissions(isPlatformAdmin: false);
+
+      const testUser = SessionUser(
+        userId: 'regular-user-id',
+        name: 'Regular User',
+        email: 'user@example.com',
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(fakeRepo),
+          permissionsRepositoryProvider.overrideWithValue(fakePerms),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(sessionProvider.notifier).setSession(testUser);
+      await container.read(userPermissionsProvider.notifier).loadPermissions();
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(container: container, child: const KiteApp()),
+      );
+      await tester.pumpAndSettle();
+
+      // Sidebar does NOT show "Quản lý Người dùng"
+      expect(find.text('Quản lý Người dùng'), findsNothing);
+
+      // Attempt navigating directly to /admin/users
+      container.read(routerProvider).go(R.adminUsers);
+      await tester.pumpAndSettle();
+
+      // Redirected back to dashboard
+      expect(find.byType(UserListScreen), findsNothing);
+      expect(
+        container.read(routerProvider).routeInformationProvider.value.uri.path,
+        R.dashboard,
+      );
+    },
+  );
+
+  testWidgets(
+    'confirmed platform admin sees "Quản lý Người dùng" in sidebar and can navigate to /admin/users',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fakePerms = FakePermissionsRepository()
+        ..resultToReturn = const UserPermissions(isPlatformAdmin: true);
+
+      const adminUser = SessionUser(
+        userId: 'admin-user-id',
+        name: 'System Admin',
+        email: 'admin@example.com',
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(fakeRepo),
+          permissionsRepositoryProvider.overrideWithValue(fakePerms),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(sessionProvider.notifier).setSession(adminUser);
+      await container.read(userPermissionsProvider.notifier).loadPermissions();
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(container: container, child: const KiteApp()),
+      );
+      await tester.pumpAndSettle();
+
+      // Sidebar shows "Quản lý Người dùng"
+      expect(find.text('Quản lý Người dùng'), findsOneWidget);
+
+      // Tap navigation item
+      await tester.tap(find.text('Quản lý Người dùng'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(UserListScreen), findsOneWidget);
     },
   );
 }

@@ -10,6 +10,7 @@ import '../../features/gateways/presentation/gateway_list_screen.dart';
 import '../../features/gateways/presentation/gateway_provision_screen.dart';
 import '../../features/system/error_screen.dart';
 import '../../features/system/license_screen.dart';
+import '../../features/users/presentation/user_list_screen.dart';
 import '../../shared/layout/app_shell.dart';
 import '../auth/permissions.dart';
 import '../auth/session.dart';
@@ -61,6 +62,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         }
       }
 
+      // Protected route: /admin/users is accessible only by confirmed Platform Admins.
+      if (signedIn && matched == R.adminUsers) {
+        final permState = ref.read(userPermissionsProvider);
+        if (permState.isLoading) {
+          // Do not redirect while checking permissions to preserve URL and avoid kicking admin on reload
+          return null;
+        }
+        if (!permState.isPlatformAdmin) {
+          return R.dashboard;
+        }
+      }
+
       return null;
     },
     errorBuilder: (context, state) => NotFoundScreen(location: state.uri.path),
@@ -88,6 +101,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: R.gatewayProvision,
             builder: (_, _) => const GatewayProvisionScreen(),
+          ),
+          GoRoute(
+            path: R.adminUsers,
+            builder: (_, _) => const UserListScreen(),
           ),
           GoRoute(
             path: R.gatewayDetailPattern,

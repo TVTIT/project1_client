@@ -11,6 +11,7 @@ abstract final class R {
   static const gatewayProvision = '/gateways/provision';
   static const gatewayDetailPattern = '/gateways/:gatewayId';
   static String gatewayDetail(String gatewayId) => '/gateways/$gatewayId';
+  static const adminUsers = '/admin/users';
   static const account = '/account';
   static const license = '/license';
   static const serverError = '/500';
@@ -20,7 +21,13 @@ abstract final class R {
 
 @immutable
 class NavItem {
-  const NavItem(this.label, this.path, this.icon, {this.inSidebar = true});
+  const NavItem(
+    this.label,
+    this.path,
+    this.icon, {
+    this.inSidebar = true,
+    this.adminOnly = false,
+  });
 
   /// English/Vietnamese label. Also the fallback if a translation is missing.
   final String label;
@@ -30,10 +37,14 @@ class NavItem {
   /// Whether the sidebar lists this item.
   final bool inSidebar;
 
+  /// Whether this item is visible only to confirmed Platform Admins.
+  final bool adminOnly;
+
   /// Localised label.
   String labelOf(L l) => switch (path) {
     R.dashboard => l.navDashboard,
     R.gateways => l.navGateways,
+    R.adminUsers => l.navAdminUsers,
     _ => label,
   };
 }
@@ -54,6 +65,12 @@ const kNavGroups = <NavGroup>[
   NavGroup('Overview', [
     NavItem('Bảng điều khiển', R.dashboard, Icons.dashboard_outlined),
     NavItem('Quản lý Gateway', R.gateways, Icons.router_outlined),
+    NavItem(
+      'Quản lý Người dùng',
+      R.adminUsers,
+      Icons.people_outline,
+      adminOnly: true,
+    ),
     NavItem('Giấy phép', R.license, Icons.description_outlined),
   ]),
 ];

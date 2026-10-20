@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kite_ui/kite_ui.dart';
 
+import '../../core/auth/permissions.dart';
 import '../../core/auth/session.dart';
 import '../../core/router/routes.dart';
 import '../../core/theme/app_theme.dart';
@@ -85,13 +86,14 @@ class AppShell extends ConsumerWidget {
   }
 }
 
-class _SidebarBody extends StatelessWidget {
+class _SidebarBody extends ConsumerWidget {
   const _SidebarBody({required this.location});
   final String location;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = KiteText.of(context);
+    final isPlatformAdmin = ref.watch(isPlatformAdminProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -126,7 +128,7 @@ class _SidebarBody extends StatelessWidget {
                   ),
                 ),
                 for (final item in group.items)
-                  if (item.inSidebar)
+                  if (item.inSidebar && (!item.adminOnly || isPlatformAdmin))
                     _NavTile(
                       item: item,
                       active:
@@ -411,15 +413,19 @@ class _AccountMenu extends ConsumerWidget {
   }
 }
 
-class _BottomBar extends StatelessWidget {
+class _BottomBar extends ConsumerWidget {
   const _BottomBar({required this.location});
   final String location;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = KiteColors.of(context);
     final l = L.of(context);
-    final items = kNav;
+    final isPlatformAdmin = ref.watch(isPlatformAdminProvider);
+    final items = [
+      for (final n in kNav)
+        if (!n.adminOnly || isPlatformAdmin) n,
+    ];
     var index = items.indexWhere(
       (n) =>
           n.path == location ||
