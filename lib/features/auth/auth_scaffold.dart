@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:kite_ui/kite_ui.dart';
 
+import '../../shared/widgets/app_brand.dart';
+
 /// Shared frame for the five auth screens: centred card, product mark, and a
 /// footer link. Keeps them consistent without five copies of the same layout.
 class AuthScaffold extends StatelessWidget {
@@ -33,13 +35,9 @@ class AuthScaffold extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
+                const AppBrand(
+                  logoSize: 22,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.change_history, size: 22, color: c.primary),
-                    const SizedBox(width: KiteSpace.sm),
-                    Text('Kite', style: t.h4),
-                  ],
                 ),
                 const SizedBox(height: KiteSpace.xxl),
                 KiteCard(

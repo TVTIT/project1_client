@@ -10,7 +10,7 @@ class LEn extends L {
   LEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'Kite';
+  String get appName => 'SANSLAB IoT Server';
 
   @override
   String get navOverview => 'Overview';
@@ -106,7 +106,7 @@ class LEn extends L {
   String get signInTitle => 'Sign in';
 
   @override
-  String get signInSubtitle => 'Any email works — this is the mock provider.';
+  String get signInSubtitle => 'Type your email and password to continue';
 
   @override
   String get fieldEmail => 'Email';
@@ -160,4 +160,590 @@ class LEn extends L {
   String rangeOfTotal(int first, int last, int total) {
     return '$first–$last of $total';
   }
+
+  @override
+  String get accountInfo => 'Account Information';
+
+  @override
+  String get accountSubtitle =>
+      'View identity and active session details for this account.';
+
+  @override
+  String get accountIdentityTitle => 'Identity Information';
+
+  @override
+  String get accountUserId => 'User ID';
+
+  @override
+  String get accountEmail => 'Account Email';
+
+  @override
+  String get accountFullName => 'Full Name';
+
+  @override
+  String get accountRole => 'Gateway Role';
+
+  @override
+  String get accountRoleUnassigned => 'No gateway role assigned';
+
+  @override
+  String get accountRoleNote =>
+      'Gateway permissions (owner, operator, viewer) and Platform Admin privileges are evaluated dynamically per request on Go Backend. Identity session does not assert or infer permissions.';
+
+  @override
+  String get accountSessionTitle => 'Session & Security';
+
+  @override
+  String get accountSessionStatus => 'Session Status';
+
+  @override
+  String get accountStatusActive => 'Active';
+
+  @override
+  String get accountAuthMethod => 'Authentication Method';
+
+  @override
+  String get accountAuthMethodValue =>
+      'Supabase Auth (GoTrue) · Local HS256 JWT Verification on Go Backend';
+
+  @override
+  String get accountAdminNoteTitle => 'Account Management Policy';
+
+  @override
+  String get accountAdminNote =>
+      'Accounts are managed centrally by Platform Administrators. Direct self-modification from client UI is disabled. Platform Admin privileges are maintained separately in public.platform_admins.';
+
+  @override
+  String get accountCopyId => 'Copy ID';
+
+  @override
+  String get accountCopiedId => 'Copied User ID to clipboard';
+
+  @override
+  String get accountBackToDashboard => 'Back to Dashboard';
+
+  @override
+  String get navGateways => 'Gateways';
+
+  @override
+  String get gatewayListTitle => 'Gateways';
+
+  @override
+  String get gatewayListSubtitle =>
+      'List of accessible gateway devices in the platform.';
+
+  @override
+  String get gatewayId => 'Gateway ID';
+
+  @override
+  String get gatewayName => 'Name';
+
+  @override
+  String get gatewayDescription => 'Description';
+
+  @override
+  String get gatewayRole => 'Role';
+
+  @override
+  String get gatewayCreatedAt => 'Created At';
+
+  @override
+  String get gatewaySearchPlaceholder =>
+      'Search loaded gateways by ID, name or description...';
+
+  @override
+  String gatewayLoadedCount(int count) {
+    return 'Showing $count loaded gateways (not total)';
+  }
+
+  @override
+  String gatewayLoadedCountFiltered(int filtered, int count) {
+    return 'Showing $filtered of $count loaded gateways (not total)';
+  }
+
+  @override
+  String get gatewaySensorReadDeniedMessage =>
+      'You do not have permission to access the Sensor list for this Gateway.';
+
+  @override
+  String get actionRetry => 'Retry';
+
+  @override
+  String get gatewayEmptyTitle => 'No gateways found';
+
+  @override
+  String get gatewayEmptyMessage =>
+      'Your account has not been assigned access to any gateways yet.';
+
+  @override
+  String get gatewaySearchEmptyTitle => 'No matching gateways';
+
+  @override
+  String get gatewaySearchEmptyMessage =>
+      'No gateways match your search query.';
+
+  @override
+  String get gatewayRoleOwner => 'Owner';
+
+  @override
+  String get gatewayRoleOperator => 'Operator';
+
+  @override
+  String get gatewayRoleViewer => 'Viewer';
+
+  @override
+  String get gatewayActionDetail => 'Details';
+
+  @override
+  String get gatewayDetailTitle => 'Gateway Details';
+
+  @override
+  String get gatewayDetailSubtitle =>
+      'Overview of station configuration and associated sensors.';
+
+  @override
+  String get gatewayNotFoundTitle => 'Gateway not found';
+
+  @override
+  String get gatewayNotFoundMessage =>
+      'The requested gateway was not found or your account does not have access permission.';
+
+  @override
+  String get gatewayInvalidIdMessage =>
+      'Invalid gateway identifier or reserved identifier.';
+
+  @override
+  String get gatewayBackToList => 'Back to Gateways';
+
+  @override
+  String get gatewaySectionMetadata => 'Gateway Information';
+
+  @override
+  String get gatewaySectionSensors => 'Sensor Catalog';
+
+  @override
+  String get sensorId => 'Sensor ID';
+
+  @override
+  String get sensorName => 'Sensor Name';
+
+  @override
+  String get sensorUnit => 'Unit';
+
+  @override
+  String get sensorCreatedAt => 'Created At';
+
+  @override
+  String get sensorEmptyTitle => 'No sensors configured';
+
+  @override
+  String get sensorEmptyMessage =>
+      'No sensors have been added to this gateway station yet.';
+
+  @override
+  String get sensorSearchPlaceholder => 'Search sensors by ID, name or unit...';
+
+  @override
+  String get sensorSearchEmptyTitle => 'No matching sensors';
+
+  @override
+  String get sensorSearchEmptyMessage => 'No sensors match your search query.';
+
+  @override
+  String get sensorErrorTitle => 'Failed to load sensors';
+
+  @override
+  String get sensorErrorRetry => 'Retry loading sensors';
+
+  @override
+  String get gatewayReadOnlyNotice =>
+      'Read-only mode (Stage 2). Remote control, downlink commands, and real-time telemetry streaming are not active.';
+
+  @override
+  String get accountPermissionsTitle => 'Cơ chế phân quyền trạm & quản trị';
+
+  @override
+  String get accountPlatformAdminStatus => 'Platform Admin Status';
+
+  @override
+  String get accountPlatformAdminTrue => 'Platform Admin (Confirmed)';
+
+  @override
+  String get accountPlatformAdminFalse => 'Standard User (No Admin privileges)';
+
+  @override
+  String get accountPlatformAdminChecking => 'Checking admin permissions...';
+
+  @override
+  String get gatewayAddButton => 'Thêm Gateway mới';
+
+  @override
+  String get gatewayProvisionTitle => 'Provision Gateway';
+
+  @override
+  String get gatewayProvisionSubtitle =>
+      'Provision a new Gateway station and assign initial owner (Platform Admin only).';
+
+  @override
+  String get gatewayProvisionSuccessCreated =>
+      'Gateway provisioned successfully (HTTP 201 Created)';
+
+  @override
+  String get gatewayProvisionSuccessReplayed =>
+      'Gateway already exists with identical payload (HTTP 200 OK - Idempotent Replay)';
+
+  @override
+  String get gatewayProvisionNoticeAdmin =>
+      'Authorization notice: Platform Admin accounts are not automatically catalog members (user_gateways) unless assigned ownership. This gateway may not appear in your personal catalog unless you are the assigned owner.';
+
+  @override
+  String get gatewayProvisionCreateAnother => 'Provision another Gateway';
+
+  @override
+  String get gatewayProvisionSubmit => 'Provision Gateway';
+
+  @override
+  String get gatewayProvisionSubmitting => 'Provisioning...';
+
+  @override
+  String get gatewayProvisionFieldId => 'Gateway ID';
+
+  @override
+  String get gatewayProvisionFieldIdHint =>
+      'Gateway\'s identification, must not be a duplicate of other gateways';
+
+  @override
+  String get gatewayProvisionFieldName => 'Gateway Name';
+
+  @override
+  String get gatewayProvisionFieldNameHint => 'Gateway display name';
+
+  @override
+  String get gatewayProvisionFieldDesc => 'Description (Optional)';
+
+  @override
+  String get gatewayProvisionFieldDescHint =>
+      'Location or function description';
+
+  @override
+  String get gatewayProvisionFieldOwner => 'Owner User ID (owner_user_id)';
+
+  @override
+  String get gatewayProvisionFieldOwnerHint =>
+      'UUID of the owner user in the system';
+
+  @override
+  String get gatewayProvisionEntityId => 'Digital Twin Entity ID';
+
+  @override
+  String get gatewayProvisionOwnerId => 'Initial Owner User ID';
+
+  @override
+  String get gatewayProvisionCreatedAt => 'Created At';
+
+  @override
+  String get gatewayProvisionAccessDeniedTitle => 'Access Denied';
+
+  @override
+  String get gatewayProvisionAccessDeniedMessage =>
+      'You do not have Platform Admin privileges to perform this action.';
+
+  @override
+  String get gatewayProvisionRetrySamePayload => 'Retry with same payload';
+
+  @override
+  String get gatewayProvisionConflictError =>
+      'Gateway already exists with different payload (HTTP 409 Conflict). Provisioning endpoint does not support updating existing metadata.';
+
+  @override
+  String get gatewayProvisionNotFoundError =>
+      'Owner user ID not found in system (HTTP 404 Not Found). Please verify UUID.';
+
+  @override
+  String get sensorAddButton => 'Thêm cảm biến mới';
+
+  @override
+  String get sensorCreateDialogTitle => 'Create New Sensor';
+
+  @override
+  String get sensorCreateDialogSubtitle =>
+      'Add a new sensor associated with this Gateway station';
+
+  @override
+  String get sensorParentGateway => 'Parent Gateway ID';
+
+  @override
+  String get sensorFieldId => 'Sensor ID';
+
+  @override
+  String get sensorFieldIdHint =>
+      'Sensor\'s identification, must not be a duplicate of other sensors inside this Gateway';
+
+  @override
+  String get sensorFieldName => 'Sensor Name';
+
+  @override
+  String get sensorFieldNameHint => 'Sensor display name';
+
+  @override
+  String get sensorFieldUnit => 'Measurement Unit (Optional)';
+
+  @override
+  String get sensorFieldUnitHint => 'e.g. °C, %, ppm';
+
+  @override
+  String get sensorCreateSubmit => 'Create Sensor';
+
+  @override
+  String get sensorCreateSubmitting => 'Creating...';
+
+  @override
+  String get sensorCreateSuccessCreated =>
+      'Sensor created successfully (HTTP 201 Created)';
+
+  @override
+  String get sensorCreateSuccessReplayed =>
+      'Sensor already exists with identical payload (HTTP 200 OK - Idempotent Replay)';
+
+  @override
+  String get sensorProvisionConflictError =>
+      'Sensor already exists with different payload (HTTP 409 Conflict). Provisioning endpoint does not support updating existing metadata.';
+
+  @override
+  String get sensorProvisionNotFoundError =>
+      'Parent Gateway not found (HTTP 404 Not Found).';
+
+  @override
+  String get sensorProvisionForbiddenError =>
+      'Access denied. You do not have Platform Admin privileges.';
+
+  @override
+  String get navAdminUsers => 'User Management';
+
+  @override
+  String get adminUserListTitle => 'User Management';
+
+  @override
+  String get adminUserListSubtitle =>
+      'All users and roles across the system (Platform Admin only).';
+
+  @override
+  String get adminUserCreateButton => 'Add User';
+
+  @override
+  String get adminUserSearchPlaceholder => 'Search by name, email or UUID...';
+
+  @override
+  String get adminUserCapacityExceeded =>
+      'User list capacity exceeded limit (HTTP 409 Conflict). Please contact the database administrator.';
+
+  @override
+  String get adminUserEmptyTitle => 'No users found';
+
+  @override
+  String get adminUserEmptyMessage =>
+      'No users have been created in the system.';
+
+  @override
+  String get adminUserSearchEmptyTitle => 'No matching users';
+
+  @override
+  String get adminUserSearchEmptyMessage => 'No users match your search term.';
+
+  @override
+  String get adminUserFullName => 'Full Name';
+
+  @override
+  String get adminUserEmail => 'Email';
+
+  @override
+  String get adminUserRole => 'Platform Role';
+
+  @override
+  String get adminUserMembershipCount => 'Gateways';
+
+  @override
+  String get adminUserCreatedAt => 'Created At';
+
+  @override
+  String get adminUserUnassignedName => 'Not set';
+
+  @override
+  String get adminUserRoleAdmin => 'Platform Admin';
+
+  @override
+  String get adminUserRoleUser => 'User';
+
+  @override
+  String get adminUserCreateTitle => 'Create New User Account';
+
+  @override
+  String get adminUserCreateSubtitle =>
+      'Provision a user account centrally via Go Backend and Supabase Auth.';
+
+  @override
+  String get adminUserCreateFieldFullName => 'Full Name';
+
+  @override
+  String get adminUserCreateFieldEmail => 'Email Address';
+
+  @override
+  String get adminUserCreateFieldPassword => 'Initial Password';
+
+  @override
+  String get adminUserCreateSubmit => 'Create Account';
+
+  @override
+  String get adminUserCreateSubmitting => 'Creating...';
+
+  @override
+  String get adminUserCreateSuccess =>
+      'User account created successfully (HTTP 201 Created)';
+
+  @override
+  String get adminUserCreateConflictError =>
+      'This email already exists (HTTP 409 Conflict). Please use another email.';
+
+  @override
+  String get adminUserCreateUnknownOutcomeTitle =>
+      'Uncertain Account Creation Result';
+
+  @override
+  String get adminUserCreateUnknownOutcomeMessage =>
+      'Request may have completed on the server, but the response was interrupted. Do not blind retry. Please reconcile the user list.';
+
+  @override
+  String get adminUserReconcileButton => 'Reconcile List';
+
+  @override
+  String adminUserReconcileFound(String email) {
+    return 'Account $email confirmed created in user list!';
+  }
+
+  @override
+  String get adminUserReconcileNotFound =>
+      'Reconciled: Account not found in list yet. You may verify and retry.';
+
+  @override
+  String get adminUserReconcileFailed =>
+      'Unable to reconcile list. Please check later.';
+
+  @override
+  String get adminUserEditButton => 'Edit';
+
+  @override
+  String get adminUserEditTitle => 'Edit User';
+
+  @override
+  String get adminUserEditSubtitle =>
+      'Update full name or platform role for this account.';
+
+  @override
+  String get adminUserSelfDemotionWarning =>
+      'You cannot demote your own Platform Admin role.';
+
+  @override
+  String get adminUserRoleConfirmGrant =>
+      'I confirm granting Platform Admin role to this account.';
+
+  @override
+  String get adminUserRoleConfirmRevoke =>
+      'I confirm revoking Platform Admin role from this account.';
+
+  @override
+  String get adminUserEditNoChanges => 'No changes to save.';
+
+  @override
+  String get adminUserEditSave => 'Save Changes';
+
+  @override
+  String get adminUserEditSaving => 'Saving...';
+
+  @override
+  String get adminUserEditSuccess => 'User updated successfully (HTTP 200 OK)';
+
+  @override
+  String get adminUserSelfDemotionForbidden =>
+      'Self admin demotion forbidden (HTTP 409 Conflict). Changes have been rolled back.';
+
+  @override
+  String get adminAssignRoleTitle => 'Assign Gateway Membership Role';
+
+  @override
+  String get adminAssignRoleSubtitle =>
+      'Assign operator or viewer role on this gateway to a user.';
+
+  @override
+  String get adminAssignRoleButton => 'Assign Role';
+
+  @override
+  String get adminAssignRoleSubmit => 'Save Membership';
+
+  @override
+  String get adminAssignRoleSubmitting => 'Saving...';
+
+  @override
+  String get adminAssignRoleOperator => 'Operator';
+
+  @override
+  String get adminAssignRoleViewer => 'Viewer';
+
+  @override
+  String get adminAssignRoleOwnerHint =>
+      'To change the owner\'s role, please use the ownership transfer feature.';
+
+  @override
+  String get adminAssignRoleOwnerConflict =>
+      'This user is currently the owner of the gateway. To change an owner\'s role, please use Transfer Ownership.';
+
+  @override
+  String get adminAssignRoleSuccess =>
+      'Gateway membership role assigned successfully (HTTP 200 OK)';
+
+  @override
+  String get adminTransferOwnerTitle => 'Transfer Gateway Ownership';
+
+  @override
+  String get adminTransferOwnerSubtitle =>
+      'Transfer the owner role of this gateway to another user.';
+
+  @override
+  String get adminTransferOwnerButton => 'Transfer Ownership';
+
+  @override
+  String get adminTransferOwnerCurrentOwner => 'Current Owner';
+
+  @override
+  String get adminTransferOwnerNewOwner => 'New Owner (Recipient)';
+
+  @override
+  String get adminTransferOwnerConfirm =>
+      'I confirm transferring gateway ownership to this user. The previous owner will become a Viewer and retain read access.';
+
+  @override
+  String adminTransferOwnerReplayNotice(Object id) {
+    return 'Notice: After transferring ownership, replaying initial gateway provisioning (PUT /v1/admin/gateways/$id) with the previous owner ID will conflict with 409 Conflict.';
+  }
+
+  @override
+  String get adminTransferOwnerSubmit => 'Confirm Transfer';
+
+  @override
+  String get adminTransferOwnerSubmitting => 'Transferring...';
+
+  @override
+  String get adminTransferOwnerSuccess =>
+      'Gateway ownership transferred successfully (HTTP 200 OK)';
+
+  @override
+  String get adminTransferOwnerInconsistentError =>
+      'Gateway owner state on the server is inconsistent (HTTP 409 Conflict).';
+
+  @override
+  String get adminTransferOwnerZeroOwners =>
+      'No current owner found in the directory for this gateway. Transfer is blocked.';
+
+  @override
+  String get adminTransferOwnerMultipleOwners =>
+      'Multiple owners found on this gateway. Inconsistent state, transfer is blocked.';
 }

@@ -15,7 +15,7 @@ class KiteApp extends ConsumerWidget {
     final theme = ref.watch(themeProvider);
     final locale = ref.watch(localeProvider);
     return ShadApp.router(
-      title: 'Kite',
+      onGenerateTitle: (context) => L.of(context).appName,
       themeMode: theme.mode,
       theme: theme.data(Brightness.light),
       darkTheme: theme.data(Brightness.dark),

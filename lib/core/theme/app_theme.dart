@@ -27,7 +27,7 @@ enum KiteAccent {
 @immutable
 class ThemeState {
   const ThemeState({
-    this.mode = ThemeMode.system,
+    this.mode = ThemeMode.light,
     this.accent = KiteAccent.slate,
   });
 

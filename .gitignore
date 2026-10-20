@@ -5,7 +5,8 @@ build/
 *.iml
 .idea/
 .vscode/
-pubspec.lock
+packages/*/pubspec.lock
+packages/*/example/pubspec.lock
 ios/Pods/
 ios/.symlinks/
 macos/Pods/
@@ -18,3 +19,7 @@ node_modules/
 
 AGENTS.md
 .opencode
+
+.env*
+!.env.example
+/assets/client.env

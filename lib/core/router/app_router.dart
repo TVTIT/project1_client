@@ -2,32 +2,24 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/apps/calendar_screen.dart';
-import '../../features/apps/chat_screen.dart';
-import '../../features/apps/inbox_screen.dart';
-import '../../features/apps/kanban_screen.dart';
+import '../../features/account/account_screen.dart';
 import '../../features/auth/auth_screens.dart';
-import '../../features/components/components_screen.dart';
-import '../../features/dashboard/dashboard_screen.dart';
-import '../../features/dashboard/project_dashboard_screen.dart';
-import '../../features/forms/forms_screen.dart';
-import '../../features/forms/wizard_screen.dart';
-import '../../features/resources/resource_detail_screen.dart';
-import '../../features/resources/resource_form_screen.dart';
-import '../../features/resources/resource_list_screen.dart';
+import '../../features/dashboard/placeholder_screen.dart';
+import '../../features/gateways/presentation/gateway_detail_screen.dart';
+import '../../features/gateways/presentation/gateway_list_screen.dart';
+import '../../features/gateways/presentation/gateway_provision_screen.dart';
 import '../../features/system/error_screen.dart';
-import '../../features/system/profile_screen.dart';
-import '../../features/system/settings_screen.dart';
+import '../../features/system/license_screen.dart';
+import '../../features/users/presentation/user_list_screen.dart';
 import '../../shared/layout/app_shell.dart';
+import '../auth/permissions.dart';
 import '../auth/session.dart';
 import 'routes.dart';
 
-/// Bridges Riverpod state into go_router's `refreshListenable`, so signing in
-/// or out re-evaluates the guard immediately rather than on the next
-/// navigation.
 class _SessionRefresh extends ChangeNotifier {
   _SessionRefresh(Ref ref) {
     ref.listen(sessionProvider, (_, _) => notifyListeners());
+    ref.listen(userPermissionsProvider, (_, _) => notifyListeners());
   }
 }
 
@@ -39,79 +31,88 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: R.dashboard,
     refreshListenable: refresh,
     redirect: (context, state) {
-      final signedIn = ref.read(sessionProvider) != null;
-      final onAuth = R.isAuthRoute(state.matchedLocation);
+      final session = ref.read(sessionProvider);
+      final matched = state.matchedLocation;
+      final onAuth = R.isAuthRoute(matched);
+      final onLicense = matched == R.license;
+
+      // License page is accessible publicly from both login and dashboard.
+      if (onLicense) return null;
+
+      // When session is still restoring, keep current location/URL without redirect loop.
+      // Protected shell will display a non-flickering loading barrier.
+      if (session.isRestoring) {
+        return null;
+      }
+
+      final signedIn = session.isAuthenticated;
+
       if (!signedIn && !onAuth) return R.signIn;
       if (signedIn && onAuth) return R.dashboard;
+
+      // Protected route: /gateways/provision is accessible only by confirmed Platform Admins.
+      if (signedIn && matched == R.gatewayProvision) {
+        final permState = ref.read(userPermissionsProvider);
+        if (permState.isLoading) {
+          // Do not redirect while checking permissions to preserve URL and avoid kicking admin on reload
+          return null;
+        }
+        if (!permState.isPlatformAdmin) {
+          return R.gateways;
+        }
+      }
+
+      // Protected route: /admin/users is accessible only by confirmed Platform Admins.
+      if (signedIn && matched == R.adminUsers) {
+        final permState = ref.read(userPermissionsProvider);
+        if (permState.isLoading) {
+          // Do not redirect while checking permissions to preserve URL and avoid kicking admin on reload
+          return null;
+        }
+        if (!permState.isPlatformAdmin) {
+          return R.dashboard;
+        }
+      }
+
       return null;
     },
     errorBuilder: (context, state) => NotFoundScreen(location: state.uri.path),
     routes: [
       GoRoute(path: R.signIn, builder: (_, _) => const SignInScreen()),
-      GoRoute(path: R.signUp, builder: (_, _) => const SignUpScreen()),
-      GoRoute(path: R.forgot, builder: (_, _) => const ForgotPasswordScreen()),
-      GoRoute(path: R.otp, builder: (_, _) => const OtpScreen()),
-      GoRoute(path: R.lock, builder: (_, _) => const LockScreen()),
+      GoRoute(path: R.license, builder: (_, _) => const LicenseScreen()),
+      GoRoute(
+        path: R.serverError,
+        builder: (_, _) => const ServerErrorScreen(),
+      ),
 
-      // Everything below renders inside the persistent shell: the sidebar and
-      // top bar survive navigation instead of rebuilding on every route.
+      // Protected shell: AppShell with sidebar and top bar survives navigation.
       ShellRoute(
         builder: (context, state, child) =>
             AppShell(location: state.matchedLocation, child: child),
         routes: [
           GoRoute(
             path: R.dashboard,
-            builder: (_, _) => const DashboardScreen(),
+            builder: (_, _) => const PlaceholderScreen(),
           ),
-          // One list / new / detail / edit set per resource. `new` is declared
-          // before `:id` so it is matched as a literal rather than an id.
-          for (final resource in const ['orders', 'customers', 'products'])
-            GoRoute(
-              path: '/$resource',
-              builder: (_, _) => ResourceListScreen(resource: resource),
-              routes: [
-                GoRoute(
-                  path: 'new',
-                  builder: (_, _) => ResourceFormScreen(resource: resource),
-                ),
-                GoRoute(
-                  path: ':id',
-                  builder: (_, state) => ResourceDetailScreen(
-                    resource: resource,
-                    id: state.pathParameters['id']!,
-                  ),
-                  routes: [
-                    GoRoute(
-                      path: 'edit',
-                      builder: (_, state) => ResourceFormScreen(
-                        resource: resource,
-                        id: state.pathParameters['id']!,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          GoRoute(
+            path: R.gateways,
+            builder: (_, _) => const GatewayListScreen(),
+          ),
+          GoRoute(
+            path: R.gatewayProvision,
+            builder: (_, _) => const GatewayProvisionScreen(),
+          ),
+          GoRoute(
+            path: R.adminUsers,
+            builder: (_, _) => const UserListScreen(),
+          ),
+          GoRoute(
+            path: R.gatewayDetailPattern,
+            builder: (_, state) => GatewayDetailScreen(
+              gatewayId: state.pathParameters['gatewayId'] ?? '',
             ),
-          GoRoute(path: R.inbox, builder: (_, _) => const InboxScreen()),
-          GoRoute(path: R.kanban, builder: (_, _) => const KanbanScreen()),
-          GoRoute(path: R.calendar, builder: (_, _) => const CalendarScreen()),
-          GoRoute(path: R.chat, builder: (_, _) => const ChatScreen()),
-          GoRoute(
-            path: R.components,
-            builder: (_, _) => const ComponentsScreen(),
           ),
-          GoRoute(path: R.forms, builder: (_, _) => const FormsScreen()),
-          GoRoute(path: R.wizard, builder: (_, _) => const WizardScreen()),
-          GoRoute(
-            path: R.projects,
-            builder: (_, _) => const ProjectDashboardScreen(),
-          ),
-          GoRoute(path: R.settings, builder: (_, _) => const SettingsScreen()),
-          GoRoute(path: R.profile, builder: (_, _) => const ProfileScreen()),
-          GoRoute(
-            path: R.serverError,
-            builder: (_, _) => const ServerErrorScreen(),
-          ),
+          GoRoute(path: R.account, builder: (_, _) => const AccountScreen()),
         ],
       ),
     ],

@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kite_ui/kite_ui.dart';
 
+import '../../core/auth/permissions.dart';
 import '../../core/auth/session.dart';
-import '../../core/l10n/locale_controller.dart';
 import '../../core/router/routes.dart';
 import '../../core/theme/app_theme.dart';
-import '../../features/search/command_palette.dart';
 import '../../l10n/app_localizations.dart';
-import 'promo_card.dart';
+import '../widgets/app_brand.dart';
 
 /// The persistent shell.
 ///
-/// Desktop gets a sidebar; mobile gets a bottom bar and a drawer. This is the
-/// "mobile is not a reflow" rule made concrete — the small-screen layout is a
-/// different arrangement, not the desktop one squeezed. See docs/ARCHITECTURE.md.
+/// Desktop gets a sidebar; mobile gets a bottom bar and a drawer.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.location, required this.child});
 
@@ -25,86 +21,90 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(sessionProvider);
     final c = KiteColors.of(context);
+    final t = KiteText.of(context);
     final mobile = KiteBreak.isMobile(context);
 
-    // ⌘K on macOS, Ctrl+K elsewhere. Bound on the shell rather than per
-    // screen, so it works from anywhere behind the auth guard.
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () =>
-            showCommandPalette(context),
-        const SingleActivator(LogicalKeyboardKey.keyK, control: true): () =>
-            showCommandPalette(context),
-      },
-      child: Focus(
-        autofocus: true,
-        child: Scaffold(
-          backgroundColor: c.background,
-          drawer: mobile
-              ? Drawer(child: _SidebarBody(location: location))
-              : null,
-          bottomNavigationBar: mobile ? _BottomBar(location: location) : null,
-          body: SafeArea(
-            child: Row(
-              children: [
-                if (!mobile)
-                  SizedBox(
-                    width: 248,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: c.card,
-                        // Directional: in RTL the sidebar moves to the right edge, so its
-                        // divider has to move with it.
-                        border: BorderDirectional(
-                          end: BorderSide(color: c.border),
-                        ),
-                      ),
-                      child: _SidebarBody(location: location),
-                    ),
-                  ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      _TopBar(location: location, mobile: mobile),
-                      Expanded(child: child),
-                    ],
-                  ),
+    // If session is restoring, present a stable loading shell barrier (no placeholder leakage)
+    if (session.isRestoring) {
+      return Scaffold(
+        backgroundColor: c.background,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: c.primary,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: KiteSpace.md),
+              Text(
+                'Đang kiểm tra phiên làm việc...',
+                style: t.muted.copyWith(fontSize: 13),
+              ),
+            ],
           ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: c.background,
+      drawer: mobile ? Drawer(child: _SidebarBody(location: location)) : null,
+      bottomNavigationBar: mobile ? _BottomBar(location: location) : null,
+      body: SafeArea(
+        child: Row(
+          children: [
+            if (!mobile)
+              SizedBox(
+                width: 248,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: c.card,
+                    border: BorderDirectional(end: BorderSide(color: c.border)),
+                  ),
+                  child: _SidebarBody(location: location),
+                ),
+              ),
+            Expanded(
+              child: Column(
+                children: [
+                  _TopBar(location: location, mobile: mobile),
+                  Expanded(child: child),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _SidebarBody extends StatelessWidget {
+class _SidebarBody extends ConsumerWidget {
   const _SidebarBody({required this.location});
   final String location;
 
   @override
-  Widget build(BuildContext context) {
-    final c = KiteColors.of(context);
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = KiteText.of(context);
+    final isPlatformAdmin = ref.watch(isPlatformAdminProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
+        const Padding(
+          padding: EdgeInsets.fromLTRB(
             KiteSpace.xl,
             KiteSpace.xl,
             KiteSpace.xl,
             KiteSpace.lg,
           ),
-          child: Row(
-            children: [
-              Icon(Icons.change_history, size: 20, color: c.primary),
-              const SizedBox(width: KiteSpace.sm),
-              Text('Kite', style: t.h4),
-            ],
-          ),
+          child: AppBrand(logoSize: 20),
         ),
         Expanded(
           child: ListView(
@@ -112,9 +112,6 @@ class _SidebarBody extends StatelessWidget {
             children: [
               for (final group in kNavGroups) ...[
                 Padding(
-                  // Tight on purpose: four group labels at `lg` pushed the last
-                  // nav item under the pinned promo card at 1000px viewport
-                  // height, where it read as clipped rather than scrollable.
                   padding: const EdgeInsets.fromLTRB(
                     KiteSpace.md,
                     KiteSpace.sm,
@@ -131,16 +128,18 @@ class _SidebarBody extends StatelessWidget {
                   ),
                 ),
                 for (final item in group.items)
-                  if (item.inSidebar)
-                    _NavTile(item: item, active: location == item.path),
+                  if (item.inSidebar && (!item.adminOnly || isPlatformAdmin))
+                    _NavTile(
+                      item: item,
+                      active:
+                          location == item.path ||
+                          (item.path != '/' &&
+                              location.startsWith('${item.path}/')),
+                    ),
               ],
             ],
           ),
         ),
-        // Pinned above the user tile rather than at the end of the scrolling
-        // nav list, where it sat below the fold on a laptop and was the first
-        // thing clipped. Nav scrolls independently above it.
-        if (kShowPromo) const PromoCard(),
         const Divider(height: 1),
         const _UserTile(),
       ],
@@ -178,11 +177,14 @@ class _NavTile extends StatelessWidget {
                   color: active ? c.foreground : c.mutedForeground,
                 ),
                 const SizedBox(width: KiteSpace.md),
-                Text(
-                  item.labelOf(L.of(context)),
-                  style: t.small.copyWith(
-                    color: active ? c.foreground : c.mutedForeground,
-                    fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    item.labelOf(L.of(context)),
+                    style: t.small.copyWith(
+                      color: active ? c.foreground : c.mutedForeground,
+                      fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -199,7 +201,7 @@ class _UserTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(sessionProvider);
+    final user = ref.watch(sessionProvider).user;
     final c = KiteColors.of(context);
     final t = KiteText.of(context);
     if (user == null) return const SizedBox.shrink();
@@ -224,11 +226,18 @@ class _UserTile extends ConsumerWidget {
                   style: t.small,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  user.role,
-                  style: t.muted.copyWith(fontSize: 11),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                if (user.role != null)
+                  Text(
+                    user.role!,
+                    style: t.muted.copyWith(fontSize: 11),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                else
+                  Text(
+                    user.email,
+                    style: t.muted.copyWith(fontSize: 11),
+                    overflow: TextOverflow.ellipsis,
+                  ),
               ],
             ),
           ),
@@ -255,21 +264,25 @@ class _TopBar extends ConsumerWidget {
     final c = KiteColors.of(context);
     final t = KiteText.of(context);
     final l = L.of(context);
-    // Longest-prefix match, not equality: /orders/10004/edit still belongs to
-    // Orders. Exact matching left every nested route titled "Kite".
-    final matches = [
-      for (final n in kNav)
-        if (location == n.path ||
-            (n.path != '/' && location.startsWith('${n.path}/')))
-          n,
-    ]..sort((a, b) => b.path.length.compareTo(a.path.length));
-    final title = matches.isEmpty ? 'Kite' : matches.first.labelOf(l);
+    final String title;
+    if (location == R.account) {
+      title = l.accountInfo;
+    } else {
+      final matches = [
+        for (final n in kNav)
+          if (location == n.path ||
+              (n.path != '/' && location.startsWith('${n.path}/')))
+            n,
+      ]..sort((a, b) => b.path.length.compareTo(a.path.length));
+      title = matches.isEmpty ? l.appName : matches.first.labelOf(l);
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final wide = KiteBreak.isDesktop(context);
 
     return Container(
       height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: KiteSpace.xl),
+      padding: EdgeInsets.symmetric(
+        horizontal: mobile ? KiteSpace.md : KiteSpace.xl,
+      ),
       decoration: BoxDecoration(
         color: c.card,
         border: BorderDirectional(bottom: BorderSide(color: c.border)),
@@ -282,14 +295,15 @@ class _TopBar extends ConsumerWidget {
               color: c.mutedForeground,
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
-          Text(title, style: t.large),
-          const Spacer(),
-          if (wide) ...[
-            const _SearchTrigger(),
-            const SizedBox(width: KiteSpace.md),
-          ],
-          const _NotificationsButton(),
-          const SizedBox(width: KiteSpace.xs),
+          Expanded(
+            child: Text(
+              title,
+              style: t.large,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+          const SizedBox(width: KiteSpace.sm),
           KiteTooltip(
             message: isDark ? l.lightMode : l.darkMode,
             child: IconButton(
@@ -310,182 +324,33 @@ class _TopBar extends ConsumerWidget {
   }
 }
 
-/// A search affordance rather than a search field.
-///
-/// The bar is 60px tall and shared by every screen; a live input here would
-/// compete with the one each list already has. This opens the same command
-/// palette the keyboard shortcut does.
-class _SearchTrigger extends StatelessWidget {
-  const _SearchTrigger();
-
-  @override
-  Widget build(BuildContext context) {
-    final c = KiteColors.of(context);
-    final t = KiteText.of(context);
-    return Material(
-      color: c.background,
-      borderRadius: KiteRadius.allSm,
-      child: InkWell(
-        borderRadius: KiteRadius.allSm,
-        onTap: () => showCommandPalette(context),
-        child: Container(
-          width: 240,
-          padding: const EdgeInsets.symmetric(
-            horizontal: KiteSpace.md,
-            vertical: 7,
-          ),
-          decoration: BoxDecoration(
-            border: Border.all(color: c.border),
-            borderRadius: KiteRadius.allSm,
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.search, size: 15, color: c.mutedForeground),
-              const SizedBox(width: KiteSpace.sm),
-              Expanded(
-                child: Text('Search…', style: t.muted.copyWith(fontSize: 13)),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: c.muted,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text('⌘K', style: t.muted.copyWith(fontSize: 11)),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NotificationsButton extends StatelessWidget {
-  const _NotificationsButton();
-
-  static const _items = <(String, String, KiteTone)>[
-    ('Payment gateway unreachable', '2m', KiteTone.danger),
-    ('3 products below reorder point', '18m', KiteTone.warning),
-    ('Ada Lovelace refunded #10265', '1h', KiteTone.info),
-    ('Sprint 14 burndown on track', '4h', KiteTone.success),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final c = KiteColors.of(context);
-    final t = KiteText.of(context);
-
-    return KiteMenu(
-      width: 320,
-      header: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          KiteSpace.sm,
-          KiteSpace.xs,
-          KiteSpace.sm,
-          0,
-        ),
-        child: Row(
-          children: [
-            Text(
-              'Notifications',
-              style: t.small.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const Spacer(),
-            KiteBadge('${_items.length} new', tone: KiteTone.info),
-          ],
-        ),
-      ),
-      items: [
-        for (final (text, ago, tone) in _items)
-          KiteMenuItem(
-            label: text,
-            trailing: ago,
-            icon: switch (tone) {
-              KiteTone.danger => Icons.error_outline,
-              KiteTone.warning => Icons.warning_amber_outlined,
-              KiteTone.success => Icons.check_circle_outline,
-              _ => Icons.info_outline,
-            },
-            onPressed: () {},
-          ),
-        const KiteMenuItem.separator(),
-        KiteMenuItem(
-          label: 'Mark all as read',
-          icon: Icons.done_all,
-          onPressed: () => KiteToast.show(context, title: 'All caught up'),
-        ),
-      ],
-      trigger: (context, open) => KiteTooltip(
-        message: 'Notifications',
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            IconButton(
-              iconSize: 18,
-              color: c.mutedForeground,
-              icon: const Icon(Icons.notifications_none),
-              onPressed: open,
-            ),
-            // Count in a badge, not just a dot — "how many" is the question.
-            PositionedDirectional(
-              top: 6,
-              end: 6,
-              child: IgnorePointer(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  constraints: const BoxConstraints(minWidth: 15),
-                  decoration: BoxDecoration(
-                    color: c.destructive,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: c.card, width: 1.5),
-                  ),
-                  child: Text(
-                    '${_items.length}',
-                    textAlign: TextAlign.center,
-                    style: t.small.copyWith(
-                      fontSize: 9,
-                      height: 1.5,
-                      color: c.background,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _AccountMenu extends ConsumerWidget {
   const _AccountMenu();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(sessionProvider);
-    final locale = ref.watch(localeProvider);
-    final theme = ref.watch(themeProvider);
+    final user = ref.watch(sessionProvider).user;
     final c = KiteColors.of(context);
     final t = KiteText.of(context);
     final l = L.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final displayName = user?.name ?? 'Người dùng';
 
     return KiteMenu(
-      width: 248,
+      width: 300,
       header: Padding(
         padding: const EdgeInsets.symmetric(horizontal: KiteSpace.sm),
         child: Row(
           children: [
-            KiteAvatar(name: user?.name ?? 'Admin', size: 34),
+            KiteAvatar(name: displayName, size: 34),
             const SizedBox(width: KiteSpace.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user?.name ?? 'Admin',
+                    displayName,
                     overflow: TextOverflow.ellipsis,
                     style: t.small.copyWith(fontWeight: FontWeight.w600),
                   ),
@@ -502,37 +367,20 @@ class _AccountMenu extends ConsumerWidget {
       ),
       items: [
         KiteMenuItem(
-          label: l.navProfile,
+          label: 'Thông tin tài khoản',
           icon: Icons.person_outline,
-          onPressed: () => context.go(R.profile),
+          onPressed: () => context.go(R.account),
         ),
         KiteMenuItem(
-          label: l.navSettings,
-          icon: Icons.settings_outlined,
-          onPressed: () => context.go(R.settings),
+          label: 'Giấy phép bản quyền',
+          icon: Icons.description_outlined,
+          onPressed: () => context.go(R.license),
         ),
         KiteMenuItem(
-          label: l.theme,
-          icon: Icons.palette_outlined,
-          trailing: theme.accent.label,
-          onPressed: () => context.go(R.settings),
-        ),
-        KiteMenuItem(
-          label: l.language,
-          icon: Icons.translate,
-          trailing: locale.nativeName,
-          onPressed: () => context.go(R.settings),
-        ),
-        const KiteMenuItem.separator(),
-        KiteMenuItem(
-          label: 'Keyboard shortcuts',
-          icon: Icons.keyboard_outlined,
-          trailing: '⌘/',
-          onPressed: () => KiteToast.show(
-            context,
-            title: 'Shortcuts',
-            description: 'Add your own bindings in app_shell.dart.',
-          ),
+          label: isDark ? l.lightMode : l.darkMode,
+          icon: isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+          onPressed: () =>
+              ref.read(themeProvider.notifier).toggleBrightness(context),
         ),
         const KiteMenuItem.separator(),
         KiteMenuItem(
@@ -550,7 +398,7 @@ class _AccountMenu extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              KiteAvatar(name: user?.name ?? 'Admin', size: 28),
+              KiteAvatar(name: displayName, size: 28),
               const SizedBox(width: KiteSpace.xs),
               Icon(
                 Icons.keyboard_arrow_down,
@@ -565,16 +413,24 @@ class _AccountMenu extends ConsumerWidget {
   }
 }
 
-class _BottomBar extends StatelessWidget {
+class _BottomBar extends ConsumerWidget {
   const _BottomBar({required this.location});
   final String location;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = KiteColors.of(context);
-    // Four destinations on mobile, not six — the rest live in the drawer.
-    final items = kNav.take(4).toList();
-    var index = items.indexWhere((n) => n.path == location);
+    final l = L.of(context);
+    final isPlatformAdmin = ref.watch(isPlatformAdminProvider);
+    final items = [
+      for (final n in kNav)
+        if (!n.adminOnly || isPlatformAdmin) n,
+    ];
+    var index = items.indexWhere(
+      (n) =>
+          n.path == location ||
+          (n.path != '/' && location.startsWith('${n.path}/')),
+    );
     if (index < 0) index = 0;
 
     return NavigationBar(
@@ -583,7 +439,10 @@ class _BottomBar extends StatelessWidget {
       onDestinationSelected: (i) => context.go(items[i].path),
       destinations: [
         for (final n in items)
-          NavigationDestination(icon: Icon(n.icon, size: 20), label: n.label),
+          NavigationDestination(
+            icon: Icon(n.icon, size: 20),
+            label: n.labelOf(l),
+          ),
       ],
     );
   }
