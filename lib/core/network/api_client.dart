@@ -8,35 +8,71 @@ import '../auth/auth_repository.dart';
 import '../auth/session.dart';
 import '../config/app_config.dart';
 import 'api_exception.dart';
+import 'link_header.dart';
+import 'web_safe_json.dart';
 
-/// Result of an API mutation request, preserving response HTTP status code.
+/// Result of an API request or mutation, preserving HTTP status code and headers.
 class ApiResponse {
   const ApiResponse({
     required this.statusCode,
-    required this.data,
+    Map<String, dynamic>? data,
+    this.rawBody,
     this.requestId,
-  });
+    this.headers = const {},
+  }) : data =
+           data ??
+           (rawBody is Map<String, dynamic>
+               ? rawBody
+               : const <String, dynamic>{});
 
   final int statusCode;
+
+  /// Parsed JSON object payload (empty map if payload is a root array).
   final Map<String, dynamic> data;
+
+  /// The raw parsed JSON payload, which can be a [Map<String, dynamic>] or [List<dynamic>].
+  final dynamic rawBody;
+
   final String? requestId;
+  final Map<String, String> headers;
 
   bool get isCreated => statusCode == 201;
   bool get isOk => statusCode == 200;
+
+  /// Value of response `Location` header, if present.
+  String? get location => headers['location'];
+
+  /// Value of response `Link` header, if present.
+  String? get link => headers['link'];
+
+  /// Convenience accessor when caller expects a JSON object.
+  Map<String, dynamic> get asMap => data;
+
+  /// Convenience accessor when caller expects a root JSON array.
+  List<dynamic> get asList {
+    if (rawBody is List<dynamic>) return rawBody as List<dynamic>;
+    if (rawBody is List) return (rawBody as List).cast<dynamic>();
+    throw FormatException(
+      'Response data is not a List (got ${rawBody.runtimeType})',
+    );
+  }
 }
 
 /// HTTP Client providing shared transport for Go REST API (`/v1/*`).
 ///
-/// Complies with Stage 2 Client boundaries:
+/// Complies with Client boundaries:
 /// - Injects `Authorization: Bearer <token>` fetched dynamically per call.
-/// - Injects `Accept: application/json`.
+/// - Injects configurable `Accept` header (defaults to `application/json`, supports `application/ld+json`).
+/// - Accepts response Content-Types matching `application/json` or suffix `+json` (e.g. `application/ld+json`).
 /// - Injects and echoes valid log-safe `X-Request-ID`.
 /// - Strictly forbids `user_id` query parameters (Anti-IDOR).
 /// - Enforces relative URI paths within the backend origin (anti-SSRF/token leakage).
 /// - Session epoch & user identity fencing prevents cross-session refresh/logout/replay.
-/// - Safe single-flight 401 token refresh retry (max 1 retry for safe reads).
+/// - Safe single-flight 401 token refresh retry (max 1 retry for safe reads; NO mutation replay).
 /// - Safe error envelope parsing (`httpapi.APIErrorEnvelope`).
 /// - Preserves user session on 403, 404, 5xx, or transient network timeouts (never logs out).
+/// - Preserves 64-bit integer precision via [webSafeJsonDecode] before standard JS rounding.
+/// - Validates pagination `Link` headers safely against expected path and allowlists via [SafeLinkParser].
 class ApiClient {
   ApiClient({
     required this.authRepository,
@@ -120,20 +156,43 @@ class ApiClient {
     return resolved;
   }
 
-  /// Sends an authenticated GET request to the given relative [path].
-  Future<Map<String, dynamic>> get(
+  /// Sends an authenticated GET request to the given relative [path], returning [ApiResponse].
+  ///
+  /// Supports object OR array root payloads, exposes response status and headers (like `Link`).
+  Future<ApiResponse> getEnvelope(
     String path, {
     Map<String, String>? queryParams,
+    String? accept,
     String? customRequestId,
     Duration timeout = const Duration(seconds: 15),
   }) async {
-    return _sendWithRetry(
-      method: 'GET',
+    return _sendGet(
       path: path,
       queryParams: queryParams,
+      accept: accept,
       customRequestId: customRequestId,
       timeout: timeout,
     );
+  }
+
+  /// Sends an authenticated GET request to the given relative [path].
+  ///
+  /// Backward-compatible with existing callers expecting `Map<String, dynamic>`.
+  Future<Map<String, dynamic>> get(
+    String path, {
+    Map<String, String>? queryParams,
+    String? accept,
+    String? customRequestId,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    final response = await _sendGet(
+      path: path,
+      queryParams: queryParams,
+      accept: accept,
+      customRequestId: customRequestId,
+      timeout: timeout,
+    );
+    return response.asMap;
   }
 
   /// Sends an authenticated PUT mutation to the given relative [path] with [body].
@@ -148,6 +207,7 @@ class ApiClient {
   Future<ApiResponse> put(
     String path, {
     required Map<String, dynamic> body,
+    String? accept,
     String? idempotencyKey,
     String? customRequestId,
     Duration timeout = const Duration(seconds: 15),
@@ -156,6 +216,7 @@ class ApiClient {
       method: 'PUT',
       path: path,
       body: body,
+      accept: accept,
       idempotencyKey: idempotencyKey,
       customRequestId: customRequestId,
       timeout: timeout,
@@ -172,6 +233,7 @@ class ApiClient {
   Future<ApiResponse> post(
     String path, {
     Map<String, dynamic>? body,
+    String? accept,
     String? idempotencyKey,
     String? customRequestId,
     Duration timeout = const Duration(seconds: 15),
@@ -180,6 +242,34 @@ class ApiClient {
       method: 'POST',
       path: path,
       body: body,
+      accept: accept,
+      idempotencyKey: idempotencyKey,
+      customRequestId: customRequestId,
+      timeout: timeout,
+    );
+  }
+
+  /// Sends an authenticated PATCH mutation to the given relative [path].
+  ///
+  /// Safe mutation rules:
+  /// - Sets `Content-Type: application/json; charset=utf-8`.
+  /// - Serializes [body] as JSON string.
+  /// - Transmits `Idempotency-Key` header if provided.
+  /// - Does NOT auto-retry on 401 or network errors (no auto replay mutation).
+  /// - Preserves response status code (e.g. 200 OK).
+  Future<ApiResponse> patch(
+    String path, {
+    required Map<String, dynamic> body,
+    String? accept,
+    String? idempotencyKey,
+    String? customRequestId,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    return _sendMutation(
+      method: 'PATCH',
+      path: path,
+      body: body,
+      accept: accept,
       idempotencyKey: idempotencyKey,
       customRequestId: customRequestId,
       timeout: timeout,
@@ -196,6 +286,7 @@ class ApiClient {
   Future<ApiResponse> delete(
     String path, {
     Map<String, dynamic>? body,
+    String? accept,
     String? idempotencyKey,
     String? customRequestId,
     Duration timeout = const Duration(seconds: 15),
@@ -204,9 +295,31 @@ class ApiClient {
       method: 'DELETE',
       path: path,
       body: body,
+      accept: accept,
       idempotencyKey: idempotencyKey,
       customRequestId: customRequestId,
       timeout: timeout,
+    );
+  }
+
+  /// Safely resolves and validates a pagination `Link` header next URI.
+  ///
+  /// Enforces same origin, expected endpoint path, `/v1/` prefix, and allowlists
+  /// query parameters while rejecting credentials, fragments, and `user_id`.
+  Uri? resolveAndValidateNextLink({
+    required String? rawLinkHeader,
+    required String requestPath,
+    required String expectedPath,
+    Set<String>? allowedQueryParams,
+  }) {
+    final reqUri = buildUri(requestPath);
+    final bUri = Uri.parse(_baseUrl);
+    return SafeLinkParser.resolveAndValidateNextLink(
+      rawLinkHeader: rawLinkHeader,
+      requestUri: reqUri,
+      baseUri: bUri,
+      expectedPath: expectedPath,
+      allowedQueryParams: allowedQueryParams,
     );
   }
 
@@ -214,6 +327,7 @@ class ApiClient {
     required String method,
     required String path,
     Map<String, dynamic>? body,
+    String? accept,
     String? idempotencyKey,
     String? customRequestId,
     required Duration timeout,
@@ -255,7 +369,7 @@ class ApiClient {
 
     final headers = <String, String>{
       'Authorization': 'Bearer $token',
-      'Accept': 'application/json',
+      'Accept': accept ?? 'application/json',
       'X-Request-ID': reqId,
     };
 
@@ -281,6 +395,10 @@ class ApiClient {
       } else if (method == 'POST') {
         response = await _httpClient
             .post(uri, headers: headers, body: encodedBody)
+            .timeout(timeout);
+      } else if (method == 'PATCH') {
+        response = await _httpClient
+            .patch(uri, headers: headers, body: encodedBody)
             .timeout(timeout);
       } else if (method == 'DELETE') {
         response = await _httpClient
@@ -339,11 +457,25 @@ class ApiClient {
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       try {
-        final decoded = jsonDecode(response.body);
-        if (decoded is Map<String, dynamic>) {
+        final decoded = response.body.isEmpty
+            ? <String, dynamic>{}
+            : webSafeJsonDecode(response.body);
+        if (_isSessionMismatch(opEpoch, opUserId)) {
+          throw const ApiException(
+            statusCode: 401,
+            code: 'session_mismatch',
+            message: 'Phản hồi bị loại bỏ do phiên làm việc đã thay đổi.',
+          );
+        }
+        if (decoded is Map) {
+          final mapData = decoded is Map<String, dynamic>
+              ? decoded
+              : Map<String, dynamic>.from(decoded);
           return ApiResponse(
             statusCode: response.statusCode,
-            data: decoded,
+            data: mapData,
+            rawBody: mapData,
+            headers: response.headers,
             requestId: response.headers['x-request-id'] ?? reqId,
           );
         }
@@ -375,10 +507,10 @@ class ApiClient {
     throw _parseErrorResponse(response, fallbackReqId: reqId);
   }
 
-  Future<Map<String, dynamic>> _sendWithRetry({
-    required String method,
+  Future<ApiResponse> _sendGet({
     required String path,
     Map<String, String>? queryParams,
+    String? accept,
     String? customRequestId,
     required Duration timeout,
     bool isRetry = false,
@@ -422,19 +554,13 @@ class ApiClient {
 
     final headers = <String, String>{
       'Authorization': 'Bearer $token',
-      'Accept': 'application/json',
+      'Accept': accept ?? 'application/json',
       'X-Request-ID': reqId,
     };
 
     final http.Response response;
     try {
-      if (method == 'GET') {
-        response = await _httpClient
-            .get(uri, headers: headers)
-            .timeout(timeout);
-      } else {
-        throw UnsupportedError('Only GET is supported in current stage.');
-      }
+      response = await _httpClient.get(uri, headers: headers).timeout(timeout);
     } on http.ClientException catch (e) {
       if (_isSessionMismatch(opEpoch, opUserId)) {
         throw const ApiException(
@@ -485,12 +611,43 @@ class ApiClient {
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       try {
-        final decoded = jsonDecode(response.body);
+        final decoded = webSafeJsonDecode(response.body);
+        if (_isSessionMismatch(opEpoch, opUserId)) {
+          throw const ApiException(
+            statusCode: 401,
+            code: 'session_mismatch',
+            message: 'Phản hồi bị loại bỏ do phiên làm việc đã thay đổi.',
+          );
+        }
         if (decoded is Map<String, dynamic>) {
-          return decoded;
+          return ApiResponse(
+            statusCode: response.statusCode,
+            data: decoded,
+            rawBody: decoded,
+            headers: response.headers,
+            requestId: response.headers['x-request-id'] ?? reqId,
+          );
+        }
+        if (decoded is Map) {
+          final mapData = Map<String, dynamic>.from(decoded);
+          return ApiResponse(
+            statusCode: response.statusCode,
+            data: mapData,
+            rawBody: mapData,
+            headers: response.headers,
+            requestId: response.headers['x-request-id'] ?? reqId,
+          );
+        }
+        if (decoded is List) {
+          return ApiResponse(
+            statusCode: response.statusCode,
+            rawBody: decoded,
+            headers: response.headers,
+            requestId: response.headers['x-request-id'] ?? reqId,
+          );
         }
         throw FormatException(
-          'Expected JSON map but got ${decoded.runtimeType}',
+          'Expected JSON map or list but got ${decoded.runtimeType}',
         );
       } on FormatException {
         throw ApiException(
@@ -547,10 +704,10 @@ class ApiClient {
         }
 
         if (refreshedToken != null && refreshedToken.isNotEmpty) {
-          return _sendWithRetry(
-            method: method,
+          return _sendGet(
             path: path,
             queryParams: queryParams,
+            accept: accept,
             customRequestId: customRequestId,
             timeout: timeout,
             isRetry: true,
@@ -595,7 +752,7 @@ class ApiClient {
 
     try {
       if (response.body.isNotEmpty) {
-        final decoded = jsonDecode(response.body);
+        final decoded = webSafeJsonDecode(response.body);
         if (decoded is Map<String, dynamic> && decoded['error'] is Map) {
           final err = decoded['error'] as Map;
           if (err['code'] != null) code = err['code'].toString();

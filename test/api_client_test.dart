@@ -1086,4 +1086,155 @@ void main() {
       },
     );
   });
+
+  group('ApiClient C1 Transport Extensions: PATCH, getEnvelope, Accept, +json, Link', () {
+    test('sends PATCH mutation with JSON body, preserves 200 OK, does not retry on 401', () async {
+      await authRepo.signInWithPassword(
+        email: 'admin@example.com',
+        password: 'pwd',
+      );
+
+      late http.Request capturedRequest;
+      final mockHttp = MockClient((request) async {
+        capturedRequest = request;
+        return http.Response(
+          jsonEncode({
+            'name': {'type': 'Property', 'value': 'Renamed Gateway'},
+          }),
+          200,
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'x-request-id': 'req-patch-200',
+          },
+        );
+      });
+
+      final client = ApiClient(
+        authRepository: authRepo,
+        httpClient: mockHttp,
+        baseUrl: 'http://localhost/v1/',
+      );
+
+      final res = await client.patch(
+        'digital-twins/urn%3Angsi-ld%3AGateway%3Agw-001/attrs',
+        body: {
+          'name': {'type': 'Property', 'value': 'Renamed Gateway'},
+        },
+      );
+
+      expect(res.statusCode, 200);
+      expect(res.isOk, isTrue);
+      expect(capturedRequest.method, 'PATCH');
+      expect(
+        capturedRequest.headers['Content-Type'],
+        contains('application/json'),
+      );
+      expect(capturedRequest.headers['Authorization'], 'Bearer mock_jwt_token');
+      expect(res.data['name']['value'], 'Renamed Gateway');
+      expect(res.requestId, 'req-patch-200');
+    });
+
+    test('getEnvelope supports root JSON array, configurable Accept, and exposes headers/Link', () async {
+      await authRepo.signInWithPassword(
+        email: 'admin@example.com',
+        password: 'pwd',
+      );
+
+      late http.Request capturedRequest;
+      final mockHttp = MockClient((request) async {
+        capturedRequest = request;
+        return http.Response(
+          jsonEncode([
+            {'id': 'urn:ngsi-ld:Gateway:gw-01', 'type': 'Gateway'},
+            {'id': 'urn:ngsi-ld:Gateway:gw-02', 'type': 'Gateway'},
+          ]),
+          200,
+          headers: {
+            'content-type': 'application/ld+json; charset=utf-8',
+            'link': '</v1/digital-twins?cursor=v1.nextCursor>; rel="next"',
+            'x-request-id': 'req-twins-list',
+          },
+        );
+      });
+
+      final client = ApiClient(
+        authRepository: authRepo,
+        httpClient: mockHttp,
+        baseUrl: 'http://localhost/v1/',
+      );
+
+      final res = await client.getEnvelope(
+        'digital-twins',
+        accept: 'application/ld+json',
+      );
+
+      expect(res.statusCode, 200);
+      expect(res.isOk, isTrue);
+      expect(res.asList, isA<List<dynamic>>());
+      expect(res.asList.length, 2);
+      expect(res.rawBody, isA<List<dynamic>>());
+      expect(res.link, '</v1/digital-twins?cursor=v1.nextCursor>; rel="next"');
+      expect(res.requestId, 'req-twins-list');
+      expect(capturedRequest.headers['Accept'], 'application/ld+json');
+    });
+
+    test('accepts response with content-type ending in +json (e.g. application/ld+json)', () async {
+      await authRepo.signInWithPassword(
+        email: 'admin@example.com',
+        password: 'pwd',
+      );
+
+      final mockHttp = MockClient((request) async {
+        return http.Response(
+          jsonEncode({'id': 'urn:ngsi-ld:Gateway:gw-01'}),
+          200,
+          headers: {'content-type': 'application/ld+json; charset=utf-8'},
+        );
+      });
+
+      final client = ApiClient(
+        authRepository: authRepo,
+        httpClient: mockHttp,
+        baseUrl: 'http://localhost/v1/',
+      );
+
+      final res = await client.getEnvelope(
+        'digital-twins/urn%3Angsi-ld%3AGateway%3Agw-01',
+      );
+      expect(res.statusCode, 200);
+      expect(res.data['id'], 'urn:ngsi-ld:Gateway:gw-01');
+    });
+
+    test('validates and resolves nextLink safely using ApiClient helper', () {
+      final client = ApiClient(
+        authRepository: authRepo,
+        baseUrl: 'http://localhost/v1/',
+      );
+
+      const rawLink =
+          '</v1/digital-twins?type=Gateway&limit=50&cursor=v1.abc>; rel="next"';
+      final resolved = client.resolveAndValidateNextLink(
+        rawLinkHeader: rawLink,
+        requestPath: 'digital-twins?type=Gateway&limit=50',
+        expectedPath: '/v1/digital-twins',
+        allowedQueryParams: {'type', 'gateway_id', 'limit', 'format', 'cursor'},
+      );
+
+      expect(resolved, isNotNull);
+      expect(resolved!.path, '/v1/digital-twins');
+      expect(resolved.queryParameters['cursor'], 'v1.abc');
+
+      // Rejects malicious / external link
+      expect(
+        () => client.resolveAndValidateNextLink(
+          rawLinkHeader:
+              '<http://evil.com/v1/digital-twins?cursor=v1.abc>; rel="next"',
+          requestPath: 'digital-twins',
+          expectedPath: '/v1/digital-twins',
+          allowedQueryParams: {'cursor'},
+        ),
+        throwsA(isA<ApiException>()),
+      );
+    });
+  });
 }
