@@ -520,4 +520,236 @@ class LVi extends L {
   @override
   String get sensorProvisionForbiddenError =>
       'Từ chối truy cập. Bạn không có quyền Quản trị viên nền tảng.';
+
+  @override
+  String get navAdminUsers => 'Quản lý Người dùng';
+
+  @override
+  String get adminUserListTitle => 'Quản lý Người dùng';
+
+  @override
+  String get adminUserListSubtitle =>
+      'Danh sách tất cả người dùng và vai trò trong hệ thống (Dành cho Quản trị viên nền tảng).';
+
+  @override
+  String get adminUserCreateButton => 'Thêm Người dùng';
+
+  @override
+  String get adminUserSearchPlaceholder => 'Tìm theo tên, email hoặc UUID...';
+
+  @override
+  String get adminUserCapacityExceeded =>
+      'Dung lượng danh sách người dùng vượt quá giới hạn hệ thống (HTTP 409 Conflict). Vui lòng liên hệ quản trị viên cơ sở dữ liệu.';
+
+  @override
+  String get adminUserEmptyTitle => 'Chưa có người dùng nào';
+
+  @override
+  String get adminUserEmptyMessage =>
+      'Hệ thống chưa có người dùng nào được tạo.';
+
+  @override
+  String get adminUserSearchEmptyTitle => 'Không tìm thấy người dùng';
+
+  @override
+  String get adminUserSearchEmptyMessage =>
+      'Không có người dùng nào khớp với từ khóa tìm kiếm.';
+
+  @override
+  String get adminUserFullName => 'Họ và tên';
+
+  @override
+  String get adminUserEmail => 'Email';
+
+  @override
+  String get adminUserRole => 'Vai trò';
+
+  @override
+  String get adminUserMembershipCount => 'Số gateway quản lý';
+
+  @override
+  String get adminUserCreatedAt => 'Ngày tạo';
+
+  @override
+  String get adminUserUnassignedName => 'Chưa cập nhật';
+
+  @override
+  String get adminUserRoleAdmin => 'Platform Admin';
+
+  @override
+  String get adminUserRoleUser => 'User';
+
+  @override
+  String get adminUserCreateTitle => 'Tạo tài khoản người dùng mới';
+
+  @override
+  String get adminUserCreateSubtitle =>
+      'Khởi tạo tài khoản người dùng tập trung qua Go Backend và Supabase Auth.';
+
+  @override
+  String get adminUserCreateFieldFullName => 'Họ và tên';
+
+  @override
+  String get adminUserCreateFieldEmail => 'Địa chỉ email';
+
+  @override
+  String get adminUserCreateFieldPassword => 'Mật khẩu ban đầu';
+
+  @override
+  String get adminUserCreateSubmit => 'Tạo tài khoản';
+
+  @override
+  String get adminUserCreateSubmitting => 'Đang tạo...';
+
+  @override
+  String get adminUserCreateSuccess =>
+      'Tạo tài khoản người dùng thành công (HTTP 201 Created)';
+
+  @override
+  String get adminUserCreateConflictError =>
+      'Email này đã tồn tại trong hệ thống (HTTP 409 Conflict). Vui lòng sử dụng địa chỉ email khác.';
+
+  @override
+  String get adminUserCreateUnknownOutcomeTitle =>
+      'Kết quả tạo tài khoản chưa xác định';
+
+  @override
+  String get adminUserCreateUnknownOutcomeMessage =>
+      'Yêu cầu tạo tài khoản có thể đã được tiếp nhận và xử lý trên máy chủ nhưng phản hồi bị gián đoạn. Tuyệt đối không tự động thử lại để tránh tạo trùng lặp.';
+
+  @override
+  String get adminUserReconcileButton => 'Đối soát danh sách';
+
+  @override
+  String adminUserReconcileFound(String email) {
+    return 'Tài khoản $email đã được xác nhận tạo thành công trong danh sách!';
+  }
+
+  @override
+  String get adminUserReconcileNotFound =>
+      'Đã đối soát: Tài khoản chưa xuất hiện trong danh sách. Bạn có thể kiểm tra lại thông tin và thử lại.';
+
+  @override
+  String get adminUserReconcileFailed =>
+      'Không thể tải danh sách để đối soát. Tuyệt đối không tự ý thử lại.';
+
+  @override
+  String get adminUserEditButton => 'Chỉnh sửa';
+
+  @override
+  String get adminUserEditTitle => 'Chỉnh sửa Người dùng';
+
+  @override
+  String get adminUserEditSubtitle =>
+      'Cập nhật họ tên hoặc vai trò nền tảng cho tài khoản.';
+
+  @override
+  String get adminUserSelfDemotionWarning =>
+      'Bạn không thể tự hạ quyền Quản trị viên của chính mình.';
+
+  @override
+  String get adminUserRoleConfirmGrant =>
+      'Tôi xác nhận cấp quyền Quản trị viên nền tảng (Platform Admin) cho tài khoản này.';
+
+  @override
+  String get adminUserRoleConfirmRevoke =>
+      'Tôi xác nhận thu hồi quyền Quản trị viên nền tảng (chuyển về User) của tài khoản này.';
+
+  @override
+  String get adminUserEditNoChanges => 'Không có thay đổi nào để lưu.';
+
+  @override
+  String get adminUserEditSave => 'Lưu thay đổi';
+
+  @override
+  String get adminUserEditSaving => 'Đang lưu...';
+
+  @override
+  String get adminUserEditSuccess =>
+      'Cập nhật người dùng thành công (HTTP 200 OK)';
+
+  @override
+  String get adminUserSelfDemotionForbidden =>
+      'Bạn không thể tự hạ quyền Quản trị viên của chính mình (HTTP 409 Conflict). Toàn bộ thay đổi đã được hoàn tác.';
+
+  @override
+  String get adminAssignRoleTitle => 'Gán vai trò thành viên Gateway';
+
+  @override
+  String get adminAssignRoleSubtitle =>
+      'Phân quyền vận hành (Operator) hoặc chỉ xem (Viewer) cho tài khoản trên trạm.';
+
+  @override
+  String get adminAssignRoleButton => 'Phân quyền';
+
+  @override
+  String get adminAssignRoleSubmit => 'Lưu phân quyền';
+
+  @override
+  String get adminAssignRoleSubmitting => 'Đang lưu...';
+
+  @override
+  String get adminAssignRoleOperator => 'Vận hành (Operator)';
+
+  @override
+  String get adminAssignRoleViewer => 'Chỉ xem (Viewer)';
+
+  @override
+  String get adminAssignRoleOwnerHint =>
+      'Để thay vai trò của chủ sở hữu, bạn hãy dùng tính năng chuyển quyền sở hữu.';
+
+  @override
+  String get adminAssignRoleOwnerConflict =>
+      'Người dùng này hiện là chủ sở hữu của trạm. Để thay đổi vai trò của chủ sở hữu, vui lòng dùng chức năng Chuyển giao quyền sở hữu.';
+
+  @override
+  String get adminAssignRoleSuccess =>
+      'Phân quyền thành viên trạm thành công (HTTP 200 OK)';
+
+  @override
+  String get adminTransferOwnerTitle => 'Chuyển giao quyền sở hữu Gateway';
+
+  @override
+  String get adminTransferOwnerSubtitle =>
+      'Chuyển giao quyền chủ sở hữu (Owner) của trạm sang một người dùng khác.';
+
+  @override
+  String get adminTransferOwnerButton => 'Chuyển quyền sở hữu';
+
+  @override
+  String get adminTransferOwnerCurrentOwner => 'Chủ sở hữu hiện tại';
+
+  @override
+  String get adminTransferOwnerNewOwner => 'Chủ sở hữu mới (Người nhận)';
+
+  @override
+  String get adminTransferOwnerConfirm =>
+      'Tôi xác nhận chuyển giao quyền sở hữu trạm cho người dùng này. Chủ sở hữu cũ sẽ chuyển thành Người xem (Viewer) và vẫn giữ quyền đọc trạm.';
+
+  @override
+  String adminTransferOwnerReplayNotice(Object id) {
+    return 'Lưu ý: Sau khi chuyển quyền sở hữu, các yêu cầu khởi tạo trạm (PUT /v1/admin/gateways/$id) được lặp lại với mã người sở hữu cũ sẽ bị từ chối với mã 409 Conflict.';
+  }
+
+  @override
+  String get adminTransferOwnerSubmit => 'Xác nhận chuyển giao';
+
+  @override
+  String get adminTransferOwnerSubmitting => 'Đang chuyển giao...';
+
+  @override
+  String get adminTransferOwnerSuccess =>
+      'Chuyển giao quyền sở hữu Gateway thành công (HTTP 200 OK)';
+
+  @override
+  String get adminTransferOwnerInconsistentError =>
+      'Dữ liệu chủ sở hữu trạm trên máy chủ không đồng nhất (HTTP 409 Conflict).';
+
+  @override
+  String get adminTransferOwnerZeroOwners =>
+      'Không tìm thấy chủ sở hữu hiện tại trong danh sách. Không thể thực hiện chuyển giao.';
+
+  @override
+  String get adminTransferOwnerMultipleOwners =>
+      'Tìm thấy nhiều hơn một chủ sở hữu trên trạm này. Dữ liệu không đồng nhất, không thể chuyển giao.';
 }

@@ -1032,6 +1032,408 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Access denied. You do not have Platform Admin privileges.'**
   String get sensorProvisionForbiddenError;
+
+  /// No description provided for @navAdminUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'User Management'**
+  String get navAdminUsers;
+
+  /// No description provided for @adminUserListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'User Management'**
+  String get adminUserListTitle;
+
+  /// No description provided for @adminUserListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All users and roles across the system (Platform Admin only).'**
+  String get adminUserListSubtitle;
+
+  /// No description provided for @adminUserCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add User'**
+  String get adminUserCreateButton;
+
+  /// No description provided for @adminUserSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, email or UUID...'**
+  String get adminUserSearchPlaceholder;
+
+  /// No description provided for @adminUserCapacityExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'User list capacity exceeded limit (HTTP 409 Conflict). Please contact the database administrator.'**
+  String get adminUserCapacityExceeded;
+
+  /// No description provided for @adminUserEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found'**
+  String get adminUserEmptyTitle;
+
+  /// No description provided for @adminUserEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No users have been created in the system.'**
+  String get adminUserEmptyMessage;
+
+  /// No description provided for @adminUserSearchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching users'**
+  String get adminUserSearchEmptyTitle;
+
+  /// No description provided for @adminUserSearchEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No users match your search term.'**
+  String get adminUserSearchEmptyMessage;
+
+  /// No description provided for @adminUserFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get adminUserFullName;
+
+  /// No description provided for @adminUserEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get adminUserEmail;
+
+  /// No description provided for @adminUserRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Role'**
+  String get adminUserRole;
+
+  /// No description provided for @adminUserMembershipCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateways'**
+  String get adminUserMembershipCount;
+
+  /// No description provided for @adminUserCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created At'**
+  String get adminUserCreatedAt;
+
+  /// No description provided for @adminUserUnassignedName.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get adminUserUnassignedName;
+
+  /// No description provided for @adminUserRoleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Admin'**
+  String get adminUserRoleAdmin;
+
+  /// No description provided for @adminUserRoleUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get adminUserRoleUser;
+
+  /// No description provided for @adminUserCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New User Account'**
+  String get adminUserCreateTitle;
+
+  /// No description provided for @adminUserCreateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Provision a user account centrally via Go Backend and Supabase Auth.'**
+  String get adminUserCreateSubtitle;
+
+  /// No description provided for @adminUserCreateFieldFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get adminUserCreateFieldFullName;
+
+  /// No description provided for @adminUserCreateFieldEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get adminUserCreateFieldEmail;
+
+  /// No description provided for @adminUserCreateFieldPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial Password'**
+  String get adminUserCreateFieldPassword;
+
+  /// No description provided for @adminUserCreateSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get adminUserCreateSubmit;
+
+  /// No description provided for @adminUserCreateSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating...'**
+  String get adminUserCreateSubmitting;
+
+  /// No description provided for @adminUserCreateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'User account created successfully (HTTP 201 Created)'**
+  String get adminUserCreateSuccess;
+
+  /// No description provided for @adminUserCreateConflictError.
+  ///
+  /// In en, this message translates to:
+  /// **'This email already exists (HTTP 409 Conflict). Please use another email.'**
+  String get adminUserCreateConflictError;
+
+  /// No description provided for @adminUserCreateUnknownOutcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncertain Account Creation Result'**
+  String get adminUserCreateUnknownOutcomeTitle;
+
+  /// No description provided for @adminUserCreateUnknownOutcomeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Request may have completed on the server, but the response was interrupted. Do not blind retry. Please reconcile the user list.'**
+  String get adminUserCreateUnknownOutcomeMessage;
+
+  /// No description provided for @adminUserReconcileButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile List'**
+  String get adminUserReconcileButton;
+
+  /// No description provided for @adminUserReconcileFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Account {email} confirmed created in user list!'**
+  String adminUserReconcileFound(String email);
+
+  /// No description provided for @adminUserReconcileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciled: Account not found in list yet. You may verify and retry.'**
+  String get adminUserReconcileNotFound;
+
+  /// No description provided for @adminUserReconcileFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to reconcile list. Please check later.'**
+  String get adminUserReconcileFailed;
+
+  /// No description provided for @adminUserEditButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get adminUserEditButton;
+
+  /// No description provided for @adminUserEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit User'**
+  String get adminUserEditTitle;
+
+  /// No description provided for @adminUserEditSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update full name or platform role for this account.'**
+  String get adminUserEditSubtitle;
+
+  /// No description provided for @adminUserSelfDemotionWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot demote your own Platform Admin role.'**
+  String get adminUserSelfDemotionWarning;
+
+  /// No description provided for @adminUserRoleConfirmGrant.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm granting Platform Admin role to this account.'**
+  String get adminUserRoleConfirmGrant;
+
+  /// No description provided for @adminUserRoleConfirmRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm revoking Platform Admin role from this account.'**
+  String get adminUserRoleConfirmRevoke;
+
+  /// No description provided for @adminUserEditNoChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'No changes to save.'**
+  String get adminUserEditNoChanges;
+
+  /// No description provided for @adminUserEditSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get adminUserEditSave;
+
+  /// No description provided for @adminUserEditSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get adminUserEditSaving;
+
+  /// No description provided for @adminUserEditSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'User updated successfully (HTTP 200 OK)'**
+  String get adminUserEditSuccess;
+
+  /// No description provided for @adminUserSelfDemotionForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Self admin demotion forbidden (HTTP 409 Conflict). Changes have been rolled back.'**
+  String get adminUserSelfDemotionForbidden;
+
+  /// No description provided for @adminAssignRoleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Gateway Membership Role'**
+  String get adminAssignRoleTitle;
+
+  /// No description provided for @adminAssignRoleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign operator or viewer role on this gateway to a user.'**
+  String get adminAssignRoleSubtitle;
+
+  /// No description provided for @adminAssignRoleButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Role'**
+  String get adminAssignRoleButton;
+
+  /// No description provided for @adminAssignRoleSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Membership'**
+  String get adminAssignRoleSubmit;
+
+  /// No description provided for @adminAssignRoleSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get adminAssignRoleSubmitting;
+
+  /// No description provided for @adminAssignRoleOperator.
+  ///
+  /// In en, this message translates to:
+  /// **'Operator'**
+  String get adminAssignRoleOperator;
+
+  /// No description provided for @adminAssignRoleViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewer'**
+  String get adminAssignRoleViewer;
+
+  /// No description provided for @adminAssignRoleOwnerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'To change the owner\'s role, please use the ownership transfer feature.'**
+  String get adminAssignRoleOwnerHint;
+
+  /// No description provided for @adminAssignRoleOwnerConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'This user is currently the owner of the gateway. To change an owner\'s role, please use Transfer Ownership.'**
+  String get adminAssignRoleOwnerConflict;
+
+  /// No description provided for @adminAssignRoleSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway membership role assigned successfully (HTTP 200 OK)'**
+  String get adminAssignRoleSuccess;
+
+  /// No description provided for @adminTransferOwnerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Gateway Ownership'**
+  String get adminTransferOwnerTitle;
+
+  /// No description provided for @adminTransferOwnerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer the owner role of this gateway to another user.'**
+  String get adminTransferOwnerSubtitle;
+
+  /// No description provided for @adminTransferOwnerButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Ownership'**
+  String get adminTransferOwnerButton;
+
+  /// No description provided for @adminTransferOwnerCurrentOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Owner'**
+  String get adminTransferOwnerCurrentOwner;
+
+  /// No description provided for @adminTransferOwnerNewOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'New Owner (Recipient)'**
+  String get adminTransferOwnerNewOwner;
+
+  /// No description provided for @adminTransferOwnerConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm transferring gateway ownership to this user. The previous owner will become a Viewer and retain read access.'**
+  String get adminTransferOwnerConfirm;
+
+  /// No description provided for @adminTransferOwnerReplayNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice: After transferring ownership, replaying initial gateway provisioning (PUT /v1/admin/gateways/{id}) with the previous owner ID will conflict with 409 Conflict.'**
+  String adminTransferOwnerReplayNotice(Object id);
+
+  /// No description provided for @adminTransferOwnerSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Transfer'**
+  String get adminTransferOwnerSubmit;
+
+  /// No description provided for @adminTransferOwnerSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Transferring...'**
+  String get adminTransferOwnerSubmitting;
+
+  /// No description provided for @adminTransferOwnerSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway ownership transferred successfully (HTTP 200 OK)'**
+  String get adminTransferOwnerSuccess;
+
+  /// No description provided for @adminTransferOwnerInconsistentError.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway owner state on the server is inconsistent (HTTP 409 Conflict).'**
+  String get adminTransferOwnerInconsistentError;
+
+  /// No description provided for @adminTransferOwnerZeroOwners.
+  ///
+  /// In en, this message translates to:
+  /// **'No current owner found in the directory for this gateway. Transfer is blocked.'**
+  String get adminTransferOwnerZeroOwners;
+
+  /// No description provided for @adminTransferOwnerMultipleOwners.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple owners found on this gateway. Inconsistent state, transfer is blocked.'**
+  String get adminTransferOwnerMultipleOwners;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

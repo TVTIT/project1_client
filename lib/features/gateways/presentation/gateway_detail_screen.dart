@@ -10,8 +10,10 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/states.dart';
 import '../data/gateway_dto.dart';
 import '../providers/gateway_detail_provider.dart';
+import 'assign_gateway_user_dialog.dart';
 import 'create_sensor_dialog.dart';
 import 'mqtt_credential_dialog.dart';
+import 'transfer_gateway_owner_dialog.dart';
 
 /// Screen presenting Gateway Details and associated Sensor Catalog.
 ///
@@ -170,7 +172,27 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
               spacing: KiteSpace.sm,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (isPlatformAdmin)
+                if (isPlatformAdmin) ...[
+                  KiteButton.outline(
+                    onPressed: () => showAssignGatewayUserDialog(
+                      context,
+                      gatewayId: widget.gatewayId,
+                    ),
+                    leading: const Icon(Icons.person_add_outlined, size: 16),
+                    child: Text(
+                      isMobile ? l.adminAssignRoleButton : 'Phân quyền',
+                    ),
+                  ),
+                  KiteButton.outline(
+                    onPressed: () => showTransferGatewayOwnerDialog(
+                      context,
+                      gatewayId: widget.gatewayId,
+                    ),
+                    leading: const Icon(Icons.swap_horiz_outlined, size: 16),
+                    child: Text(
+                      isMobile ? 'Chuyển Owner' : l.adminTransferOwnerButton,
+                    ),
+                  ),
                   KiteButton.outline(
                     onPressed: () => showMqttCredentialDialog(
                       context,
@@ -179,6 +201,7 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
                     leading: const Icon(Icons.vpn_key_outlined, size: 16),
                     child: Text(isMobile ? 'MQTT' : 'Thông tin xác thực MQTT'),
                   ),
+                ],
                 KiteButton.outline(
                   onPressed: state.isLoading
                       ? null

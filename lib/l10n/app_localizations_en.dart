@@ -516,4 +516,234 @@ class LEn extends L {
   @override
   String get sensorProvisionForbiddenError =>
       'Access denied. You do not have Platform Admin privileges.';
+
+  @override
+  String get navAdminUsers => 'User Management';
+
+  @override
+  String get adminUserListTitle => 'User Management';
+
+  @override
+  String get adminUserListSubtitle =>
+      'All users and roles across the system (Platform Admin only).';
+
+  @override
+  String get adminUserCreateButton => 'Add User';
+
+  @override
+  String get adminUserSearchPlaceholder => 'Search by name, email or UUID...';
+
+  @override
+  String get adminUserCapacityExceeded =>
+      'User list capacity exceeded limit (HTTP 409 Conflict). Please contact the database administrator.';
+
+  @override
+  String get adminUserEmptyTitle => 'No users found';
+
+  @override
+  String get adminUserEmptyMessage =>
+      'No users have been created in the system.';
+
+  @override
+  String get adminUserSearchEmptyTitle => 'No matching users';
+
+  @override
+  String get adminUserSearchEmptyMessage => 'No users match your search term.';
+
+  @override
+  String get adminUserFullName => 'Full Name';
+
+  @override
+  String get adminUserEmail => 'Email';
+
+  @override
+  String get adminUserRole => 'Platform Role';
+
+  @override
+  String get adminUserMembershipCount => 'Gateways';
+
+  @override
+  String get adminUserCreatedAt => 'Created At';
+
+  @override
+  String get adminUserUnassignedName => 'Not set';
+
+  @override
+  String get adminUserRoleAdmin => 'Platform Admin';
+
+  @override
+  String get adminUserRoleUser => 'User';
+
+  @override
+  String get adminUserCreateTitle => 'Create New User Account';
+
+  @override
+  String get adminUserCreateSubtitle =>
+      'Provision a user account centrally via Go Backend and Supabase Auth.';
+
+  @override
+  String get adminUserCreateFieldFullName => 'Full Name';
+
+  @override
+  String get adminUserCreateFieldEmail => 'Email Address';
+
+  @override
+  String get adminUserCreateFieldPassword => 'Initial Password';
+
+  @override
+  String get adminUserCreateSubmit => 'Create Account';
+
+  @override
+  String get adminUserCreateSubmitting => 'Creating...';
+
+  @override
+  String get adminUserCreateSuccess =>
+      'User account created successfully (HTTP 201 Created)';
+
+  @override
+  String get adminUserCreateConflictError =>
+      'This email already exists (HTTP 409 Conflict). Please use another email.';
+
+  @override
+  String get adminUserCreateUnknownOutcomeTitle =>
+      'Uncertain Account Creation Result';
+
+  @override
+  String get adminUserCreateUnknownOutcomeMessage =>
+      'Request may have completed on the server, but the response was interrupted. Do not blind retry. Please reconcile the user list.';
+
+  @override
+  String get adminUserReconcileButton => 'Reconcile List';
+
+  @override
+  String adminUserReconcileFound(String email) {
+    return 'Account $email confirmed created in user list!';
+  }
+
+  @override
+  String get adminUserReconcileNotFound =>
+      'Reconciled: Account not found in list yet. You may verify and retry.';
+
+  @override
+  String get adminUserReconcileFailed =>
+      'Unable to reconcile list. Please check later.';
+
+  @override
+  String get adminUserEditButton => 'Edit';
+
+  @override
+  String get adminUserEditTitle => 'Edit User';
+
+  @override
+  String get adminUserEditSubtitle =>
+      'Update full name or platform role for this account.';
+
+  @override
+  String get adminUserSelfDemotionWarning =>
+      'You cannot demote your own Platform Admin role.';
+
+  @override
+  String get adminUserRoleConfirmGrant =>
+      'I confirm granting Platform Admin role to this account.';
+
+  @override
+  String get adminUserRoleConfirmRevoke =>
+      'I confirm revoking Platform Admin role from this account.';
+
+  @override
+  String get adminUserEditNoChanges => 'No changes to save.';
+
+  @override
+  String get adminUserEditSave => 'Save Changes';
+
+  @override
+  String get adminUserEditSaving => 'Saving...';
+
+  @override
+  String get adminUserEditSuccess => 'User updated successfully (HTTP 200 OK)';
+
+  @override
+  String get adminUserSelfDemotionForbidden =>
+      'Self admin demotion forbidden (HTTP 409 Conflict). Changes have been rolled back.';
+
+  @override
+  String get adminAssignRoleTitle => 'Assign Gateway Membership Role';
+
+  @override
+  String get adminAssignRoleSubtitle =>
+      'Assign operator or viewer role on this gateway to a user.';
+
+  @override
+  String get adminAssignRoleButton => 'Assign Role';
+
+  @override
+  String get adminAssignRoleSubmit => 'Save Membership';
+
+  @override
+  String get adminAssignRoleSubmitting => 'Saving...';
+
+  @override
+  String get adminAssignRoleOperator => 'Operator';
+
+  @override
+  String get adminAssignRoleViewer => 'Viewer';
+
+  @override
+  String get adminAssignRoleOwnerHint =>
+      'To change the owner\'s role, please use the ownership transfer feature.';
+
+  @override
+  String get adminAssignRoleOwnerConflict =>
+      'This user is currently the owner of the gateway. To change an owner\'s role, please use Transfer Ownership.';
+
+  @override
+  String get adminAssignRoleSuccess =>
+      'Gateway membership role assigned successfully (HTTP 200 OK)';
+
+  @override
+  String get adminTransferOwnerTitle => 'Transfer Gateway Ownership';
+
+  @override
+  String get adminTransferOwnerSubtitle =>
+      'Transfer the owner role of this gateway to another user.';
+
+  @override
+  String get adminTransferOwnerButton => 'Transfer Ownership';
+
+  @override
+  String get adminTransferOwnerCurrentOwner => 'Current Owner';
+
+  @override
+  String get adminTransferOwnerNewOwner => 'New Owner (Recipient)';
+
+  @override
+  String get adminTransferOwnerConfirm =>
+      'I confirm transferring gateway ownership to this user. The previous owner will become a Viewer and retain read access.';
+
+  @override
+  String adminTransferOwnerReplayNotice(Object id) {
+    return 'Notice: After transferring ownership, replaying initial gateway provisioning (PUT /v1/admin/gateways/$id) with the previous owner ID will conflict with 409 Conflict.';
+  }
+
+  @override
+  String get adminTransferOwnerSubmit => 'Confirm Transfer';
+
+  @override
+  String get adminTransferOwnerSubmitting => 'Transferring...';
+
+  @override
+  String get adminTransferOwnerSuccess =>
+      'Gateway ownership transferred successfully (HTTP 200 OK)';
+
+  @override
+  String get adminTransferOwnerInconsistentError =>
+      'Gateway owner state on the server is inconsistent (HTTP 409 Conflict).';
+
+  @override
+  String get adminTransferOwnerZeroOwners =>
+      'No current owner found in the directory for this gateway. Transfer is blocked.';
+
+  @override
+  String get adminTransferOwnerMultipleOwners =>
+      'Multiple owners found on this gateway. Inconsistent state, transfer is blocked.';
 }
