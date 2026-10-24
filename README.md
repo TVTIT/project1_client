@@ -58,7 +58,14 @@ bash scripts/build_web.sh
 
 *Lưu ý về CORS & Nginx:* Khi phát triển web qua các origin khác nhau, cần sử dụng reverse proxy cùng origin hoặc cấu hình CORS proxy thích hợp. Không sử dụng cờ `--disable-web-security` của trình duyệt.
 
-## 2. License
+## 2. Mốc triển khai hiện tại (C6–C10, 23/10/2026)
+
+- Đã triển khai danh sách/chi tiết Digital Twin, trạng thái chỉ đọc, lịch sử temporal và sửa metadata theo quyền bằng Go REST API thật.
+- Chi tiết Gateway giữ nguyên metadata; bên dưới là **hai tab**: lịch sử (mặc định, chọn Sensor bằng `DropdownMenu`) và danh mục Sensor hiện hữu. Sensor Twin dùng chung bảng/biểu đồ lịch sử.
+- Quản trị người dùng, gán/thu hồi thành viên và chuyển owner là chức năng đã có trước C6–C10. Không thêm điều khiển thiết bị, realtime, media, số liệu tổng quan hoặc dữ liệu mẫu production.
+- Đây là mốc **triển khai + kiểm thử tự động**, chưa nghiệm thu production/live đa vai trò. Bằng chứng, coverage và giới hạn: [C6_C10_VERIFICATION.md](docs/C6_C10_VERIFICATION.md). Release build không thuộc phạm vi C10.
+
+## 3. License
 
 This project uses the MIT License.
 

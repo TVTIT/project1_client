@@ -95,7 +95,10 @@ class UserPermissionsNotifier extends Notifier<UserPermissionsState> {
 
   @override
   UserPermissionsState build() {
-    final session = ref.watch(sessionProvider);
+    ref.watch(sessionProvider.select((s) => (s.status, s.user?.userId)));
+    final session = ref.read(sessionProvider);
+    final generation = ++_seq;
+    _inFlight = null;
 
     // If unauthenticated or restoring, fail closed immediately with empty unprivileged state
     if (!session.isAuthenticated) {
@@ -104,7 +107,7 @@ class UserPermissionsNotifier extends Notifier<UserPermissionsState> {
 
     // Schedule microtask to fetch permissions for authenticated session
     Future.microtask(() {
-      if (ref.mounted) {
+      if (ref.mounted && generation == _seq) {
         loadPermissions();
       }
     });
@@ -113,9 +116,11 @@ class UserPermissionsNotifier extends Notifier<UserPermissionsState> {
 
   Future<void> loadPermissions() {
     if (_inFlight != null) return _inFlight!;
-    _inFlight = _performLoad().whenComplete(() {
-      _inFlight = null;
+    late final Future<void> request;
+    request = _performLoad().whenComplete(() {
+      if (identical(_inFlight, request)) _inFlight = null;
     });
+    _inFlight = request;
     return _inFlight!;
   }
 

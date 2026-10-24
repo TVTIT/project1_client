@@ -82,7 +82,9 @@ class GatewayListNotifier extends Notifier<GatewayListState> {
 
   @override
   GatewayListState build() {
-    final session = ref.watch(sessionProvider);
+    ref.watch(sessionProvider.select((s) => (s.status, s.user?.userId)));
+    _seq++;
+    final session = ref.read(sessionProvider);
 
     // If session is unauthenticated or restoring, purge any cached gateways from memory immediately
     if (!session.isAuthenticated) {

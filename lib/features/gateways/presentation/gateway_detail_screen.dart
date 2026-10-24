@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:kite_ui/kite_ui.dart';
 
 import '../../../core/auth/permissions.dart';
+import '../../../core/auth/session.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/metadata_edit_launcher.dart';
 import '../../../shared/widgets/states.dart';
+import '../../../shared/widgets/temporal_history_panel.dart';
 import '../data/gateway_dto.dart';
 import '../providers/gateway_detail_provider.dart';
 import 'assign_gateway_user_dialog.dart';
@@ -37,6 +40,8 @@ class GatewayDetailScreen extends ConsumerStatefulWidget {
 
 class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
   late final TextEditingController _sensorSearchController;
+  int _selectedTab = 0;
+  String? _selectedSensorId;
 
   @override
   void initState() {
@@ -54,6 +59,8 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.gatewayId != widget.gatewayId) {
       _sensorSearchController.clear();
+      _selectedTab = 0;
+      _selectedSensorId = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           ref.read(gatewayDetailProvider(widget.gatewayId).notifier).load();
@@ -81,6 +88,19 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(sessionProvider.select((s) => (s.status, s.user?.userId)), (
+      _,
+      _,
+    ) {
+      _selectedSensorId = null;
+      _selectedTab = 0;
+      _sensorSearchController.clear();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && ref.read(sessionProvider).isAuthenticated) {
+          ref.read(gatewayDetailProvider(widget.gatewayId).notifier).load();
+        }
+      });
+    });
     final state = ref.watch(gatewayDetailProvider(widget.gatewayId));
     final isPlatformAdmin = ref.watch(isPlatformAdminProvider);
     final c = KiteColors.of(context);
@@ -172,7 +192,26 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
               spacing: KiteSpace.sm,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
+                if (state.gateway != null)
+                  KiteButton.outline(
+                    onPressed: () =>
+                        context.go(R.gatewayTwin(widget.gatewayId)),
+                    child: Text(l.twinOpen),
+                  ),
                 if (isPlatformAdmin) ...[
+                  KiteButton.outline(
+                    key: const ValueKey('gateway-edit-metadata-btn'),
+                    onPressed: () {
+                      ref.read(metadataEditLauncherProvider)(
+                        context,
+                        entityUrn: 'urn:ngsi-ld:Gateway:${widget.gatewayId}',
+                        initialName: state.gateway?.name,
+                        initialDescription: state.gateway?.description,
+                      );
+                    },
+                    leading: const Icon(Icons.edit_note_outlined, size: 16),
+                    child: Text(l.actionEditMetadata),
+                  ),
                   KiteButton.outline(
                     onPressed: () => showAssignGatewayUserDialog(
                       context,
@@ -316,12 +355,277 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Section A: Gateway Metadata Card
+        // Section A: Gateway Metadata Card (completely unchanged)
         _buildGatewayMetadataCard(gateway, isMobile, c, t, l),
         const SizedBox(height: KiteSpace.xl),
 
-        // Section B: Sensor Catalog Header & Actions
-        _buildSensorsSection(context, ref, state, isMobile, c, t, l),
+        // Section B: Two Tabs (Telemetry History / Sensor Catalog)
+        _buildTabsHeader(c, t, l),
+        const SizedBox(height: KiteSpace.lg),
+
+        // Section C: Selected Tab Content
+        if (_selectedTab == 0)
+          _buildTelemetryHistoryTab(context, ref, state, isMobile, c, t, l)
+        else
+          _buildSensorsSection(context, ref, state, isMobile, c, t, l),
+      ],
+    );
+  }
+
+  Widget _buildTabsHeader(KiteColors c, KiteText t, L l) {
+    return Container(
+      decoration: BoxDecoration(
+        color: c.muted.withValues(alpha: 0.3),
+        borderRadius: KiteRadius.allMd,
+        border: Border.all(color: c.border),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              key: const Key('tab-telemetry-history'),
+              onTap: () => setState(() => _selectedTab = 0),
+              borderRadius: KiteRadius.allSm,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: KiteSpace.sm),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: _selectedTab == 0 ? c.card : null,
+                  borderRadius: KiteRadius.allSm,
+                  boxShadow: _selectedTab == 0
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  l.gatewayTabTelemetryHistory,
+                  style: t.p.copyWith(
+                    fontWeight: _selectedTab == 0
+                        ? FontWeight.w600
+                        : FontWeight.w500,
+                    color: _selectedTab == 0 ? c.foreground : c.mutedForeground,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: InkWell(
+              key: const Key('tab-sensor-catalog'),
+              onTap: () => setState(() => _selectedTab = 1),
+              borderRadius: KiteRadius.allSm,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: KiteSpace.sm),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: _selectedTab == 1 ? c.card : null,
+                  borderRadius: KiteRadius.allSm,
+                  boxShadow: _selectedTab == 1
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  l.gatewayTabSensors,
+                  style: t.p.copyWith(
+                    fontWeight: _selectedTab == 1
+                        ? FontWeight.w600
+                        : FontWeight.w500,
+                    color: _selectedTab == 1 ? c.foreground : c.mutedForeground,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTelemetryHistoryTab(
+    BuildContext context,
+    WidgetRef ref,
+    GatewayDetailState state,
+    bool isMobile,
+    KiteColors c,
+    KiteText t,
+    L l,
+  ) {
+    // 1. Admin without gateway membership: exact sensor-read denial, no temporal call
+    if (state.isSensorReadDenied) {
+      return Container(
+        padding: const EdgeInsets.all(KiteSpace.xl),
+        decoration: BoxDecoration(
+          color: c.muted.withValues(alpha: 0.2),
+          borderRadius: KiteRadius.allMd,
+          border: Border.all(color: c.border),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.lock_outline, size: 20, color: c.mutedForeground),
+            const SizedBox(width: KiteSpace.md),
+            Expanded(
+              child: Text(
+                l.gatewaySensorReadDeniedMessage,
+                style: t.p.copyWith(color: c.mutedForeground),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 2. Sensor loading or error
+    if (state.hasSensorsError) {
+      return Container(
+        padding: const EdgeInsets.all(KiteSpace.lg),
+        decoration: BoxDecoration(
+          color: c.destructive.withValues(alpha: 0.08),
+          borderRadius: KiteRadius.allMd,
+          border: Border.all(color: c.destructive.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.error_outline, size: 20, color: c.destructive),
+            const SizedBox(width: KiteSpace.md),
+            Expanded(
+              child: Text(
+                l.sensorErrorTitle,
+                style: t.p.copyWith(color: c.destructive),
+              ),
+            ),
+            KiteButton.outline(
+              onPressed: () => ref
+                  .read(gatewayDetailProvider(widget.gatewayId).notifier)
+                  .load(reloadSensorsOnly: true),
+              child: Text(l.sensorErrorRetry),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state.isLoading && state.sensors.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: KiteSpace.xxl),
+        child: LoadingState(),
+      );
+    }
+
+    // 3. No sensors available
+    if (state.sensors.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(KiteSpace.xl),
+        decoration: BoxDecoration(
+          color: c.card,
+          border: Border.all(color: c.border),
+          borderRadius: KiteRadius.allMd,
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.sensors_off_outlined,
+                size: 36,
+                color: c.mutedForeground,
+              ),
+              const SizedBox(height: KiteSpace.md),
+              Text(
+                l.gatewayNoSensorsForHistory,
+                style: t.muted,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 4. Sensors available: select sensor and display history
+    final validSensorIds = state.sensors.map((s) => s.sensorId).toSet();
+    if (_selectedSensorId == null ||
+        !validSensorIds.contains(_selectedSensorId)) {
+      _selectedSensorId = state.sensors.first.sensorId;
+    }
+
+    final selectedSensor = state.sensors.firstWhere(
+      (s) => s.sensorId == _selectedSensorId,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Sensor Selection Row with actual Flutter DropdownMenu
+        Container(
+          padding: const EdgeInsets.all(KiteSpace.md),
+          decoration: BoxDecoration(
+            color: c.card,
+            border: Border.all(color: c.border),
+            borderRadius: KiteRadius.allMd,
+          ),
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: KiteSpace.md,
+            runSpacing: KiteSpace.sm,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.sensors, size: 20, color: c.primary),
+                  const SizedBox(width: KiteSpace.sm),
+                  Text(
+                    l.gatewaySelectSensor,
+                    style: t.small.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              DropdownMenu<String>(
+                key: ValueKey(
+                  'sensor-dropdown-${widget.gatewayId}-$_selectedSensorId',
+                ),
+                initialSelection: _selectedSensorId,
+                label: Text(l.gatewaySelectSensor),
+                dropdownMenuEntries: [
+                  for (final s in state.sensors)
+                    DropdownMenuEntry<String>(
+                      value: s.sensorId,
+                      label: s.unit != null && s.unit!.isNotEmpty
+                          ? '${s.name} (${s.sensorId}) [${s.unit}]'
+                          : '${s.name} (${s.sensorId})',
+                    ),
+                ],
+                onSelected: (val) {
+                  if (val != null && val != _selectedSensorId) {
+                    setState(() => _selectedSensorId = val);
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: KiteSpace.lg),
+
+        // Temporal History Panel for selected sensor
+        TemporalHistoryPanel(
+          key: ValueKey('gw-history-${widget.gatewayId}-$_selectedSensorId'),
+          sensorUrn:
+              'urn:ngsi-ld:Sensor:${widget.gatewayId}:$_selectedSensorId',
+          unit: selectedSensor.unit,
+          sensorName: selectedSensor.name,
+        ),
       ],
     );
   }
@@ -695,6 +999,11 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: KiteSpace.md),
+                TextButton(
+                  onPressed: () =>
+                      context.go(R.sensorTwin(widget.gatewayId, item.sensorId)),
+                  child: Text(l.twinOpen),
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -790,9 +1099,23 @@ class _GatewayDetailScreenState extends ConsumerState<GatewayDetailScreen> {
                         ),
                       ),
                       DataCell(
-                        SelectableText(
-                          item.name,
-                          style: t.small.copyWith(fontWeight: FontWeight.w500),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SelectableText(
+                              item.name,
+                              style: t.small.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: l.twinOpen,
+                              icon: const Icon(Icons.hub_outlined, size: 16),
+                              onPressed: () => context.go(
+                                R.sensorTwin(widget.gatewayId, item.sensorId),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       DataCell(

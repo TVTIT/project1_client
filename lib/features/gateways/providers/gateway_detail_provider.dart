@@ -127,7 +127,9 @@ class GatewayDetailNotifier extends Notifier<GatewayDetailState> {
 
   @override
   GatewayDetailState build() {
-    final session = ref.watch(sessionProvider);
+    ref.watch(sessionProvider.select((s) => (s.status, s.user?.userId)));
+    _seq++;
+    final session = ref.read(sessionProvider);
 
     // If session is unauthenticated, reset to initial empty state
     if (!session.isAuthenticated) {

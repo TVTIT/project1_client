@@ -469,6 +469,10 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
                     ),
                   ],
                   const SizedBox(height: KiteSpace.md),
+                  TextButton(
+                    onPressed: () => context.go(R.gatewayTwin(item.gatewayId)),
+                    child: Text(l.twinOpen),
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -602,11 +606,25 @@ class _GatewayListScreenState extends ConsumerState<GatewayListScreen> {
                             ),
                           ),
                           DataCell(
-                            Text(
-                              item.name,
-                              style: t.small.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  item.name,
+                                  style: t.small.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                IconButton(
+                                  tooltip: l.twinOpen,
+                                  icon: const Icon(
+                                    Icons.hub_outlined,
+                                    size: 16,
+                                  ),
+                                  onPressed: () =>
+                                      context.go(R.gatewayTwin(item.gatewayId)),
+                                ),
+                              ],
                             ),
                           ),
                           DataCell(
