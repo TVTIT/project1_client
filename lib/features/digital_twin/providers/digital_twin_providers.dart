@@ -4,12 +4,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/auth/session.dart';
+import '../../../core/network/api_exception.dart';
 import '../data/digital_twin_dto.dart';
 import '../data/digital_twin_repository.dart';
+
+final twinSessionScopeProvider = Provider((ref) {
+  final session = ref.watch(sessionProvider);
+  return (
+    session.status,
+    session.user?.userId,
+    ref.read(sessionProvider.notifier).sessionEpoch,
+  );
+});
 
 /// State of a Digital Twin flat state view (`twin_states`).
 @immutable
 class TwinStateViewState {
+  static const _unchanged = Object();
   const TwinStateViewState({this.isLoading = false, this.state, this.error});
 
   final bool isLoading;
@@ -20,12 +31,14 @@ class TwinStateViewState {
 
   TwinStateViewState copyWith({
     bool? isLoading,
-    TwinStateResponse? state,
+    Object? state = _unchanged,
     Object? Function()? error,
   }) {
     return TwinStateViewState(
       isLoading: isLoading ?? this.isLoading,
-      state: state ?? this.state,
+      state: identical(state, _unchanged)
+          ? this.state
+          : state as TwinStateResponse?,
       error: error != null ? error() : this.error,
     );
   }
@@ -41,19 +54,22 @@ class TwinStateViewNotifier extends Notifier<TwinStateViewState> {
 
   @override
   TwinStateViewState build() {
-    final session = ref.watch(sessionProvider);
-    if (!session.isAuthenticated) {
-      return const TwinStateViewState();
-    }
+    // Token refresh for the same identity is not a new data scope.
+    ref.watch(twinSessionScopeProvider);
+    _seq++;
+    _inFlight = null;
     return const TwinStateViewState();
   }
 
   /// Triggers a fetch of the entity flat state view.
   Future<void> loadState() {
+    if (!ref.read(sessionProvider).isAuthenticated) return Future.value();
     if (_inFlight != null) return _inFlight!;
-    _inFlight = _performLoad().whenComplete(() {
-      _inFlight = null;
+    late final Future<void> request;
+    request = _performLoad().whenComplete(() {
+      if (identical(_inFlight, request)) _inFlight = null;
     });
+    _inFlight = request;
     return _inFlight!;
   }
 
@@ -65,6 +81,7 @@ class TwinStateViewNotifier extends Notifier<TwinStateViewState> {
     state = state.copyWith(isLoading: true, error: () => null);
 
     try {
+      final entity = EntityUrn.parse(entityId);
       final repo = ref.read(digitalTwinRepositoryProvider);
       final twinState = await repo.getTwinState(entityId);
 
@@ -73,6 +90,12 @@ class TwinStateViewNotifier extends Notifier<TwinStateViewState> {
           expectedEpoch != ref.read(sessionProvider.notifier).sessionEpoch ||
           expectedUserId != ref.read(currentUserProvider)?.userId) {
         return;
+      }
+
+      if (twinState.id != entityId ||
+          twinState.type != entity.type.value ||
+          twinState.gatewayId != entity.gatewayId) {
+        throw const FormatException('Wrong state identity');
       }
 
       state = TwinStateViewState(
@@ -88,12 +111,19 @@ class TwinStateViewNotifier extends Notifier<TwinStateViewState> {
         return;
       }
 
-      state = state.copyWith(isLoading: false, error: () => e);
+      final denied =
+          e is ApiException &&
+          (e.statusCode == 401 || e.statusCode == 403 || e.statusCode == 404);
+      state = state.copyWith(
+        isLoading: false,
+        state: denied ? null : state.state,
+        error: () => e,
+      );
     }
   }
 }
 
-final twinStateViewProvider =
-    NotifierProvider.family<TwinStateViewNotifier, TwinStateViewState, String>(
+final twinStateViewProvider = NotifierProvider.autoDispose
+    .family<TwinStateViewNotifier, TwinStateViewState, String>(
       (arg) => TwinStateViewNotifier(arg),
     );

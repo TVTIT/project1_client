@@ -30,6 +30,47 @@ void main() {
   });
 
   group('DigitalTwinRepository Tests', () {
+    test('temporal HTTP binds root identity, mode, UTC range and exact count to request', () async {
+      await authRepo.signInWithPassword(
+        email: 'fixture@example.com',
+        password: 'fixture',
+      );
+      const id = 'urn:ngsi-ld:Sensor:gw:s';
+      var body =
+          '{"id":"$id","type":"Sensor","measurement":{"type":"Property","avg":[],"min":[],"max":[],"totalCount":[[9007199254740993,"2026-10-23T00:00:00.000000Z","2026-10-23T00:01:00.000000Z"]]}}';
+      final client = ApiClient(
+        authRepository: authRepo,
+        baseUrl: 'http://localhost/v1/',
+        httpClient: MockClient((request) async {
+          expect(request.headers['Accept'], 'application/ld+json');
+          expect(request.headers['Authorization'], isNotEmpty);
+          expect(
+            request.url.queryParameters['timeAt'],
+            '2026-10-23T00:00:00.000Z',
+          );
+          expect(request.url.queryParameters.containsKey('user_id'), isFalse);
+          return http.Response(
+            body,
+            200,
+            headers: {'content-type': 'application/ld+json'},
+          );
+        }),
+      );
+      final repo = HttpDigitalTwinRepository(client);
+      Future<TwinTemporalResponse> fetch() => repo.getSensorTemporal(
+        id,
+        attrs: 'measurement',
+        timeAt: DateTime.utc(2026, 10, 23),
+        endTimeAt: DateTime.utc(2026, 10, 23, 0, 1),
+        aggrPeriodDuration: 'PT1M',
+      );
+      expect(
+        (await fetch()).totalCountBuckets.single.value.toString(),
+        '9007199254740993',
+      );
+      body = body.replaceFirst('"type":"Sensor"', '"type":"Gateway"');
+      await expectLater(fetch(), throwsFormatException);
+    });
     test(
       'listTwins passes simplified query and application/json Accept header',
       () async {
@@ -174,7 +215,11 @@ void main() {
           capturedRequest = request;
           return http.Response(
             jsonEncode({
-              'name': {'type': 'Property', 'value': 'New Gateway Name'},
+              'id': 'urn:ngsi-ld:Gateway:gw-01',
+              'type': 'Gateway',
+              'gateway_id': 'gw-01',
+              'name': 'New Gateway Name',
+              'updated_at': '2026-10-23T12:00:00.000000Z',
             }),
             200,
             headers: {'content-type': 'application/json'},
@@ -193,7 +238,8 @@ void main() {
           const PatchTwinAttrsInput(name: 'New Gateway Name'),
         );
 
-        expect(res.statusCode, 200);
+        expect(res.name, 'New Gateway Name');
+        expect(res.id, 'urn:ngsi-ld:Gateway:gw-01');
         expect(capturedRequest.method, 'PATCH');
         expect(
           capturedRequest.url.path,

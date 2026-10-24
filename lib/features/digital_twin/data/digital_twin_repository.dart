@@ -3,9 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_exception.dart';
 import 'digital_twin_dto.dart';
+import 'twin_detail.dart';
 
 /// Contract for accessing Stage 4 ETSI GS CIM 009 V1.9.1 Digital Twin APIs.
 abstract class DigitalTwinRepository {
+  Future<TwinDetailPage> getTwinDetail(
+    String entityId, {
+    int relationshipLimit = 20,
+    String? relationshipAfter,
+  });
+
   /// Queries membership-scoped Digital Twin entity list.
   Future<ApiResponse> listTwins({
     EntityType? type,
@@ -33,7 +40,7 @@ abstract class DigitalTwinRepository {
   Future<ApiResponse> createTwin(PostTwinEntityInput input);
 
   /// Mutates entity metadata Property fragment via `PATCH /v1/digital-twins/{entity_id}/attrs`.
-  Future<ApiResponse> patchTwinAttrs(
+  Future<PatchTwinResponseDto> patchTwinAttrs(
     String entityId,
     PatchTwinAttrsInput input,
   );
@@ -44,6 +51,33 @@ class HttpDigitalTwinRepository implements DigitalTwinRepository {
   const HttpDigitalTwinRepository(this._client);
 
   final ApiClient _client;
+
+  @override
+  Future<TwinDetailPage> getTwinDetail(
+    String entityId, {
+    int relationshipLimit = 20,
+    String? relationshipAfter,
+  }) async {
+    final entity = EntityUrn.parse(entityId);
+    if (relationshipLimit < 1 || relationshipLimit > 200) {
+      throw const FormatException('Invalid relationship limit');
+    }
+    final path = 'digital-twins/${entity.encoded}';
+    final query = <String, String>{
+      'relationship_limit': '$relationshipLimit',
+      'relationship_after': ?relationshipAfter,
+    };
+    final response = await _client.getEnvelope(
+      path,
+      queryParams: query,
+      accept: 'application/ld+json',
+    );
+    return TwinDetailPage.parse(
+      response,
+      _client.buildUri(path, query),
+      entityId,
+    );
+  }
 
   @override
   Future<ApiResponse> listTwins({
@@ -107,19 +141,24 @@ class HttpDigitalTwinRepository implements DigitalTwinRepository {
       );
     }
 
-    if (attrs != 'measurement' && attrs != 'sample_interval_us') {
-      throw const ApiException(
-        statusCode: 400,
-        code: 'invalid_request',
-        message: 'Tham số attrs phải là measurement hoặc sample_interval_us.',
-      );
-    }
+    final isRaw = aggrPeriodDuration == null || aggrPeriodDuration.isEmpty;
+    final queryParamsObj = TemporalQueryParameters(
+      attrs: attrs,
+      timeAt: timeAt,
+      endTimeAt: endTimeAt,
+      mode: isRaw ? TemporalQueryMode.raw : TemporalQueryMode.aggregated,
+      aggrPeriodDuration: isRaw ? null : aggrPeriodDuration,
+      aggrMethods: aggrMethods,
+      maxPoints: maxPoints ?? 1000,
+    );
 
-    if (!timeAt.isBefore(endTimeAt)) {
-      throw const ApiException(
+    try {
+      queryParamsObj.validate();
+    } on FormatException catch (e) {
+      throw ApiException(
         statusCode: 400,
         code: 'invalid_request',
-        message: 'Thời gian bắt đầu (timeAt) phải trước thời gian kết thúc (endTimeAt).',
+        message: e.message,
       );
     }
 
@@ -130,11 +169,11 @@ class HttpDigitalTwinRepository implements DigitalTwinRepository {
       'endTimeAt': endTimeAt.toUtc().toIso8601String(),
     };
 
-    if (aggrPeriodDuration != null && aggrPeriodDuration.isNotEmpty) {
+    if (!isRaw) {
       queryParams['aggrPeriodDuration'] = aggrPeriodDuration;
-    }
-    if (aggrMethods != null && aggrMethods.isNotEmpty) {
-      queryParams['aggrMethods'] = aggrMethods;
+      if (aggrMethods != null && aggrMethods.isNotEmpty) {
+        queryParams['aggrMethods'] = aggrMethods;
+      }
     }
     if (maxPoints != null) {
       queryParams['max_points'] = maxPoints.toString();
@@ -146,7 +185,14 @@ class HttpDigitalTwinRepository implements DigitalTwinRepository {
       accept: 'application/ld+json',
     );
 
-    return TwinTemporalResponse.fromJson(json, attrName: attrs);
+    final res = TwinTemporalResponse.fromJson(json, attrName: attrs);
+    if (res.id.isNotEmpty && (res.id != parsed.urn || res.type != 'Sensor')) {
+      throw const FormatException(
+        'Sensor URN identity or type mismatch in temporal response',
+      );
+    }
+    res.validateFor(entityId, queryParamsObj);
+    return res;
   }
 
   @override
@@ -155,15 +201,20 @@ class HttpDigitalTwinRepository implements DigitalTwinRepository {
   }
 
   @override
-  Future<ApiResponse> patchTwinAttrs(
+  Future<PatchTwinResponseDto> patchTwinAttrs(
     String entityId,
     PatchTwinAttrsInput input,
   ) async {
     final parsed = EntityUrn.parse(entityId);
-    return _client.patch(
+    final res = await _client.patch(
       'digital-twins/${parsed.encoded}/attrs',
       body: input.toJson(),
     );
+    final dto = PatchTwinResponseDto.fromJson(res.data);
+    if (dto.id != entityId) {
+      throw const FormatException('Wrong mutation identity');
+    }
+    return dto;
   }
 }
 

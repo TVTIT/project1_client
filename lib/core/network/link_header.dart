@@ -44,12 +44,16 @@ abstract final class SafeLinkParser {
   /// Throws [ApiException] with code `invalid_link_header` if the link is invalid,
   /// external, escapes the `/v1/` prefix, contains credentials, fragments, `user_id`,
   /// duplicate query keys, or unapproved query parameters.
+  /// [canonicalizePath] optionally validates endpoint-specific equivalent path
+  /// encodings. Origin/query checks remain mandatory; raw dot/slash escapes are
+  /// rejected before URI resolution can normalize them away.
   static Uri? resolveAndValidateNextLink({
     required String? rawLinkHeader,
     required Uri requestUri,
     required Uri baseUri,
     required String expectedPath,
     Set<String>? allowedQueryParams,
+    String Function(String path)? canonicalizePath,
   }) {
     final nextUriStr = extractNextUri(rawLinkHeader);
     if (nextUriStr == null) {
@@ -63,6 +67,14 @@ abstract final class SafeLinkParser {
         code: 'invalid_link_header',
         message: 'Con trỏ phân trang chứa URI không hợp lệ.',
       );
+    }
+
+    if (canonicalizePath != null &&
+        nextUriStr.split('?').first.split('/').any((part) {
+          final decoded = Uri.decodeComponent(part);
+          return decoded == '.' || decoded == '..' || decoded.contains('/');
+        })) {
+      throw const FormatException('Pagination path escape');
     }
 
     // Resolve relative against the actual request URI
@@ -103,7 +115,10 @@ abstract final class SafeLinkParser {
     final cleanExpectedPath = expectedPath.startsWith('/')
         ? expectedPath
         : '/$expectedPath';
-    if (resolved.path != cleanExpectedPath) {
+    final actualPath = canonicalizePath?.call(resolved.path) ?? resolved.path;
+    final targetPath =
+        canonicalizePath?.call(cleanExpectedPath) ?? cleanExpectedPath;
+    if (actualPath != targetPath) {
       throw ApiException(
         statusCode: 400,
         code: 'invalid_link_header',
