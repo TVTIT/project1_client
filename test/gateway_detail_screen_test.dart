@@ -131,8 +131,11 @@ void main() {
       expect(find.text('Trạm quan trắc nhà kính số 1'), findsOneWidget);
       expect(find.text('Chủ sở hữu'), findsWidgets);
 
+      // Switch to Sensor Catalog tab
+      await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+      await tester.pumpAndSettle();
+
       // Check Sensors rendered
-      expect(find.text('Danh sách Cảm biến'), findsOneWidget);
       expect(find.text('sensor_temp'), findsOneWidget);
       expect(find.text('Ambient Temperature'), findsOneWidget);
       expect(find.text('°C'), findsOneWidget);
@@ -274,6 +277,9 @@ void main() {
     container.read(routerProvider).go('/gateways/gw-empty');
     await tester.pumpAndSettle();
 
+    await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+    await tester.pumpAndSettle();
+
     expect(find.text('Empty Station'), findsOneWidget);
     expect(find.text('Chưa có cảm biến nào'), findsOneWidget);
     expect(
@@ -345,6 +351,8 @@ void main() {
 
       // Sensors are recovered
       expect(find.text('Không thể tải danh sách cảm biến'), findsNothing);
+      await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+      await tester.pumpAndSettle();
       expect(find.text('Recovered Sensor'), findsOneWidget);
       expect(find.text('sensor_rec'), findsOneWidget);
     },
@@ -394,6 +402,9 @@ void main() {
       await tester.pumpAndSettle();
 
       container.read(routerProvider).go('/gateways/gw-001');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
       await tester.pumpAndSettle();
 
       expect(find.text('Temperature'), findsOneWidget);
@@ -455,6 +466,11 @@ void main() {
         await tester.pumpAndSettle();
 
         container.read(routerProvider).go('/gateways/gw-resp');
+        await tester.pumpAndSettle();
+
+        final tab = find.byKey(const Key('tab-sensor-catalog'));
+        await tester.ensureVisible(tab);
+        await tester.tap(tab);
         await tester.pumpAndSettle();
 
         expect(find.text('Responsive Gateway'), findsOneWidget);
@@ -559,6 +575,8 @@ void main() {
         expect(find.text('Chưa có cảm biến nào'), findsNothing);
 
         // Admin still allowed to see "Thêm cảm biến mới" button
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
         expect(find.text('Thêm cảm biến mới'), findsOneWidget);
       },
     );
@@ -627,6 +645,8 @@ void main() {
         expect(find.text('Chủ sở hữu'), findsWidgets);
 
         // Sensors are loaded normally
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
         expect(find.text('Temperature Sensor'), findsOneWidget);
         expect(find.text('Humidity Sensor'), findsOneWidget);
         expect(
@@ -747,6 +767,8 @@ void main() {
 
         // Initially loaded successfully with metadata and sensors
         expect(find.text('Active Station Alpha'), findsOneWidget);
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
         expect(find.text('Temperature Sensor'), findsOneWidget);
         expect(find.text('Try again'), findsNothing);
 
@@ -780,6 +802,8 @@ void main() {
 
         // Metadata and sensors are restored
         expect(find.text('Active Station Alpha'), findsOneWidget);
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
         expect(find.text('Temperature Sensor'), findsOneWidget);
         expect(find.text('Try again'), findsNothing);
         expect(

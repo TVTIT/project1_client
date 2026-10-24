@@ -18,4 +18,5 @@ export 'src/inputs.dart';
 export 'src/menu.dart';
 export 'src/sparkline.dart';
 export 'src/stat_grid.dart';
+export 'src/temporal_chart.dart';
 export 'src/tokens.dart';

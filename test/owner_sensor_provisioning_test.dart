@@ -604,6 +604,9 @@ void main() {
         container.read(routerProvider).go(R.gatewayDetail('gw-owner-station'));
         await tester.pumpAndSettle();
 
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
+
         final addBtn = find.text('Thêm cảm biến mới');
         expect(addBtn, findsOneWidget);
 
@@ -688,6 +691,9 @@ void main() {
       container.read(routerProvider).go(R.gatewayDetail('gw-admin-station'));
       await tester.pumpAndSettle();
 
+      await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+      await tester.pumpAndSettle();
+
       await tester.tap(find.text('Thêm cảm biến mới'));
       await tester.pumpAndSettle();
 
@@ -752,6 +758,9 @@ void main() {
         await tester.pumpAndSettle();
 
         container.read(routerProvider).go(R.gatewayDetail('gw-dual-role'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('Thêm cảm biến mới'));
@@ -820,6 +829,9 @@ void main() {
         container
             .read(routerProvider)
             .go(R.gatewayDetail('gw-forbidden-station'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('Thêm cảm biến mới'));
@@ -896,6 +908,9 @@ void main() {
         container.read(routerProvider).go(R.gatewayDetail('gw-retry-station'));
         await tester.pumpAndSettle();
 
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.text('Thêm cảm biến mới'));
         await tester.pumpAndSettle();
 
@@ -970,6 +985,9 @@ void main() {
         await tester.pumpAndSettle();
 
         container.read(routerProvider).go(R.gatewayDetail('gw-stale-station'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('Thêm cảm biến mới'));
@@ -1086,6 +1104,9 @@ void main() {
           gatewayDetailProvider('gw-foreign-station'),
         );
         expect(detailState.isSensorReadDenied, isTrue);
+
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
 
         // Admin still allowed to open create sensor dialog on foreign gateway
         final addBtn = find.text('Thêm cảm biến mới');

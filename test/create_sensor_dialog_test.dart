@@ -91,7 +91,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(GatewayDetailScreen), findsOneWidget);
-        expect(find.text('Danh sách Cảm biến'), findsOneWidget);
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
         // Non-admin operator must NOT see create sensor button
         expect(find.text('Thêm cảm biến mới'), findsNothing);
       },
@@ -133,7 +134,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(GatewayDetailScreen), findsOneWidget);
-        expect(find.text('Danh sách Cảm biến'), findsOneWidget);
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
         final addBtn = find.text('Thêm cảm biến mới');
         expect(addBtn, findsOneWidget);
 
@@ -176,6 +178,9 @@ void main() {
         await tester.pumpAndSettle();
 
         container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
         await tester.pumpAndSettle();
 
         final addBtn = find.text('Thêm cảm biến mới');
@@ -228,6 +233,9 @@ void main() {
         container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
         await tester.pumpAndSettle();
 
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.text('Thêm cảm biến mới'));
         await tester.pumpAndSettle();
 
@@ -275,6 +283,9 @@ void main() {
         await tester.pumpAndSettle();
 
         container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('Thêm cảm biến mới'));
@@ -415,6 +426,9 @@ void main() {
         container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
         await tester.pumpAndSettle();
 
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.text('Thêm cảm biến mới'));
         await tester.pumpAndSettle();
 
@@ -495,6 +509,9 @@ void main() {
       container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
       await tester.pumpAndSettle();
 
+      await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+      await tester.pumpAndSettle();
+
       await tester.tap(find.text('Thêm cảm biến mới'));
       await tester.pumpAndSettle();
 
@@ -559,6 +576,9 @@ void main() {
         await tester.pumpAndSettle();
 
         container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('Thêm cảm biến mới'));
@@ -631,6 +651,9 @@ void main() {
         container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
         await tester.pumpAndSettle();
 
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.text('Thêm cảm biến mới'));
         await tester.pumpAndSettle();
 
@@ -692,6 +715,9 @@ void main() {
         await tester.pumpAndSettle();
 
         container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('Thêm cảm biến mới'));
@@ -772,6 +798,9 @@ void main() {
         container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
         await tester.pumpAndSettle();
 
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.text('Thêm cảm biến mới'));
         await tester.pumpAndSettle();
 
@@ -833,6 +862,9 @@ void main() {
         container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
         await tester.pumpAndSettle();
 
+        await tester.tap(find.byKey(const Key('tab-sensor-catalog')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.text('Thêm cảm biến mới'));
         await tester.pumpAndSettle();
 
@@ -892,6 +924,11 @@ void main() {
           await tester.pumpAndSettle();
 
           container.read(routerProvider).go(R.gatewayDetail('gw-alpha'));
+          await tester.pumpAndSettle();
+
+          final tab = find.byKey(const Key('tab-sensor-catalog'));
+          await tester.ensureVisible(tab);
+          await tester.tap(tab);
           await tester.pumpAndSettle();
 
           final addBtn = find.text('Thêm cảm biến mới');
