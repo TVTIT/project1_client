@@ -97,6 +97,594 @@ abstract class L {
     Locale('vi'),
   ];
 
+  /// No description provided for @twinEditInvalidText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text contains an invalid character.'**
+  String get twinEditInvalidText;
+
+  /// No description provided for @twinEditFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to update metadata. Check your permissions and input.'**
+  String get twinEditFailed;
+
+  /// No description provided for @twinEditReconcileUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot verify this update. Resubmission remains blocked.'**
+  String get twinEditReconcileUnavailable;
+
+  /// No description provided for @temporalRawRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw history is limited to 10 seconds. Narrow the range or use aggregation.'**
+  String get temporalRawRange;
+
+  /// No description provided for @temporalFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load history. Previously displayed data may be stale.'**
+  String get temporalFailed;
+
+  /// No description provided for @temporalShowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing'**
+  String get temporalShowing;
+
+  /// No description provided for @temporalPresets.
+  ///
+  /// In en, this message translates to:
+  /// **'Presets:'**
+  String get temporalPresets;
+
+  /// No description provided for @navDigitalTwins.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Twins'**
+  String get navDigitalTwins;
+
+  /// No description provided for @twinInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get twinInformation;
+
+  /// No description provided for @twinState.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get twinState;
+
+  /// No description provided for @twinBackToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Digital Twins'**
+  String get twinBackToList;
+
+  /// No description provided for @twinNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Entity not found or access unavailable.'**
+  String get twinNotFound;
+
+  /// No description provided for @twinNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get twinNoData;
+
+  /// No description provided for @twinStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to refresh. Displayed data may be stale.'**
+  String get twinStale;
+
+  /// No description provided for @twinDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get twinDescription;
+
+  /// No description provided for @twinMeasurement.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest measurement'**
+  String get twinMeasurement;
+
+  /// No description provided for @twinUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get twinUnit;
+
+  /// No description provided for @twinObservedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Observed (UTC)'**
+  String get twinObservedAt;
+
+  /// No description provided for @twinRelationships.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensors'**
+  String get twinRelationships;
+
+  /// No description provided for @twinRelationshipCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship limit reached (400 Sensors).'**
+  String get twinRelationshipCapacity;
+
+  /// No description provided for @twinReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only backend state. No device commands are sent.'**
+  String get twinReadOnly;
+
+  /// No description provided for @twinVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get twinVersion;
+
+  /// No description provided for @twinReportedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Last reported (UTC)'**
+  String get twinReportedAt;
+
+  /// No description provided for @twinDesiredAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Last desired (UTC)'**
+  String get twinDesiredAt;
+
+  /// No description provided for @twinTypeFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Entity type'**
+  String get twinTypeFilter;
+
+  /// No description provided for @twinGatewayFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Gateway'**
+  String get twinGatewayFilter;
+
+  /// No description provided for @twinAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get twinAll;
+
+  /// No description provided for @twinName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get twinName;
+
+  /// No description provided for @twinType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get twinType;
+
+  /// No description provided for @twinModifiedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified (UTC)'**
+  String get twinModifiedAt;
+
+  /// No description provided for @twinEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No assigned Digital Twins match these filters.'**
+  String get twinEmpty;
+
+  /// No description provided for @twinLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load next page'**
+  String get twinLoadMore;
+
+  /// No description provided for @twinCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing up to 1000 entities (20 pages). Narrow the filters to continue.'**
+  String get twinCapacity;
+
+  /// No description provided for @twinLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load Digital Twins. Refresh or retry the page.'**
+  String get twinLoadError;
+
+  /// No description provided for @twinGatewayError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load assigned Gateways.'**
+  String get twinGatewayError;
+
+  /// No description provided for @twinOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Digital Twin'**
+  String get twinOpen;
+
+  /// No description provided for @twinHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get twinHistory;
+
+  /// No description provided for @twinEditMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit metadata'**
+  String get twinEditMetadata;
+
+  /// No description provided for @twinEditMetadataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit metadata'**
+  String get twinEditMetadataTitle;
+
+  /// No description provided for @twinEditMetadataNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata is updated in the server database (this does not execute commands on hardware devices).'**
+  String get twinEditMetadataNotice;
+
+  /// No description provided for @twinEditNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get twinEditNameLabel;
+
+  /// No description provided for @twinEditDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get twinEditDescriptionLabel;
+
+  /// No description provided for @twinEditClearDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear description (set to null)'**
+  String get twinEditClearDescription;
+
+  /// No description provided for @twinEditNoChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'No fields have been changed.'**
+  String get twinEditNoChanges;
+
+  /// No description provided for @twinEditNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required and cannot be blank.'**
+  String get twinEditNameRequired;
+
+  /// No description provided for @twinEditNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must not exceed 256 UTF-8 bytes.'**
+  String get twinEditNameTooLong;
+
+  /// No description provided for @twinEditDescriptionTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Description must not exceed 512 UTF-8 bytes (server HTTP parser limit).'**
+  String get twinEditDescriptionTooLong;
+
+  /// No description provided for @twinEditUnknownOutcomeNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Update request timed out or server unavailable (503). Outcome is unknown. Automatic resubmit is blocked to avoid conflicts. Please reconcile metadata.'**
+  String get twinEditUnknownOutcomeNotice;
+
+  /// No description provided for @twinEditReconcileAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile metadata'**
+  String get twinEditReconcileAction;
+
+  /// No description provided for @twinEditReconciling.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking server status...'**
+  String get twinEditReconciling;
+
+  /// No description provided for @twinEditReconcileConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciliation confirmed: Metadata was successfully updated on server.'**
+  String get twinEditReconcileConfirmed;
+
+  /// No description provided for @twinEditReconcileMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciliation mismatch: Current server values differ from requested changes.'**
+  String get twinEditReconcileMismatch;
+
+  /// No description provided for @twinEditReconcileCannotVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot verify status because read access is not available (404).'**
+  String get twinEditReconcileCannotVerify;
+
+  /// No description provided for @twinEditSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata updated successfully in server database.'**
+  String get twinEditSuccess;
+
+  /// No description provided for @actionEditMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit metadata'**
+  String get actionEditMetadata;
+
+  /// No description provided for @twinUrn.
+  ///
+  /// In en, this message translates to:
+  /// **'URN'**
+  String get twinUrn;
+
+  /// No description provided for @twinGatewayId.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway ID'**
+  String get twinGatewayId;
+
+  /// No description provided for @twinSensorId.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor ID'**
+  String get twinSensorId;
+
+  /// No description provided for @twinHostedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosted by Gateway'**
+  String get twinHostedBy;
+
+  /// No description provided for @twinLoadedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {count} loaded entities (not total)'**
+  String twinLoadedCount(int count);
+
+  /// No description provided for @temporalHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Telemetry History'**
+  String get temporalHistoryTitle;
+
+  /// No description provided for @temporalMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get temporalMode;
+
+  /// No description provided for @temporalModeRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw (max 10s)'**
+  String get temporalModeRaw;
+
+  /// No description provided for @temporalModeAggregated.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggregated'**
+  String get temporalModeAggregated;
+
+  /// No description provided for @temporalDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get temporalDuration;
+
+  /// No description provided for @temporalAttribute.
+  ///
+  /// In en, this message translates to:
+  /// **'Attribute'**
+  String get temporalAttribute;
+
+  /// No description provided for @temporalAttrMeasurement.
+  ///
+  /// In en, this message translates to:
+  /// **'Measurement'**
+  String get temporalAttrMeasurement;
+
+  /// No description provided for @temporalAttrSampleInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Interval (µs)'**
+  String get temporalAttrSampleInterval;
+
+  /// No description provided for @temporalStartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get temporalStartTime;
+
+  /// No description provided for @temporalEndTime.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get temporalEndTime;
+
+  /// No description provided for @temporalPickDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick date and time'**
+  String get temporalPickDateTime;
+
+  /// No description provided for @temporalApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get temporalApply;
+
+  /// No description provided for @temporalPreset10s.
+  ///
+  /// In en, this message translates to:
+  /// **'10s (Raw)'**
+  String get temporalPreset10s;
+
+  /// No description provided for @temporalPreset15m.
+  ///
+  /// In en, this message translates to:
+  /// **'15m'**
+  String get temporalPreset15m;
+
+  /// No description provided for @temporalPreset1h.
+  ///
+  /// In en, this message translates to:
+  /// **'1h'**
+  String get temporalPreset1h;
+
+  /// No description provided for @temporalPreset24h.
+  ///
+  /// In en, this message translates to:
+  /// **'24h'**
+  String get temporalPreset24h;
+
+  /// No description provided for @temporalPreset7d.
+  ///
+  /// In en, this message translates to:
+  /// **'7d'**
+  String get temporalPreset7d;
+
+  /// No description provided for @temporalPreset30d.
+  ///
+  /// In en, this message translates to:
+  /// **'30d'**
+  String get temporalPreset30d;
+
+  /// No description provided for @temporalStatsMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Min'**
+  String get temporalStatsMin;
+
+  /// No description provided for @temporalStatsMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Max'**
+  String get temporalStatsMax;
+
+  /// No description provided for @temporalStatsAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighted Mean'**
+  String get temporalStatsAvg;
+
+  /// No description provided for @temporalStatsRawAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get temporalStatsRawAvg;
+
+  /// No description provided for @temporalStatsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Samples'**
+  String get temporalStatsCount;
+
+  /// No description provided for @temporalNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No temporal telemetry data for this time range.'**
+  String get temporalNoData;
+
+  /// No description provided for @temporalStaleWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to refresh. Displayed temporal history may be stale.'**
+  String get temporalStaleWarning;
+
+  /// No description provided for @temporalInspectTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed Data Inspection'**
+  String get temporalInspectTable;
+
+  /// No description provided for @temporalTimestamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Timestamp'**
+  String get temporalTimestamp;
+
+  /// No description provided for @temporalValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get temporalValue;
+
+  /// No description provided for @temporalSamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Samples'**
+  String get temporalSamples;
+
+  /// No description provided for @temporalMaxPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Points'**
+  String get temporalMaxPoints;
+
+  /// No description provided for @temporalGuidanceRawLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw telemetry points exceeded capacity. Please narrow the time range or select aggregated mode.'**
+  String get temporalGuidanceRawLimit;
+
+  /// No description provided for @temporalGuidanceResolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution is too fine for this range. Please select a coarser aggregation duration.'**
+  String get temporalGuidanceResolution;
+
+  /// No description provided for @temporalGuidanceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Query range exceeds maximum limit of 31 days (744 hours).'**
+  String get temporalGuidanceRange;
+
+  /// No description provided for @temporalGuidanceInvalidDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid calendar date or format. Please verify year, month, and day.'**
+  String get temporalGuidanceInvalidDate;
+
+  /// No description provided for @gatewayTabTelemetryHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Telemetry history'**
+  String get gatewayTabTelemetryHistory;
+
+  /// No description provided for @gatewayTabSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor catalog'**
+  String get gatewayTabSensors;
+
+  /// No description provided for @gatewaySelectSensor.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor:'**
+  String get gatewaySelectSensor;
+
+  /// No description provided for @gatewayNoSensorsForHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No sensors available to display telemetry history.'**
+  String get gatewayNoSensorsForHistory;
+
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:

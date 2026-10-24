@@ -10,6 +10,324 @@ class LEn extends L {
   LEn([String locale = 'en']) : super(locale);
 
   @override
+  String get twinEditInvalidText => 'Text contains an invalid character.';
+
+  @override
+  String get twinEditFailed =>
+      'Unable to update metadata. Check your permissions and input.';
+
+  @override
+  String get twinEditReconcileUnavailable =>
+      'Cannot verify this update. Resubmission remains blocked.';
+
+  @override
+  String get temporalRawRange =>
+      'Raw history is limited to 10 seconds. Narrow the range or use aggregation.';
+
+  @override
+  String get temporalFailed =>
+      'Unable to load history. Previously displayed data may be stale.';
+
+  @override
+  String get temporalShowing => 'Showing';
+
+  @override
+  String get temporalPresets => 'Presets:';
+
+  @override
+  String get navDigitalTwins => 'Digital Twins';
+
+  @override
+  String get twinInformation => 'Information';
+
+  @override
+  String get twinState => 'State';
+
+  @override
+  String get twinBackToList => 'Back to Digital Twins';
+
+  @override
+  String get twinNotFound => 'Entity not found or access unavailable.';
+
+  @override
+  String get twinNoData => 'No data';
+
+  @override
+  String get twinStale => 'Unable to refresh. Displayed data may be stale.';
+
+  @override
+  String get twinDescription => 'Description';
+
+  @override
+  String get twinMeasurement => 'Latest measurement';
+
+  @override
+  String get twinUnit => 'Unit';
+
+  @override
+  String get twinObservedAt => 'Observed (UTC)';
+
+  @override
+  String get twinRelationships => 'Sensors';
+
+  @override
+  String get twinRelationshipCapacity =>
+      'Relationship limit reached (400 Sensors).';
+
+  @override
+  String get twinReadOnly =>
+      'Read-only backend state. No device commands are sent.';
+
+  @override
+  String get twinVersion => 'Version';
+
+  @override
+  String get twinReportedAt => 'Last reported (UTC)';
+
+  @override
+  String get twinDesiredAt => 'Last desired (UTC)';
+
+  @override
+  String get twinTypeFilter => 'Entity type';
+
+  @override
+  String get twinGatewayFilter => 'Assigned Gateway';
+
+  @override
+  String get twinAll => 'All';
+
+  @override
+  String get twinName => 'Name';
+
+  @override
+  String get twinType => 'Type';
+
+  @override
+  String get twinModifiedAt => 'Modified (UTC)';
+
+  @override
+  String get twinEmpty => 'No assigned Digital Twins match these filters.';
+
+  @override
+  String get twinLoadMore => 'Load next page';
+
+  @override
+  String get twinCapacity =>
+      'Showing up to 1000 entities (20 pages). Narrow the filters to continue.';
+
+  @override
+  String get twinLoadError =>
+      'Unable to load Digital Twins. Refresh or retry the page.';
+
+  @override
+  String get twinGatewayError => 'Unable to load assigned Gateways.';
+
+  @override
+  String get twinOpen => 'Open Digital Twin';
+
+  @override
+  String get twinHistory => 'History';
+
+  @override
+  String get twinEditMetadata => 'Edit metadata';
+
+  @override
+  String get twinEditMetadataTitle => 'Edit metadata';
+
+  @override
+  String get twinEditMetadataNotice =>
+      'Metadata is updated in the server database (this does not execute commands on hardware devices).';
+
+  @override
+  String get twinEditNameLabel => 'Name';
+
+  @override
+  String get twinEditDescriptionLabel => 'Description';
+
+  @override
+  String get twinEditClearDescription => 'Clear description (set to null)';
+
+  @override
+  String get twinEditNoChanges => 'No fields have been changed.';
+
+  @override
+  String get twinEditNameRequired => 'Name is required and cannot be blank.';
+
+  @override
+  String get twinEditNameTooLong => 'Name must not exceed 256 UTF-8 bytes.';
+
+  @override
+  String get twinEditDescriptionTooLong =>
+      'Description must not exceed 512 UTF-8 bytes (server HTTP parser limit).';
+
+  @override
+  String get twinEditUnknownOutcomeNotice =>
+      'Update request timed out or server unavailable (503). Outcome is unknown. Automatic resubmit is blocked to avoid conflicts. Please reconcile metadata.';
+
+  @override
+  String get twinEditReconcileAction => 'Reconcile metadata';
+
+  @override
+  String get twinEditReconciling => 'Checking server status...';
+
+  @override
+  String get twinEditReconcileConfirmed =>
+      'Reconciliation confirmed: Metadata was successfully updated on server.';
+
+  @override
+  String get twinEditReconcileMismatch =>
+      'Reconciliation mismatch: Current server values differ from requested changes.';
+
+  @override
+  String get twinEditReconcileCannotVerify =>
+      'Cannot verify status because read access is not available (404).';
+
+  @override
+  String get twinEditSuccess =>
+      'Metadata updated successfully in server database.';
+
+  @override
+  String get actionEditMetadata => 'Edit metadata';
+
+  @override
+  String get twinUrn => 'URN';
+
+  @override
+  String get twinGatewayId => 'Gateway ID';
+
+  @override
+  String get twinSensorId => 'Sensor ID';
+
+  @override
+  String get twinHostedBy => 'Hosted by Gateway';
+
+  @override
+  String twinLoadedCount(int count) {
+    return 'Showing $count loaded entities (not total)';
+  }
+
+  @override
+  String get temporalHistoryTitle => 'Telemetry History';
+
+  @override
+  String get temporalMode => 'Mode';
+
+  @override
+  String get temporalModeRaw => 'Raw (max 10s)';
+
+  @override
+  String get temporalModeAggregated => 'Aggregated';
+
+  @override
+  String get temporalDuration => 'Duration';
+
+  @override
+  String get temporalAttribute => 'Attribute';
+
+  @override
+  String get temporalAttrMeasurement => 'Measurement';
+
+  @override
+  String get temporalAttrSampleInterval => 'Sample Interval (µs)';
+
+  @override
+  String get temporalStartTime => 'Start';
+
+  @override
+  String get temporalEndTime => 'End';
+
+  @override
+  String get temporalPickDateTime => 'Pick date and time';
+
+  @override
+  String get temporalApply => 'Apply';
+
+  @override
+  String get temporalPreset10s => '10s (Raw)';
+
+  @override
+  String get temporalPreset15m => '15m';
+
+  @override
+  String get temporalPreset1h => '1h';
+
+  @override
+  String get temporalPreset24h => '24h';
+
+  @override
+  String get temporalPreset7d => '7d';
+
+  @override
+  String get temporalPreset30d => '30d';
+
+  @override
+  String get temporalStatsMin => 'Min';
+
+  @override
+  String get temporalStatsMax => 'Max';
+
+  @override
+  String get temporalStatsAvg => 'Weighted Mean';
+
+  @override
+  String get temporalStatsRawAvg => 'Average';
+
+  @override
+  String get temporalStatsCount => 'Total Samples';
+
+  @override
+  String get temporalNoData =>
+      'No temporal telemetry data for this time range.';
+
+  @override
+  String get temporalStaleWarning =>
+      'Unable to refresh. Displayed temporal history may be stale.';
+
+  @override
+  String get temporalInspectTable => 'Detailed Data Inspection';
+
+  @override
+  String get temporalTimestamp => 'Timestamp';
+
+  @override
+  String get temporalValue => 'Value';
+
+  @override
+  String get temporalSamples => 'Samples';
+
+  @override
+  String get temporalMaxPoints => 'Max Points';
+
+  @override
+  String get temporalGuidanceRawLimit =>
+      'Raw telemetry points exceeded capacity. Please narrow the time range or select aggregated mode.';
+
+  @override
+  String get temporalGuidanceResolution =>
+      'Resolution is too fine for this range. Please select a coarser aggregation duration.';
+
+  @override
+  String get temporalGuidanceRange =>
+      'Query range exceeds maximum limit of 31 days (744 hours).';
+
+  @override
+  String get temporalGuidanceInvalidDate =>
+      'Invalid calendar date or format. Please verify year, month, and day.';
+
+  @override
+  String get gatewayTabTelemetryHistory => 'Telemetry history';
+
+  @override
+  String get gatewayTabSensors => 'Sensor catalog';
+
+  @override
+  String get gatewaySelectSensor => 'Sensor:';
+
+  @override
+  String get gatewayNoSensorsForHistory =>
+      'No sensors available to display telemetry history.';
+
+  @override
   String get appName => 'SANSLAB IoT Server';
 
   @override

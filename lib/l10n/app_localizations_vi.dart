@@ -10,6 +10,325 @@ class LVi extends L {
   LVi([String locale = 'vi']) : super(locale);
 
   @override
+  String get twinEditInvalidText => 'Văn bản chứa ký tự không hợp lệ.';
+
+  @override
+  String get twinEditFailed =>
+      'Không thể cập nhật metadata. Hãy kiểm tra quyền và dữ liệu nhập.';
+
+  @override
+  String get twinEditReconcileUnavailable =>
+      'Chưa thể xác minh cập nhật. Vẫn khóa gửi lại yêu cầu.';
+
+  @override
+  String get temporalRawRange =>
+      'Lịch sử thô chỉ hỗ trợ tối đa 10 giây. Hãy thu hẹp khoảng hoặc dùng tổng hợp.';
+
+  @override
+  String get temporalFailed =>
+      'Không thể tải lịch sử. Dữ liệu đã hiển thị có thể đã cũ.';
+
+  @override
+  String get temporalShowing => 'Đang hiển thị';
+
+  @override
+  String get temporalPresets => 'Khoảng mẫu:';
+
+  @override
+  String get navDigitalTwins => 'Bản sao số';
+
+  @override
+  String get twinInformation => 'Thông tin';
+
+  @override
+  String get twinState => 'Trạng thái';
+
+  @override
+  String get twinBackToList => 'Về danh sách bản sao số';
+
+  @override
+  String get twinNotFound =>
+      'Không tìm thấy thực thể hoặc không có quyền truy cập.';
+
+  @override
+  String get twinNoData => 'Không có dữ liệu';
+
+  @override
+  String get twinStale => 'Không thể làm mới. Dữ liệu hiển thị có thể đã cũ.';
+
+  @override
+  String get twinDescription => 'Mô tả';
+
+  @override
+  String get twinMeasurement => 'Giá trị đo mới nhất';
+
+  @override
+  String get twinUnit => 'Đơn vị';
+
+  @override
+  String get twinObservedAt => 'Thời điểm đo (UTC)';
+
+  @override
+  String get twinRelationships => 'Cảm biến';
+
+  @override
+  String get twinRelationshipCapacity =>
+      'Đã đạt giới hạn quan hệ (400 cảm biến).';
+
+  @override
+  String get twinReadOnly =>
+      'Trạng thái backend chỉ đọc. Không gửi lệnh tới thiết bị.';
+
+  @override
+  String get twinVersion => 'Phiên bản';
+
+  @override
+  String get twinReportedAt => 'Báo cáo gần nhất (UTC)';
+
+  @override
+  String get twinDesiredAt => 'Yêu cầu gần nhất (UTC)';
+
+  @override
+  String get twinTypeFilter => 'Loại thực thể';
+
+  @override
+  String get twinGatewayFilter => 'Gateway được gán';
+
+  @override
+  String get twinAll => 'Tất cả';
+
+  @override
+  String get twinName => 'Tên';
+
+  @override
+  String get twinType => 'Loại';
+
+  @override
+  String get twinModifiedAt => 'Cập nhật (UTC)';
+
+  @override
+  String get twinEmpty => 'Không có bản sao số được gán phù hợp với bộ lọc.';
+
+  @override
+  String get twinLoadMore => 'Tải trang tiếp theo';
+
+  @override
+  String get twinCapacity =>
+      'Đang hiển thị tối đa 1000 thực thể (20 trang). Hãy thu hẹp bộ lọc để xem tiếp.';
+
+  @override
+  String get twinLoadError =>
+      'Không tải được bản sao số. Hãy làm mới hoặc thử lại trang.';
+
+  @override
+  String get twinGatewayError => 'Không tải được Gateway được gán.';
+
+  @override
+  String get twinOpen => 'Mở bản sao số';
+
+  @override
+  String get twinHistory => 'Lịch sử';
+
+  @override
+  String get twinEditMetadata => 'Chỉnh sửa metadata';
+
+  @override
+  String get twinEditMetadataTitle => 'Chỉnh sửa metadata';
+
+  @override
+  String get twinEditMetadataNotice =>
+      'Metadata được cập nhật trong cơ sở dữ liệu máy chủ (thao tác này không thực thi lệnh trên phần cứng).';
+
+  @override
+  String get twinEditNameLabel => 'Tên';
+
+  @override
+  String get twinEditDescriptionLabel => 'Mô tả';
+
+  @override
+  String get twinEditClearDescription => 'Xóa mô tả (đặt về null)';
+
+  @override
+  String get twinEditNoChanges => 'Không có trường nào được thay đổi.';
+
+  @override
+  String get twinEditNameRequired => 'Tên không được để trống.';
+
+  @override
+  String get twinEditNameTooLong => 'Tên không được vượt quá 256 byte UTF-8.';
+
+  @override
+  String get twinEditDescriptionTooLong =>
+      'Mô tả không được vượt quá 512 byte UTF-8 (giới hạn parser HTTP máy chủ).';
+
+  @override
+  String get twinEditUnknownOutcomeNotice =>
+      'Yêu cầu cập nhật đã hết thời gian chờ hoặc máy chủ bận (503). Trạng thái chưa rõ ràng. Không tự động thử lại để tránh xung đột. Vui lòng đối soát lại metadata.';
+
+  @override
+  String get twinEditReconcileAction => 'Đối soát lại metadata';
+
+  @override
+  String get twinEditReconciling => 'Đang kiểm tra trạng thái máy chủ...';
+
+  @override
+  String get twinEditReconcileConfirmed =>
+      'Đối soát thành công: Metadata đã được cập nhật trên máy chủ.';
+
+  @override
+  String get twinEditReconcileMismatch =>
+      'Đối soát không khớp: Giá trị hiện tại trên máy chủ khác với thay đổi đã yêu cầu.';
+
+  @override
+  String get twinEditReconcileCannotVerify =>
+      'Không thể xác minh trạng thái do không có quyền đọc (404).';
+
+  @override
+  String get twinEditSuccess =>
+      'Metadata đã được cập nhật thành công trong cơ sở dữ liệu máy chủ.';
+
+  @override
+  String get actionEditMetadata => 'Sửa metadata';
+
+  @override
+  String get twinUrn => 'Mã định danh (URN)';
+
+  @override
+  String get twinGatewayId => 'Mã trạm (Gateway ID)';
+
+  @override
+  String get twinSensorId => 'Mã cảm biến (Sensor ID)';
+
+  @override
+  String get twinHostedBy => 'Trạm chủ quản';
+
+  @override
+  String twinLoadedCount(int count) {
+    return 'Đang hiển thị $count thực thể đã tải (không phải tổng số)';
+  }
+
+  @override
+  String get temporalHistoryTitle => 'Lịch sử đo đạc';
+
+  @override
+  String get temporalMode => 'Chế độ';
+
+  @override
+  String get temporalModeRaw => 'Đo thô (tối đa 10s)';
+
+  @override
+  String get temporalModeAggregated => 'Tổng hợp';
+
+  @override
+  String get temporalDuration => 'Chu kỳ';
+
+  @override
+  String get temporalAttribute => 'Thuộc tính';
+
+  @override
+  String get temporalAttrMeasurement => 'Giá trị đo đạc';
+
+  @override
+  String get temporalAttrSampleInterval => 'Chu kỳ lấy mẫu (µs)';
+
+  @override
+  String get temporalStartTime => 'Bắt đầu';
+
+  @override
+  String get temporalEndTime => 'Kết thúc';
+
+  @override
+  String get temporalPickDateTime => 'Chọn ngày và giờ';
+
+  @override
+  String get temporalApply => 'Áp dụng';
+
+  @override
+  String get temporalPreset10s => '10s (Thô)';
+
+  @override
+  String get temporalPreset15m => '15 phút';
+
+  @override
+  String get temporalPreset1h => '1 giờ';
+
+  @override
+  String get temporalPreset24h => '24 giờ';
+
+  @override
+  String get temporalPreset7d => '7 ngày';
+
+  @override
+  String get temporalPreset30d => '30 ngày';
+
+  @override
+  String get temporalStatsMin => 'Tối thiểu';
+
+  @override
+  String get temporalStatsMax => 'Tối đa';
+
+  @override
+  String get temporalStatsAvg => 'Trung bình có trọng số';
+
+  @override
+  String get temporalStatsRawAvg => 'Trung bình';
+
+  @override
+  String get temporalStatsCount => 'Tổng số mẫu';
+
+  @override
+  String get temporalNoData =>
+      'Không có dữ liệu đo đạc trong khoảng thời gian này.';
+
+  @override
+  String get temporalStaleWarning =>
+      'Không thể làm mới. Dữ liệu lịch sử đo đạc có thể đã cũ.';
+
+  @override
+  String get temporalInspectTable => 'Bảng kiểm tra dữ liệu chi tiết';
+
+  @override
+  String get temporalTimestamp => 'Thời gian';
+
+  @override
+  String get temporalValue => 'Giá trị';
+
+  @override
+  String get temporalSamples => 'Số mẫu';
+
+  @override
+  String get temporalMaxPoints => 'Số điểm tối đa';
+
+  @override
+  String get temporalGuidanceRawLimit =>
+      'Số lượng điểm đo thô vượt quá giới hạn tối đa. Vui lòng thu hẹp khoảng thời gian hoặc chọn chế độ tổng hợp.';
+
+  @override
+  String get temporalGuidanceResolution =>
+      'Độ phân giải quá mịn cho khoảng thời gian này. Vui lòng chọn chu kỳ tổng hợp lớn hơn.';
+
+  @override
+  String get temporalGuidanceRange =>
+      'Khoảng thời gian truy vấn vượt quá giới hạn tối đa 31 ngày (744 giờ).';
+
+  @override
+  String get temporalGuidanceInvalidDate =>
+      'Ngày tháng hoặc định dạng không hợp lệ. Vui lòng kiểm tra lại ngày và giờ.';
+
+  @override
+  String get gatewayTabTelemetryHistory => 'Lịch sử đo đạc';
+
+  @override
+  String get gatewayTabSensors => 'Danh sách Cảm biến';
+
+  @override
+  String get gatewaySelectSensor => 'Cảm biến:';
+
+  @override
+  String get gatewayNoSensorsForHistory =>
+      'Chưa có cảm biến nào để xem lịch sử đo đạc.';
+
+  @override
   String get appName => 'SANSLAB IoT Server';
 
   @override

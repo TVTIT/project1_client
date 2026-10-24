@@ -8,6 +8,16 @@ abstract final class R {
   static const signIn = '/sign-in';
   static const dashboard = '/';
   static const gateways = '/gateways';
+  static const digitalTwins = '/digital-twins';
+
+  /// Input is a raw authoritative URN, never a pre-encoded path component.
+  /// GoRouter decodes the path parameter once; detail retains this raw identity.
+  static String twinDetail(String urn) =>
+      '$digitalTwins/${Uri.encodeComponent(urn)}';
+  static String gatewayTwin(String gatewayId) =>
+      twinDetail('urn:ngsi-ld:Gateway:$gatewayId');
+  static String sensorTwin(String gatewayId, String sensorId) =>
+      twinDetail('urn:ngsi-ld:Sensor:$gatewayId:$sensorId');
   static const gatewayProvision = '/gateways/provision';
   static const gatewayDetailPattern = '/gateways/:gatewayId';
   static String gatewayDetail(String gatewayId) => '/gateways/$gatewayId';
@@ -44,6 +54,7 @@ class NavItem {
   String labelOf(L l) => switch (path) {
     R.dashboard => l.navDashboard,
     R.gateways => l.navGateways,
+    R.digitalTwins => l.navDigitalTwins,
     R.adminUsers => l.navAdminUsers,
     _ => label,
   };
@@ -65,6 +76,7 @@ const kNavGroups = <NavGroup>[
   NavGroup('Overview', [
     NavItem('Bảng điều khiển', R.dashboard, Icons.dashboard_outlined),
     NavItem('Quản lý Gateway', R.gateways, Icons.router_outlined),
+    NavItem('Digital Twins', R.digitalTwins, Icons.hub_outlined),
     NavItem(
       'Quản lý Người dùng',
       R.adminUsers,

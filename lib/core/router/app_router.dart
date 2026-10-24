@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/account/account_screen.dart';
 import '../../features/auth/auth_screens.dart';
 import '../../features/dashboard/placeholder_screen.dart';
+import '../../features/digital_twin/presentation/twin_detail_screen.dart';
+import '../../features/digital_twin/presentation/twin_list_screen.dart';
 import '../../features/gateways/presentation/gateway_detail_screen.dart';
 import '../../features/gateways/presentation/gateway_list_screen.dart';
 import '../../features/gateways/presentation/gateway_provision_screen.dart';
@@ -97,6 +99,17 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: R.gateways,
             builder: (_, _) => const GatewayListScreen(),
+          ),
+          GoRoute(
+            path: R.digitalTwins,
+            builder: (_, _) => const TwinListScreen(),
+          ),
+          GoRoute(
+            path: '${R.digitalTwins}/:entityId',
+            builder: (_, state) {
+              final id = state.pathParameters['entityId'] ?? '';
+              return TwinDetailScreen(key: ValueKey(id), entityId: id);
+            },
           ),
           GoRoute(
             path: R.gatewayProvision,
